@@ -167,7 +167,6 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 @keyframes drive-right { from { left: -10%; } to { left: 110%; } }
 @keyframes drive-left { from { left: 110%; } to { left: -10%; } }
 
-/* Clean Smoke/Dust Puff Animations */
 @keyframes hammerSwing {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(-35deg); }
@@ -176,22 +175,6 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   0%, 100% { opacity: 0.85; }
   50% { opacity: 0.45; }
 }
-
-@keyframes puffRise1 {
-  0% { transform: translate(0px, 0px) scale(0.2); opacity: 0; }
-  20% { opacity: 0.75; }
-  70% { transform: translate(-10px, -14px) scale(1.0); opacity: 0.4; }
-  100% { transform: translate(-20px, -26px) scale(1.4); opacity: 0; }
-}
-@keyframes puffRise2 {
-  0% { transform: translate(0px, 0px) scale(0.2); opacity: 0; }
-  25% { opacity: 0.75; }
-  75% { transform: translate(12px, -16px) scale(1.1); opacity: 0.35; }
-  100% { transform: translate(24px, -30px) scale(1.5); opacity: 0; }
-}
-
-.dust-p1 { animation: puffRise1 1.6s infinite ease-out; transform-origin: center; }
-.dust-p2 { animation: puffRise2 1.9s infinite ease-out 0.4s; transform-origin: center; }
 
 .construction-hammer {
   animation: hammerSwing 0.5s infinite ease-in-out;
@@ -216,7 +199,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   font: inherit; 
   transition: transform 0.15s, border-color 0.2s, background-color 0.2s;
   position: relative; 
-  height: 175px; 
+  height: 185px; 
   justify-content: space-between; 
   overflow: hidden;
   user-select: none; 
@@ -280,11 +263,9 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   flex-direction: column; 
   gap: 2px; 
   flex-shrink: 0; 
-  height: 48px; 
+  height: 54px; 
   justify-content: center; 
-  pointer-events: none; 
 }
-.lot-title { font-size: 11px; font-weight: 700; color: var(--mut); }
 .lot-action {
   background: rgba(0,0,0,0.35); 
   border-radius: 6px; 
@@ -295,6 +276,35 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   line-height: 1.15;
   text-align: center;
   color: #fff;
+}
+
+/* Lot Header Emoji Button Bar */
+.lot-header-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 22px;
+  flex-shrink: 0;
+}
+.lot-icon-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  width: 26px;
+  height: 22px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s, border-color 0.15s;
+}
+.lot-icon-btn:hover {
+  transform: scale(1.15);
+  background: rgba(255,255,255,0.25);
+  border-color: var(--gold);
 }
 
 .lot .pb { width: 100%; height: 5px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; flex-shrink: 0; pointer-events: none; }
@@ -454,9 +464,8 @@ button.menu-btn.line-btn:hover { background: var(--card-hover); }
 
 @media (max-width: 600px) {
   .lot-row { grid-template-columns: repeat(5, 1fr); gap: 4px; }
-  .lot { height: 145px; padding: 4px; }
+  .lot { height: 155px; padding: 4px; }
   .lot svg { height: 52px; }
-  .lot-title { font-size: 9px; }
   .lot-action { font-size: 9px; padding: 2px; }
   .ribbon { padding: 6px 10px; gap: 6px; }
   .ribbon-item .label { font-size: 9px; }
@@ -669,7 +678,11 @@ function buildScene() {
         <div class="ai-badge" style="display:none">NEIGHBOR</div>
         <svg viewBox="0 0 100 65"></svg>
         <div class="lot-info">
-          <div class="lot-title">Lot ${i + 1}</div>
+          <div class="lot-header-bar">
+            <button class="lot-icon-btn btn-action-list" title="List/Unlist">🏷️</button>
+            <button class="lot-icon-btn btn-action-demolish" title="Demolish">🏗️</button>
+            <button class="lot-icon-btn btn-action-upgrade" title="Upgrade">👷</button>
+          </div>
           <div class="lot-action"></div>
         </div>
         <div class="pb"><i></i></div>
@@ -677,7 +690,22 @@ function buildScene() {
       bt.onclick = (e) => {
         if (e.target.closest('button')) return;
         clickLot(i);
-      }; 
+      };
+
+      // Bind Lot Header Icon Buttons
+      bt.querySelector(".btn-action-list").onclick = (e) => {
+        e.stopPropagation();
+        handleListAction(i);
+      };
+      bt.querySelector(".btn-action-demolish").onclick = (e) => {
+        e.stopPropagation();
+        handleDemolishAction(i);
+      };
+      bt.querySelector(".btn-action-upgrade").onclick = (e) => {
+        e.stopPropagation();
+        handleUpgradeAction(i);
+      };
+
       r.appendChild(bt);
     }
     return r;
@@ -847,6 +875,48 @@ function triggerNextRenovation(i) {
   $("choice").innerHTML = "";
   msg("Started " + RENOVATIONS[nextUpgradeKey].name + " on Lot " + (i + 1) + " (" + Math.round(duration) + "s)...");
   draw();
+}
+
+function handleListAction(i) {
+  const l = lots[i];
+  if (l.st === "rented") {
+    if (l.houseStyle && STYLES[l.houseStyle].category === "infra") return msg("Infrastructure cannot be listed for sale.");
+    l.st = "listed";
+    l.wait = 1.5 + Math.random() * 2;
+    msg("Listed Lot " + (i + 1) + " for sale! Rent income paused.");
+    draw();
+  } else if (l.st === "listed") {
+    l.st = "rented";
+    l.rent = calcRent(i);
+    l.rt = 3;
+    if (l.offer) l.offer = null;
+    msg("Unlisted Lot " + (i + 1) + ". Resumed rental income.");
+    draw();
+  } else {
+    msg("Listing is only available for rented properties.");
+  }
+}
+
+function handleDemolishAction(i) {
+  const l = lots[i];
+  if (l.st === "empty" || l.st === "ai_owned" || l.st === "ai_for_sale") return msg("Nothing to demolish here.");
+  if (money < 100) return msg("Not enough money to demolish property ($100 required).");
+  money -= 100;
+  const p = l.landPrice, t = l.pt;
+  Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
+  activeDrawerLot = null;
+  $("choice").innerHTML = "";
+  msg("Demolished property on Lot " + (i + 1) + ".");
+  draw();
+}
+
+function handleUpgradeAction(i) {
+  const l = lots[i];
+  if (l.st === "rented") {
+    triggerNextRenovation(i);
+  } else {
+    msg("Property must be fully built and rented before upgrading.");
+  }
 }
 
 function clickLot(i) {
@@ -1251,7 +1321,7 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
-// Progressive Building Construction, Clean Dust FX & Large Centered Realtor Signs
+// Progressive Building Construction & Large Centered Realtor Signs (No Dust FX)
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
@@ -1357,7 +1427,7 @@ function renderArt(l, idx) {
     completedBuildingSvg += `<g>${starsStr}</g>`;
   }
 
-  // Active Construction State with Clean Smoke/Dust Puffs
+  // Active Construction State (No Dust FX)
   if (st === "working" || st === "reno_working") {
     const prog = st === "working" ? Math.max(0.05, Math.min(1, l.p)) : Math.max(0.05, Math.min(1, l.renoProgress));
     const revealY = 60 - (prog * 56);
@@ -1375,12 +1445,6 @@ function renderArt(l, idx) {
       
       <g clip-path="url(#${clipId})">
         ${completedBuildingSvg}
-      </g>
-      
-      <!-- Clean, Scaled Smoke Puffs (No Artifact Dots) -->
-      <g fill="#d8d0c5" opacity="0.85">
-        <circle class="dust-p1" cx="24" cy="42" r="7"/>
-        <circle class="dust-p2" cx="74" cy="42" r="8"/>
       </g>
 
       <g class="scaffold-line" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none">
