@@ -167,7 +167,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 @keyframes drive-right { from { left: -10%; } to { left: 110%; } }
 @keyframes drive-left { from { left: 110%; } to { left: -10%; } }
 
-/* Organic Dust Billow Animations */
+/* Organic Billowing Dust Animations */
 @keyframes hammerSwing {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(-35deg); }
@@ -319,7 +319,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   filter: brightness(1.1);
 }
 
-/* Inline Quick Widget Action Bar (High z-index to ensure clickability) */
+/* Inline Quick Widget Action Bar */
 .lot-widget-bar {
   position: absolute;
   bottom: 52px;
@@ -610,9 +610,9 @@ const STYLES = {
 };
 
 const RENOVATIONS = {
-  paint: { name: "Fresh Paint", cost: 150, valBonus: 120, tint: "#81c784" },
-  roof: { name: "Modern Roof", cost: 300, valBonus: 280, tint: "#ff8a65" },
-  luxury: { name: "Luxury Interior", cost: 500, valBonus: 500, tint: "#ba68c8" }
+  paint: { name: "Fresh Paint", cost: 150, valBonus: 120, dur: 4, tint: "#81c784" },
+  roof: { name: "Modern Roof", cost: 300, valBonus: 280, dur: 7, tint: "#ff8a65" },
+  luxury: { name: "Luxury Interior", cost: 500, valBonus: 500, dur: 10, tint: "#ba68c8" }
 };
 
 const N = 10;
@@ -641,11 +641,14 @@ const mkLot = () => ({
   aiPrice: 0,
   aiWait: 0,
   aiTimer: 0,
-  renovations: []
+  renovations: [],
+  renoProgress: 0,
+  renoDuration: 0,
+  pendingRenoKey: null
 });
 
 const msg = t => $("msg").textContent = t;
-const busy = () => lots.filter(l => l.st === "working").length;
+const busy = () => lots.filter(l => l.st === "working" || l.st === "reno_working").length;
 
 function getAdjacentIndices(i) {
   const adj = [];
@@ -661,7 +664,7 @@ function getAdjacentIndices(i) {
 function getGlobalCivicBoost() {
   let count = 0;
   lots.forEach(l => {
-    if (l.houseStyle === "civic" && l.st !== "empty" && l.st !== "working") {
+    if (l.houseStyle === "civic" && l.st !== "empty" && l.st !== "working" && l.st !== "reno_working") {
       count++;
     }
   });
@@ -673,7 +676,7 @@ function getNeighborBoost(i) {
   let boost = getGlobalCivicBoost();
   neighbors.forEach(nIdx => {
     const nLot = lots[nIdx];
-    if (nLot && nLot.houseStyle && nLot.st !== "empty" && nLot.st !== "working") {
+    if (nLot && nLot.houseStyle && nLot.st !== "empty" && nLot.st !== "working" && nLot.st !== "reno_working") {
       const b = STYLES[nLot.houseStyle].boost;
       if (b > 0 && nLot.houseStyle !== "civic") boost += b;
     }
@@ -686,7 +689,7 @@ function getParkRentBoost(i) {
   let boost = 0;
   neighbors.forEach(nIdx => {
     const nLot = lots[nIdx];
-    if (nLot && nLot.houseStyle === "park" && nLot.st !== "empty" && nLot.st !== "working") {
+    if (nLot && nLot.houseStyle === "park" && nLot.st !== "empty" && nLot.st !== "working" && nLot.st !== "reno_working") {
       boost += STYLES.park.rentBoost;
     }
   });
@@ -708,7 +711,7 @@ function getLotValue(i) {
 
 function calcRent(i) {
   const l = lots[i];
-  if (!l || !l.houseStyle || STYLES[l.houseStyle].category === "infra") return 0;
+  if (!l || !l.houseStyle || STYLES[l.houseStyle].category === "infra" || l.st === "reno_working") return 0;
   const val = getLotValue(i);
   const rentMult = STYLES[l.houseStyle].rentMult;
   const parkRentBoost = getParkRentBoost(i);
@@ -876,26 +879,34 @@ function updateMainMenu() {
 function triggerNextRenovation(i) {
   const l = lots[i];
   if (STYLES[l.houseStyle].category === "infra") return msg("Infrastructure cannot be renovated.");
+  if (busy() >= builders) return msg("All builders are busy!");
   
   let nextUpgradeKey = null;
   let cost = 0;
+  let duration = 0;
   if (!l.renovations.includes('paint')) {
     nextUpgradeKey = 'paint';
     cost = RENOVATIONS.paint.cost;
+    duration = RENOVATIONS.paint.dur / speed;
   } else if (!l.renovations.includes('roof')) {
     nextUpgradeKey = 'roof';
     cost = RENOVATIONS.roof.cost;
+    duration = RENOVATIONS.roof.dur / speed;
   } else if (!l.renovations.includes('luxury')) {
     nextUpgradeKey = 'luxury';
     cost = RENOVATIONS.luxury.cost;
+    duration = RENOVATIONS.luxury.dur / speed;
   } else {
     return msg("Lot " + (i + 1) + " is already fully upgraded with all renovations!");
   }
 
   if (money < cost) return msg("Not enough money for " + RENOVATIONS[nextUpgradeKey].name + " (" + fmt(cost) + ").");
   money -= cost;
-  l.renovations.push(nextUpgradeKey);
-  msg("Upgraded Lot " + (i + 1) + " with " + RENOVATIONS[nextUpgradeKey].name + "!");
+  l.st = "reno_working";
+  l.pendingRenoKey = nextUpgradeKey;
+  l.renoProgress = 0;
+  l.renoDuration = duration;
+  msg("Started " + RENOVATIONS[nextUpgradeKey].name + " on Lot " + (i + 1) + " (" + Math.round(duration) + "s)...");
   draw();
 }
 
@@ -1077,7 +1088,7 @@ function tick(now) {
     }
 
     lots.forEach((l, i) => {
-      if (l.houseStyle === "civic" && l.st !== "empty" && l.st !== "working") {
+      if (l.houseStyle === "civic" && l.st !== "empty" && l.st !== "working" && l.st !== "reno_working") {
         l.rt = (l.rt || 0) - dt;
         if (l.rt <= 0) {
           l.rt = 3;
@@ -1142,6 +1153,17 @@ function tick(now) {
             msg("Completed " + STYLES[l.houseStyle].name + " on Lot " + (i + 1) + "! Auto-renting for " + fmt(l.rent) + "/3s.");
           }
         }
+      } else if (l.st === "reno_working") {
+        l.renoProgress += dt / l.renoDuration;
+        if (l.renoProgress >= 1) {
+          l.renovations.push(l.pendingRenoKey);
+          const renoName = RENOVATIONS[l.pendingRenoKey].name;
+          l.st = "rented";
+          l.rent = calcRent(i);
+          l.rt = 3;
+          l.pendingRenoKey = null;
+          msg("Completed " + renoName + " on Lot " + (i + 1) + "! Valuation increased.");
+        }
       } else if (l.st === "listed" && !l.offer) {
         l.wait -= dt;
         if (l.wait <= 0) spawnOffer(i);
@@ -1186,16 +1208,28 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
-// Progressive Building Construction, Organic Billowing Dust Clouds & Realtor Signs
+// Progressive Building Construction, Organic Billowing Dust & Realtor Sign with Reduced Sticker
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
 
   if (st === "empty") {
+    const isReduced = l.landPrice < 125;
     return `
-      <rect x="35" y="22" width="30" height="22" rx="3" fill="#ffffff" stroke="#4e8a38" stroke-width="2"/>
-      <path d="M43,30 L43,38 M43,33 L50,33 M50,30 L50,38" stroke="#e53935" stroke-width="2.5" stroke-linecap="round"/>
-      <text x="50" y="58" font-size="8" font-weight="800" text-anchor="middle" fill="#2d5220">FOR SALE</text>
+      <line x1="25" y1="30" x2="25" y2="54" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="25" y1="32" x2="42" y2="32" stroke="#5d4037" stroke-width="2"/>
+      
+      <rect x="25" y="34" width="30" height="18" rx="2" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
+      <rect x="25" y="34" width="30" height="6" fill="#2e7d32"/>
+      <text x="40" y="38.5" font-size="4" font-weight="900" text-anchor="middle" fill="#ffffff">FOR SALE</text>
+      <text x="40" y="47" font-size="5.5" font-weight="900" text-anchor="middle" fill="#1b5e20">${fmt(l.landPrice)}</text>
+      
+      ${isReduced ? `
+        <g transform="translate(68, 38) rotate(-10)">
+          <rect x="-14" y="-5" width="28" height="10" rx="2" fill="#d32f2f" stroke="#ffffff" stroke-width="1"/>
+          <text x="0" y="2" font-size="4.5" font-weight="900" text-anchor="middle" fill="#ffffff" letter-spacing="0.2">REDUCED</text>
+        </g>
+      ` : ''}
     `;
   }
 
@@ -1266,13 +1300,19 @@ function renderArt(l, idx) {
     `;
   }
 
-  if (l.renovations.includes('luxury')) {
-    completedBuildingSvg += `<circle cx="50" cy="10" r="4" fill="#ffd700"/><polygon points="50,4 52,9 48,9" fill="#ffb300"/>`;
+  // Star System for Upgrades (1 Star per renovation, 3 Stars for fully upgraded)
+  if (l.renovations.length > 0) {
+    let starX = 50 - (l.renovations.length * 5);
+    let starsStr = "";
+    for (let s = 0; s < l.renovations.length; s++) {
+      starsStr += `<text x="${starX + (s * 10)}" y="8" font-size="9" text-anchor="middle">⭐</text>`;
+    }
+    completedBuildingSvg += `<g>${starsStr}</g>`;
   }
 
-  // Active Construction State with Organic Billowing Dust Clouds
-  if (st === "working") {
-    const prog = Math.max(0.05, Math.min(1, l.p));
+  // Active Construction State (Building or Renovation)
+  if (st === "working" || st === "reno_working") {
+    const prog = st === "working" ? Math.max(0.05, Math.min(1, l.p)) : Math.max(0.05, Math.min(1, l.renoProgress));
     const revealY = 60 - (prog * 56);
     const revealH = prog * 56;
     const clipId = `build-clip-${idx}`;
@@ -1499,6 +1539,7 @@ function draw() {
     if (l.st === "empty") lbl = "Buy<br><span style='color:var(--gold)'>" + fmt(l.landPrice) + "</span>";
     else if (l.st === "owned") lbl = sellMode ? "Sell Lot" : "Build Here";
     else if (l.st === "working") { lbl = STYLES[l.houseStyle].name + "..."; pb = l.p; }
+    else if (l.st === "reno_working") { lbl = "Upgrading..."; pb = l.renoProgress; }
     else if (l.st === "ready") lbl = STYLES[l.houseStyle].category === "infra" ? "Community Upgrade" : "Ready!";
     else if (l.st === "rented") lbl = "Rented (" + fmt(calcRent(i)) + "/3s)";
     else if (l.st === "listed") lbl = l.offer ? "Offer Below!" : "On Market (Tap)";
@@ -1506,7 +1547,7 @@ function draw() {
     else if (l.st === "ai_for_sale") lbl = "Buy House<br><span style='color:#fff'>" + fmt(l.aiPrice) + "</span>";
     else lbl = "Sold ✔";
 
-    const key = l.st + (l.houseStyle || "") + Math.round(l.p * 15) + l.landPrice + l.renovations.join() + (activeWidgetLot === i) + l.c;
+    const key = l.st + (l.houseStyle || "") + Math.round((l.p || l.renoProgress) * 15) + l.landPrice + l.renovations.join() + (activeWidgetLot === i) + l.c;
     if (el._k !== key) { el._k = key; el.querySelector("svg").innerHTML = renderArt(l, i); }
     const actEl = el.querySelector(".lot-action");
     actEl.innerHTML = lbl;
