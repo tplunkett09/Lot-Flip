@@ -322,6 +322,71 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 .lot .pb { width: 100%; height: 6px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; flex-shrink: 0; pointer-events: none; }
 .lot .pb i { display: block; height: 100%; background: var(--gold); width: 0; }
 
+/* In-Lot Floating Contractor Helmet Upgrade Button */
+.contractor-btn {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(255, 152, 0, 0.95);
+  border: 1px solid #fff;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  transition: transform 0.1s, filter 0.15s;
+}
+.contractor-btn:hover {
+  transform: scale(1.15);
+  filter: brightness(1.1);
+}
+
+/* Inline Quick Widget Action Bar (Expanded on the lot card) */
+.lot-widget-bar {
+  position: absolute;
+  bottom: 22px;
+  left: 4px;
+  right: 4px;
+  background: rgba(18, 26, 16, 0.92);
+  border: 1px solid var(--acc);
+  border-radius: 6px;
+  padding: 3px;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  z-index: 8;
+  backdrop-filter: blur(2px);
+}
+.lot-widget-bar button {
+  background: var(--card-hover);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.lot-widget-bar button:hover {
+  border-color: var(--acc);
+  background: var(--acc);
+  color: #fff;
+}
+.lot-widget-bar button.demolish-widget {
+  border-color: var(--warn);
+  background: rgba(229, 57, 53, 0.2);
+  color: #ff8a80;
+}
+.lot-widget-bar button.demolish-widget:hover {
+  background: var(--warn);
+  color: #fff;
+}
+
 /* Inline Offer Overlay Window */
 .house-offer-overlay {
   position: absolute; 
@@ -580,6 +645,7 @@ const SAVE_KEY = "lot_flip_save_v1";
 let lv = 1, money = 0, goal = 0, timeVal = 0, builders = 2, speed = 1, lots = [], els = [], last = 0, run = false, isPaused = false;
 let sellMode = false;
 let gameMode = "timed";
+let activeWidgetLot = null; // Tracks which lot has its quick widget bar open
 
 const $ = id => document.getElementById(id);
 const fmt = n => "$" + Math.round(n);
@@ -692,7 +758,11 @@ function buildScene() {
         </div>
         <div class="pb"><i></i></div>
       `;
-      bt.onclick = () => clickLot(i); 
+      bt.onclick = (e) => {
+        // Prevent toggle if clicking buttons inside the widget bar
+        if (e.target.closest('button')) return;
+        clickLot(i);
+      }; 
       r.appendChild(bt);
     }
     return r;
@@ -736,7 +806,7 @@ function startLevel() {
     l.aiWait = 3 + Math.random() * 6;
   });
 
-  builders = 2; speed = 1; sellMode = false; isPaused = false;
+  builders = 2; speed = 1; sellMode = false; isPaused = false; activeWidgetLot = null;
   buildScene(); run = true; last = performance.now();
   $("ov").style.display = "none";
   $("pause-ov").style.display = "none";
@@ -828,6 +898,33 @@ function updateMainMenu() {
   }
 }
 
+function triggerNextRenovation(i) {
+  const l = lots[i];
+  if (STYLES[l.houseStyle].category === "infra") return msg("Infrastructure cannot be renovated.");
+  
+  // Sequence order: paint -> roof -> luxury
+  let nextUpgradeKey = null;
+  let cost = 0;
+  if (!l.renovations.includes('paint')) {
+    nextUpgradeKey = 'paint';
+    cost = RENOVATIONS.paint.cost;
+  } else if (!l.renovations.includes('roof')) {
+    nextUpgradeKey = 'roof';
+    cost = RENOVATIONS.roof.cost;
+  } else if (!l.renovations.includes('luxury')) {
+    nextUpgradeKey = 'luxury';
+    cost = RENOVATIONS.luxury.cost;
+  } else {
+    return msg("Lot " + (i + 1) + " is already fully upgraded with all renovations!");
+  }
+
+  if (money < cost) return msg("Not enough money for " + RENOVATIONS[nextUpgradeKey].name + " (" + fmt(cost) + ").");
+  money -= cost;
+  l.renovations.push(nextUpgradeKey);
+  msg("Upgraded Lot " + (i + 1) with + RENOVATIONS[nextUpgradeKey].name + "!");
+  draw();
+}
+
 function clickLot(i) {
   if (!run || isPaused) return;
   const l = lots[i];
@@ -861,7 +958,9 @@ function clickLot(i) {
   } else if (l.st === "owned") {
     showStyleSelector(i);
   } else if (l.st === "rented" || l.st === "listed" || l.st === "ready") {
-    showHouseOptions(i);
+    // Toggle inline widget bar
+    activeWidgetLot = (activeWidgetLot === i) ? null : i;
+    draw();
   }
   draw();
 }
@@ -960,143 +1059,6 @@ function showStyleSelector(i) {
   $("b-park").onclick = () => startBuild("park");
   $("b-civic").onclick = () => startBuild("civic");
   $("b-close").onclick = () => c.innerHTML = "";
-}
-
-function showHouseOptions(i) {
-  const l = lots[i];
-  const c = $("choice");
-  const val = getLotValue(i);
-  const isInfra = STYLES[l.houseStyle].category === "infra";
-  const currentRent = calcRent(i);
-
-  let statusText = "";
-  if (isInfra) {
-    statusText = "Community Upgrade Active";
-  } else if (l.st === "rented") {
-    statusText = `Currently Rented: <b>${fmt(currentRent)}/3s</b> (Val: ${fmt(val)})`;
-  } else if (l.st === "listed") {
-    statusText = `Listed on Market (Val: ${fmt(val)}) - Rent Paused`;
-  } else {
-    statusText = `Valuation: ${fmt(val)}`;
-  }
-
-  c.innerHTML = `
-    <div class="choice-drawer" style="flex-direction:column;align-items:stretch;gap:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <b style="font-size:15px;color:var(--gold);">Lot ${i + 1} (${STYLES[l.houseStyle].name})</b>
-          <div style="font-size:12px;color:var(--mut);margin-top:2px;">${statusText}</div>
-        </div>
-        <button class="close-btn" id="cx">Close</button>
-      </div>
-
-      ${!isInfra ? `
-        <div class="drawer-section">
-          <div class="drawer-section-title">Renovate Property</div>
-          <div class="style-options">
-            <button class="style-btn" id="reno-paint" ${l.renovations.includes('paint') ? 'disabled' : ''}>
-              <b>🎨 Fresh Paint (${fmt(RENOVATIONS.paint.cost)})</b>
-              <small>+${fmt(RENOVATIONS.paint.valBonus)} Value</small>
-            </button>
-            <button class="style-btn" id="reno-roof" ${l.renovations.includes('roof') ? 'disabled' : ''}>
-              <b>🏠 Modern Roof (${fmt(RENOVATIONS.roof.cost)})</b>
-              <small>+${fmt(RENOVATIONS.roof.valBonus)} Value</small>
-            </button>
-            <button class="style-btn" id="reno-lux" ${l.renovations.includes('luxury') ? 'disabled' : ''}>
-              <b>✨ Luxury Interior (${fmt(RENOVATIONS.luxury.cost)})</b>
-              <small>+${fmt(RENOVATIONS.luxury.valBonus)} Value</small>
-            </button>
-          </div>
-        </div>
-      ` : ''}
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px;">
-        ${!isInfra ? `
-          ${l.st === 'rented' ? `
-            <button class="style-btn" id="cs" style="border-color:var(--gold);background:rgba(255,179,0,0.15);">
-              <b>🏷️ List for Sale (Direct)</b>
-              <small>Halts rent, takes offers</small>
-            </button>
-          ` : ''}
-          ${l.st === 'listed' ? `
-            <button class="style-btn" id="cur" style="border-color:var(--blue);">
-              <b>🛑 Unlist (Resume Rent)</b>
-              <small>Re-collect rent</small>
-            </button>
-          ` : ''}
-        ` : ''}
-        <button class="style-btn" id="demolish-btn" style="border-color:var(--warn);background:rgba(229,57,53,0.15);">
-          <b>🏗️ Demolish Property ($100)</b>
-          <small>Clear lot for new build</small>
-        </button>
-      </div>
-    </div>
-  `;
-
-  if (!isInfra) {
-    if ($("reno-paint") && !l.renovations.includes('paint')) {
-      $("reno-paint").onclick = () => {
-        if (money < RENOVATIONS.paint.cost) return msg("Not enough money for Fresh Paint (" + fmt(RENOVATIONS.paint.cost) + ").");
-        money -= RENOVATIONS.paint.cost;
-        l.renovations.push('paint');
-        msg("Applied Fresh Paint to Lot " + (i + 1) + "!");
-        showHouseOptions(i);
-        draw();
-      };
-    }
-    if ($("reno-roof") && !l.renovations.includes('roof')) {
-      $("reno-roof").onclick = () => {
-        if (money < RENOVATIONS.roof.cost) return msg("Not enough money for Modern Roof (" + fmt(RENOVATIONS.roof.cost) + ").");
-        money -= RENOVATIONS.roof.cost;
-        l.renovations.push('roof');
-        msg("Installed Modern Roof on Lot " + (i + 1) + "!");
-        showHouseOptions(i);
-        draw();
-      };
-    }
-    if ($("reno-lux") && !l.renovations.includes('luxury')) {
-      $("reno-lux").onclick = () => {
-        if (money < RENOVATIONS.luxury.cost) return msg("Not enough money for Luxury Interior (" + fmt(RENOVATIONS.luxury.cost) + ").");
-        money -= RENOVATIONS.luxury.cost;
-        l.renovations.push('luxury');
-        msg("Upgraded Luxury Interior on Lot " + (i + 1) + "!");
-        showHouseOptions(i);
-        draw();
-      };
-    }
-
-    if ($("cs")) {
-      $("cs").onclick = () => {
-        l.st = "listed";
-        l.wait = 1.5 + Math.random() * 2;
-        msg("Listed Lot " + (i + 1) + " for sale! Rent income paused while on market.");
-        c.innerHTML = ""; draw();
-      };
-    }
-
-    if ($("cur")) {
-      $("cur").onclick = () => {
-        l.st = "rented";
-        l.rent = calcRent(i);
-        l.rt = 3;
-        if (l.offer) l.offer = null;
-        msg("Unlisted Lot " + (i + 1) + ". Resumed rental income (" + fmt(l.rent) + "/3s).");
-        c.innerHTML = ""; draw();
-      };
-    }
-  }
-
-  $("demolish-btn").onclick = () => {
-    if (money < 100) return msg("Not enough money to demolish property ($100 required).");
-    money -= 100;
-    const p = l.landPrice, t = l.pt;
-    Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
-    msg("Demolished property on Lot " + (i + 1) + ". Lot ready for rebuilding!");
-    c.innerHTML = "";
-    draw();
-  };
-
-  $("cx").onclick = () => c.innerHTML = "";
 }
 
 function spawnOffer(i) {
@@ -1448,6 +1410,83 @@ function draw() {
       aiBadge.style.display = "none";
     }
 
+    // Contractor Helmet Upgrader Button (Shown on built residential houses that aren't fully maxed)
+    let contractorBtn = el.querySelector(".contractor-btn");
+    const isInfra = l.houseStyle && STYLES[l.houseStyle].category === "infra";
+    const canUpgrade = l.st === "rented" && !isInfra && l.renovations.length < 3;
+
+    if (canUpgrade) {
+      if (!contractorBtn) {
+        contractorBtn = document.createElement("div");
+        contractorBtn.className = "contractor-btn";
+        contractorBtn.title = "Click to trigger next available upgrade!";
+        contractorBtn.textContent = "👷";
+        el.appendChild(contractorBtn);
+        contractorBtn.onclick = (e) => {
+          e.stopPropagation();
+          triggerNextRenovation(i);
+        };
+      }
+    } else if (contractorBtn) {
+      contractorBtn.remove();
+    }
+
+    // Inline Quick Widget Action Bar (Expanded when clicked)
+    let widgetBar = el.querySelector(".lot-widget-bar");
+    if (activeWidgetLot === i && (l.st === "rented" || l.st === "listed" || l.st === "ready")) {
+      if (!widgetBar) {
+        widgetBar = document.createElement("div");
+        widgetBar.className = "lot-widget-bar";
+        el.appendChild(widgetBar);
+      }
+      
+      let widgetHtml = "";
+      if (l.st === "rented" && !isInfra) {
+        widgetHtml += `<button id="w-list">🏷️ List</button>`;
+      } else if (l.st === "listed") {
+        widgetHtml += `<button id="w-unlist">🛑 Unlist</button>`;
+      }
+      widgetHtml += `<button class="demolish-widget" id="w-demolish">🏗️ Demolish ($100)</button>`;
+      widgetBar.innerHTML = widgetHtml;
+
+      if ($("w-list")) {
+        $("w-list").onclick = (e) => {
+          e.stopPropagation();
+          l.st = "listed";
+          l.wait = 1.5 + Math.random() * 2;
+          activeWidgetLot = null;
+          msg("Listed Lot " + (i + 1) + " for sale! Rent income paused.");
+          draw();
+        };
+      }
+      if ($("w-unlist")) {
+        $("w-unlist").onclick = (e) => {
+          e.stopPropagation();
+          l.st = "rented";
+          l.rent = calcRent(i);
+          l.rt = 3;
+          if (l.offer) l.offer = null;
+          activeWidgetLot = null;
+          msg("Unlisted Lot " + (i + 1) + ". Resumed rental income.");
+          draw();
+        };
+      }
+      if ($("w-demolish")) {
+        $("w-demolish").onclick = (e) => {
+          e.stopPropagation();
+          if (money < 100) return msg("Not enough money to demolish property ($100 required).");
+          money -= 100;
+          const p = l.landPrice, t = l.pt;
+          Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
+          activeWidgetLot = null;
+          msg("Demolished property on Lot " + (i + 1) + ".");
+          draw();
+        };
+      }
+    } else if (widgetBar) {
+      widgetBar.remove();
+    }
+
     let offerOverlay = el.querySelector(".house-offer-overlay");
     if (l.offer) {
       if (!offerOverlay) {
@@ -1489,7 +1528,7 @@ function draw() {
     else if (l.st === "ai_for_sale") lbl = "Buy House<br><span style='color:#fff'>" + fmt(l.aiPrice) + "</span>";
     else lbl = "Sold ✔";
 
-    const key = l.st + (l.houseStyle || "") + Math.round(l.p * 15) + l.landPrice + l.renovations.join() + l.c;
+    const key = l.st + (l.houseStyle || "") + Math.round(l.p * 15) + l.landPrice + l.renovations.join() + (activeWidgetLot === i) + l.c;
     if (el._k !== key) { el._k = key; el.querySelector("svg").innerHTML = renderArt(l, i); }
     const actEl = el.querySelector(".lot-action");
     actEl.innerHTML = lbl;
