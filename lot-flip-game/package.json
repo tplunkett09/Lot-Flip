@@ -1,0 +1,12 @@
+{
+  "name": "lot-flip",
+  "version": "1.0.0",
+  "description": "Suburban Real Estate Management Game",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": ["game", "html5", "real-estate", "simulation"],
+  "author": "Timothy Plunkett",
+  "license": "MIT"
+}
