@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -31,27 +31,27 @@ body {
   margin: 0; 
   background: var(--bg); 
   color: var(--text);
-  font: 15px/1.4 system-ui, -apple-system, sans-serif;
+  font: 14px/1.3 system-ui, -apple-system, sans-serif;
   display: flex; 
   justify-content: center; 
   min-height: 100vh; 
-  padding: 10px;
+  padding: 6px;
 }
 #app { 
   width: 100%; 
   max-width: 920px; 
   display: flex; 
   flex-direction: column; 
-  gap: 10px; 
+  gap: 8px; 
 }
 
 header { 
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
-  padding: 0 4px;
+  padding: 0 2px;
 }
-h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--gold); }
+h1 { font-size: 20px; margin: 0; display: flex; align-items: center; gap: 6px; font-weight: 800; color: var(--gold); }
 
 /* Top Status Ribbon */
 .ribbon {
@@ -61,49 +61,49 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   align-items: center;
   background: var(--card); 
   border: 2px solid var(--line); 
-  border-radius: 12px;
-  padding: 8px 14px; 
-  gap: 8px; 
+  border-radius: 10px;
+  padding: 6px 10px; 
+  gap: 6px; 
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
-.ribbon-item { display: flex; align-items: baseline; gap: 5px; }
-.ribbon-item .label { font-size: 11px; color: var(--mut); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-.ribbon-item b { font-size: 15px; color: var(--text); font-weight: 800; }
+.ribbon-item { display: flex; align-items: baseline; gap: 4px; }
+.ribbon-item .label { font-size: 10px; color: var(--mut); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+.ribbon-item b { font-size: 14px; color: var(--text); font-weight: 800; }
 
 .pause-btn {
   background: var(--card-hover);
   border: 1px solid var(--gold);
   color: var(--gold);
-  border-radius: 8px;
-  padding: 4px 10px;
-  font-size: 12px;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.1s, background 0.2s;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 .pause-btn:hover {
   transform: scale(1.05);
   background: rgba(255, 179, 0, 0.15);
 }
 
-.progress-container { background: var(--card); border: 2px solid var(--line); border-radius: 8px; padding: 6px 12px; }
-.progress-labels { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; color: var(--mut); font-weight: 600; }
-.bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.progress-container { background: var(--card); border: 2px solid var(--line); border-radius: 6px; padding: 4px 10px; }
+.progress-labels { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px; color: var(--mut); font-weight: 600; }
+.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--acc); width: 0; transition: width 0.3s; }
 
 /* Cartoon Neighborhood Scene */
 #scene {
   background: var(--grass); 
-  border: 4px solid #4d8837; 
-  border-radius: 18px;
-  padding: 12px; 
+  border: 3px solid #4d8837; 
+  border-radius: 14px;
+  padding: 8px; 
   display: flex; 
   flex-direction: column; 
-  gap: 10px; 
-  box-shadow: inset 0 2px 12px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.4);
+  gap: 8px; 
+  box-shadow: inset 0 2px 12px rgba(0,0,0,0.3), 0 6px 16px rgba(0,0,0,0.4);
   position: relative;
   overflow: hidden;
 }
@@ -115,14 +115,14 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 .lot-row { 
   display: grid; 
   grid-template-columns: repeat(5, 1fr); 
-  gap: 8px; 
+  gap: 6px; 
 }
 
 /* Two-Lane Fixed Road System */
 .road {
-  height: 52px; 
+  height: 42px; 
   background: var(--asphalt); 
-  border-radius: 8px; 
+  border-radius: 6px; 
   position: relative; 
   overflow: hidden;
   border: 2px solid #222; 
@@ -132,14 +132,14 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   position: absolute; 
   left: 0; 
   right: 0; 
-  top: 25px;
+  top: 20px;
   border-top: 2px dashed #f5d061;
 }
 .crosswalk {
   position: absolute;
   top: 0; bottom: 0;
-  width: 22px;
-  background: repeating-linear-gradient(0deg, #fff, #fff 5px, transparent 5px, transparent 10px);
+  width: 18px;
+  background: repeating-linear-gradient(0deg, #fff, #fff 4px, transparent 4px, transparent 8px);
   opacity: 0.7;
   pointer-events: none;
 }
@@ -150,18 +150,18 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 /* Cars in Separate Vertical Lanes */
 .road span {
   position: absolute; 
-  font-size: 20px; 
+  font-size: 16px; 
   display: block; 
   line-height: 1;
   z-index: 2;
 }
 .car-top { 
-  top: 3px; 
+  top: 2px; 
   transform: scaleX(-1); 
   animation: drive-right 8.5s linear infinite; 
 }
 .car-bottom { 
-  top: 27px; 
+  top: 22px; 
   animation: drive-left 10.5s linear infinite; 
 }
 @keyframes drive-right { from { left: -10%; } to { left: 110%; } }
@@ -188,9 +188,9 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 /* Lot Container */
 .lot {
   background: #73b853; 
-  border: 3px dashed #488433; 
-  border-radius: 12px;
-  padding: 6px; 
+  border: 2px dashed #488433; 
+  border-radius: 10px;
+  padding: 4px; 
   cursor: pointer; 
   display: flex; 
   flex-direction: column; 
@@ -199,7 +199,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   font: inherit; 
   transition: transform 0.15s, border-color 0.2s, background-color 0.2s;
   position: relative; 
-  height: 185px; 
+  height: 155px; 
   justify-content: space-between; 
   overflow: hidden;
   user-select: none; 
@@ -214,35 +214,35 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   background: #33261a;
   border: 2px solid #8d6e63;
 }
-.lot:hover { border-color: #fff; transform: translateY(-3px); }
+.lot:hover { border-color: #fff; transform: translateY(-2px); }
 .lot.hot { border-color: var(--gold); animation: pulse 1.5s infinite; }
 @keyframes pulse { 50% { border-color: var(--acc); } }
 
 /* Badges */
 .boost-badge {
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 3px;
+  left: 3px;
   background: rgba(171, 71, 188, 0.95);
   color: #fff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
-  padding: 1px 5px;
-  border-radius: 6px;
+  padding: 1px 4px;
+  border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   z-index: 5;
   pointer-events: none;
 }
 .ai-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 3px;
+  right: 3px;
   background: #d84315;
   color: #fff;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 800;
-  padding: 1px 5px;
-  border-radius: 6px;
+  padding: 1px 4px;
+  border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   z-index: 5;
   pointer-events: none;
@@ -255,7 +255,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 }
 @keyframes flashTag { from { filter: brightness(1); } to { filter: brightness(1.25); } }
 
-.lot svg { width: 100%; height: 68px; display: block; flex-shrink: 0; pointer-events: none; }
+.lot svg { width: 100%; height: 58px; display: block; flex-shrink: 0; pointer-events: none; }
 .lot-info { 
   width: 100%; 
   text-align: center; 
@@ -263,14 +263,14 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   flex-direction: column; 
   gap: 2px; 
   flex-shrink: 0; 
-  height: 54px; 
+  height: 50px; 
   justify-content: center; 
 }
 .lot-action {
   background: rgba(0,0,0,0.35); 
-  border-radius: 6px; 
-  padding: 2px 4px;
-  font-size: 10px; 
+  border-radius: 5px; 
+  padding: 2px;
+  font-size: 9px; 
   font-weight: 800; 
   width: 100%; 
   line-height: 1.15;
@@ -283,18 +283,18 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  height: 22px;
+  height: 20px;
   flex-shrink: 0;
 }
 .lot-icon-btn {
   background: rgba(255,255,255,0.1);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  width: 26px;
-  height: 22px;
-  font-size: 12px;
+  border-radius: 5px;
+  width: 24px;
+  height: 20px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -307,7 +307,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   border-color: var(--gold);
 }
 
-.lot .pb { width: 100%; height: 5px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; flex-shrink: 0; pointer-events: none; }
+.lot .pb { width: 100%; height: 4px; background: rgba(0,0,0,0.3); border-radius: 2px; overflow: hidden; flex-shrink: 0; pointer-events: none; }
 .lot .pb i { display: block; height: 100%; background: var(--gold); width: 0; }
 
 /* Inline Offer Overlay Window */
@@ -320,15 +320,15 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   flex-direction: column; 
   align-items: center; 
   justify-content: center; 
-  gap: 3px; 
+  gap: 2px; 
   z-index: 30; 
-  padding: 4px; 
+  padding: 3px; 
   text-align: center;
   cursor: default;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 .house-offer-title { 
-  font-size: 10px; 
+  font-size: 9px; 
   color: var(--mut); 
   font-weight: 800; 
   text-transform: uppercase; 
@@ -336,52 +336,52 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   line-height: 1;
 }
 .house-offer-price { 
-  font-size: 15px; 
+  font-size: 13px; 
   font-weight: 900; 
   color: var(--gold); 
   line-height: 1.1;
 }
 .house-offer-sub { 
-  font-size: 9px; 
+  font-size: 8px; 
   color: var(--acc); 
   font-weight: 700; 
   line-height: 1;
 }
 .house-offer-btns { 
   display: flex; 
-  gap: 6px; 
-  margin-top: 3px; 
+  gap: 4px; 
+  margin-top: 2px; 
 }
 .house-offer-btns button {
   border: 0; 
-  border-radius: 6px; 
-  width: 32px; 
-  height: 28px; 
-  font-size: 15px; 
+  border-radius: 5px; 
+  width: 26px; 
+  height: 24px; 
+  font-size: 13px; 
   cursor: pointer; 
   font-weight: 800;
   display: flex; 
   align-items: center; 
   justify-content: center; 
   transition: transform 0.1s, filter 0.15s;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
 }
 .house-offer-btns button:hover { transform: scale(1.1); filter: brightness(1.1); }
 .accept-offer { background: var(--acc); color: #fff; }
 .reject-offer { background: var(--warn); color: #fff; }
 
 .pop {
-  position: absolute; top: 8px; right: 8px; font-weight: 800; color: var(--acc);
-  background: var(--card); border: 1px solid var(--acc); border-radius: 6px;
-  padding: 2px 6px; font-size: 12px; animation: popanim 1s ease-out forwards; pointer-events: none; z-index: 40;
+  position: absolute; top: 6px; right: 6px; font-weight: 800; color: var(--acc);
+  background: var(--card); border: 1px solid var(--acc); border-radius: 5px;
+  padding: 1px 4px; font-size: 10px; animation: popanim 1s ease-out forwards; pointer-events: none; z-index: 40;
 }
-@keyframes popanim { to { transform: translateY(-22px); opacity: 0; } }
+@keyframes popanim { to { transform: translateY(-18px); opacity: 0; } }
 
 /* Action Toolbar */
-.shop { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.shop { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 button.b {
   background: var(--card); color: var(--text); border: 2px solid var(--line);
-  border-radius: 12px; padding: 10px 8px; font: inherit; font-size: 13px;
+  border-radius: 10px; padding: 8px 6px; font: inherit; font-size: 12px;
   cursor: pointer; text-align: center; font-weight: 700; transition: background 0.2s, border-color 0.2s;
   box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
@@ -389,50 +389,50 @@ button.b:disabled { opacity: 0.4; cursor: default; border-color: var(--line); }
 button.b:not(:disabled):hover { background: var(--card-hover); border-color: var(--acc); }
 button.b.active { border-color: var(--blue); background: rgba(41, 182, 246, 0.15); color: var(--blue); }
 
-#msg { font-size: 13px; color: var(--mut); min-height: 20px; text-align: center; font-weight: 600; }
+#msg { font-size: 12px; color: var(--mut); min-height: 18px; text-align: center; font-weight: 600; }
 
 /* Overlay Modal */
 .modal-ov {
   position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
-  display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 100;
+  display: flex; align-items: center; justify-content: center; padding: 12px; z-index: 100;
 }
 .modal-ov .box {
-  background: var(--card); border: 2px solid var(--line); border-radius: 20px;
-  padding: 26px; max-width: 460px; width: 100%; text-align: center; display: flex; flex-direction: column; gap: 14px;
+  background: var(--card); border: 2px solid var(--line); border-radius: 16px;
+  padding: 20px; max-width: 420px; width: 100%; text-align: center; display: flex; flex-direction: column; gap: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
-.modal-ov h2 { margin: 0; font-size: 26px; color: var(--gold); }
-.modal-ov p { margin: 0; color: var(--mut); font-size: 14px; line-height: 1.5; }
+.modal-ov h2 { margin: 0; font-size: 22px; color: var(--gold); }
+.modal-ov p { margin: 0; color: var(--mut); font-size: 13px; line-height: 1.4; }
 
 .mode-select {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 6px 0;
+  gap: 8px;
+  margin: 4px 0;
 }
 .mode-btn {
   background: var(--card-hover);
   border: 2px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 8px;
+  border-radius: 10px;
+  padding: 8px 6px;
   color: var(--text);
   font: inherit;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   transition: border-color 0.2s, background 0.2s;
 }
 .mode-btn:hover { border-color: var(--acc); }
 .mode-btn.active { border-color: var(--gold); background: rgba(255, 179, 0, 0.15); }
-.mode-btn b { font-size: 14px; color: var(--gold); }
-.mode-btn small { font-size: 11px; color: var(--mut); }
+.mode-btn b { font-size: 13px; color: var(--gold); }
+.mode-btn small { font-size: 10px; color: var(--mut); }
 
 button.menu-btn {
-  background: var(--acc); color: #fff; border: 0; border-radius: 12px;
-  padding: 12px; font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; transition: background 0.2s, transform 0.1s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--acc); color: #fff; border: 0; border-radius: 10px;
+  padding: 10px; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 button.menu-btn:hover { background: var(--acc-hover); transform: translateY(-1px); }
 button.menu-btn.blue-btn { background: #0288d1; }
@@ -443,37 +443,37 @@ button.menu-btn.line-btn { background: var(--line); color: var(--text); }
 button.menu-btn.line-btn:hover { background: var(--card-hover); }
 
 /* Selector Drawer */
-#choice { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 920px; margin: 0 auto; z-index: 50; }
+#choice { position: fixed; bottom: 12px; left: 12px; right: 12px; max-width: 920px; margin: 0 auto; z-index: 50; }
 .choice-drawer {
-  background: var(--card); border: 2px solid var(--acc); border-radius: 16px;
-  padding: 14px 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  background: var(--card); border: 2px solid var(--acc); border-radius: 14px;
+  padding: 12px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.7); flex-wrap: wrap; max-height: 85vh; overflow-y: auto;
 }
-.drawer-section { display: flex; flex-direction: column; gap: 6px; }
-.drawer-section-title { font-size: 11px; color: var(--gold); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-.style-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.drawer-section { display: flex; flex-direction: column; gap: 5px; }
+.drawer-section-title { font-size: 10px; color: var(--gold); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+.style-options { display: flex; gap: 6px; flex-wrap: wrap; }
 .style-btn {
-  background: var(--card-hover); border: 1px solid var(--line); border-radius: 10px;
-  padding: 8px 12px; color: var(--text); font: inherit; cursor: pointer; text-align: left;
+  background: var(--card-hover); border: 1px solid var(--line); border-radius: 8px;
+  padding: 6px 10px; color: var(--text); font: inherit; cursor: pointer; text-align: left;
   display: flex; flex-direction: column; gap: 2px; transition: border-color 0.15s, transform 0.1s;
 }
-.style-btn:hover { border-color: var(--acc); transform: translateY(-2px); }
-.style-btn b { font-size: 13px; color: var(--gold); }
-.style-btn small { font-size: 11px; color: var(--mut); }
-.close-btn { background: var(--line); color: var(--text); border: 0; border-radius: 8px; padding: 10px 14px; font-weight: 700; cursor: pointer; align-self: center; }
+.style-btn:hover { border-color: var(--acc); transform: translateY(-1px); }
+.style-btn b { font-size: 12px; color: var(--gold); }
+.style-btn small { font-size: 10px; color: var(--mut); }
+.close-btn { background: var(--line); color: var(--text); border: 0; border-radius: 6px; padding: 8px 12px; font-weight: 700; cursor: pointer; align-self: center; font-size: 12px; }
 
-@media (max-width: 600px) {
-  .lot-row { grid-template-columns: repeat(5, 1fr); gap: 4px; }
-  .lot { height: 155px; padding: 4px; }
-  .lot svg { height: 52px; }
-  .lot-action { font-size: 9px; padding: 2px; }
-  .ribbon { padding: 6px 10px; gap: 6px; }
-  .ribbon-item .label { font-size: 9px; }
-  .ribbon-item b { font-size: 13px; }
-  .house-offer-title { font-size: 9px; }
-  .house-offer-price { font-size: 13px; }
-  .house-offer-sub { font-size: 8px; }
-  .house-offer-btns button { width: 28px; height: 24px; font-size: 13px; }
+@media (max-width: 768px) and (orientation: portrait) {
+  .lot { height: 132px; padding: 3px; }
+  .lot svg { height: 46px; }
+  .lot-info { height: 46px; gap: 1px; }
+  .lot-action { font-size: 8px; padding: 1px; }
+  .lot-header-bar { height: 18px; gap: 4px; }
+  .lot-icon-btn { width: 22px; height: 18px; font-size: 10px; }
+  .road { height: 36px; }
+  .road::before { top: 17px; }
+  .road span { font-size: 14px; }
+  .car-top { top: 1px; }
+  .car-bottom { top: 18px; }
 }
 </style>
 </head>
@@ -692,7 +692,6 @@ function buildScene() {
         clickLot(i);
       };
 
-      // Bind Lot Header Icon Buttons
       bt.querySelector(".btn-action-list").onclick = (e) => {
         e.stopPropagation();
         handleListAction(i);
@@ -986,10 +985,10 @@ function showActionDrawer(i) {
   c.innerHTML = `
     <div class="choice-drawer">
       <div>
-        <b style="font-size:15px;color:var(--gold);">Lot ${i + 1}: ${houseName}</b>
-        <div style="font-size:12px;color:var(--mut);">Valuation: <b style="color:#fff">${fmt(getLotValue(i))}</b></div>
+        <b style="font-size:14px;color:var(--gold);">Lot ${i + 1}: ${houseName}</b>
+        <div style="font-size:11px;color:var(--mut);">Valuation: <b style="color:#fff">${fmt(getLotValue(i))}</b></div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
         ${canUpgrade ? `
           <button class="style-btn" id="drawer-upgrade" style="border-color:var(--gold);background:rgba(255,179,0,0.15)">
             <b>👷 Upgrade: ${nextUpgradeName} (${fmt(nextUpgradeCost)})</b>
@@ -1069,10 +1068,10 @@ function showAiBuyDrawer(i) {
   c.innerHTML = `
     <div class="choice-drawer">
       <div>
-        <b style="font-size:15px;color:var(--gold);">Buy Pre-Built House (Lot ${i + 1})</b>
-        <div style="font-size:12px;color:var(--mut);">${style.name} · Asking Price: <b style="color:#fff">${fmt(l.aiPrice)}</b></div>
+        <b style="font-size:14px;color:var(--gold);">Buy Pre-Built House (Lot ${i + 1})</b>
+        <div style="font-size:11px;color:var(--mut);">${style.name} · Asking Price: <b style="color:#fff">${fmt(l.aiPrice)}</b></div>
       </div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:6px;">
         <button class="style-btn" id="b-aibuynow" style="border-color:var(--gold);background:rgba(255,179,0,0.15)">
           <b>🛒 Buy & Auto-Rent (${fmt(l.aiPrice)})</b>
           <small>Instant ownership</small>
@@ -1105,15 +1104,15 @@ function showStyleSelector(i) {
         <div class="style-options">
           <button class="style-btn" id="b-ranch">
             <b>🏡 Ranch (${fmt(STYLES.ranch.cost)})</b>
-            <small>Val: ${fmt(STYLES.ranch.baseVal)} · 1.0x Rent · 3s</small>
+            <small>Val: ${fmt(STYLES.ranch.baseVal)} · 1.0x Rent</small>
           </button>
           <button class="style-btn" id="b-colonial">
             <b>🏛️ Colonial (${fmt(STYLES.colonial.cost)})</b>
-            <small>Val: ${fmt(STYLES.colonial.baseVal)} · 1.3x Rent · +15% Boost</small>
+            <small>Val: ${fmt(STYLES.colonial.baseVal)} · +15% Boost</small>
           </button>
           <button class="style-btn" id="b-mansion">
             <b>🏰 Mansion (${fmt(STYLES.mansion.cost)})</b>
-            <small>Val: ${fmt(STYLES.mansion.baseVal)} · 1.8x Rent · +30% Boost</small>
+            <small>Val: ${fmt(STYLES.mansion.baseVal)} · +30% Boost</small>
           </button>
         </div>
       </div>
@@ -1127,7 +1126,7 @@ function showStyleSelector(i) {
           </button>
           <button class="style-btn" id="b-civic" style="border-color:var(--teal)">
             <b>🏛️ Civic Center (${fmt(STYLES.civic.cost)})</b>
-            <small>+15% Global · +$15/s Revenue</small>
+            <small>+15% Global · +$15/s</small>
           </button>
         </div>
       </div>
@@ -1321,7 +1320,7 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
-// Progressive Building Construction & Large Centered Realtor Signs (No Dust FX)
+// Progressive Building Construction & Large Centered Realtor Signs
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
@@ -1427,7 +1426,7 @@ function renderArt(l, idx) {
     completedBuildingSvg += `<g>${starsStr}</g>`;
   }
 
-  // Active Construction State (No Dust FX)
+  // Active Construction State
   if (st === "working" || st === "reno_working") {
     const prog = st === "working" ? Math.max(0.05, Math.min(1, l.p)) : Math.max(0.05, Math.min(1, l.renoProgress));
     const revealY = 60 - (prog * 56);
