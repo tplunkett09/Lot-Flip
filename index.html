@@ -2,1717 +2,387 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lot Flip</title>
 <style>
-:root {
-  --bg: #1a2417; 
-  --card: #263622; 
-  --card-hover: #32462d; 
-  --text: #f0f7ec; 
-  --mut: #a0b894;
-  --acc: #4caf50; 
-  --acc-hover: #43a047; 
-  --line: #3a5032; 
-  --warn: #e53935; 
-  --grass: #62aa48;
-  --asphalt: #33383b;
-  --gold: #ffb300; 
-  --blue: #29b6f6;
-  --purple: #ab47bc;
-  --teal: #26a69a;
-  box-sizing: border-box;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0; 
-  background: var(--bg); 
-  color: var(--text);
-  font: 14px/1.3 system-ui, -apple-system, sans-serif;
-  display: flex; 
-  justify-content: center; 
-  min-height: 100vh; 
-  padding: 6px;
-}
-#app { 
-  width: 100%; 
-  max-width: 920px; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 8px; 
-}
-
-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  padding: 0 2px;
-}
-h1 { font-size: 20px; margin: 0; display: flex; align-items: center; gap: 6px; font-weight: 800; color: var(--gold); }
-
-/* Top Status Ribbon */
-.ribbon {
-  display: flex; 
-  flex-wrap: wrap; 
-  justify-content: space-between; 
-  align-items: center;
-  background: var(--card); 
-  border: 2px solid var(--line); 
-  border-radius: 10px;
-  padding: 6px 10px; 
-  gap: 6px; 
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-.ribbon-item { display: flex; align-items: baseline; gap: 4px; }
-.ribbon-item .label { font-size: 10px; color: var(--mut); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-.ribbon-item b { font-size: 14px; color: var(--text); font-weight: 800; }
-
-.pause-btn {
-  background: var(--card-hover);
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 11px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.1s, background 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-.pause-btn:hover {
-  transform: scale(1.05);
-  background: rgba(255, 179, 0, 0.15);
-}
-
-.progress-container { background: var(--card); border: 2px solid var(--line); border-radius: 6px; padding: 4px 10px; }
-.progress-labels { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px; color: var(--mut); font-weight: 600; }
-.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
-.bar i { display: block; height: 100%; background: var(--acc); width: 0; transition: width 0.3s; }
-
-/* Cartoon Neighborhood Scene */
-#scene {
-  background: var(--grass); 
-  border: 3px solid #4d8837; 
-  border-radius: 14px;
-  padding: 8px; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 8px; 
-  box-shadow: inset 0 2px 12px rgba(0,0,0,0.3), 0 6px 16px rgba(0,0,0,0.4);
-  position: relative;
-  overflow: hidden;
-}
-
-#scene.paused-cars span {
-  animation-play-state: paused !important;
-}
-
-.lot-row { 
-  display: grid; 
-  grid-template-columns: repeat(5, 1fr); 
-  gap: 6px; 
-}
-
-/* Two-Lane Fixed Road System */
-.road {
-  height: 42px; 
-  background: var(--asphalt); 
-  border-radius: 6px; 
-  position: relative; 
-  overflow: hidden;
-  border: 2px solid #222; 
-}
-.road::before {
-  content: ""; 
-  position: absolute; 
-  left: 0; 
-  right: 0; 
-  top: 20px;
-  border-top: 2px dashed #f5d061;
-}
-.crosswalk {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 18px;
-  background: repeating-linear-gradient(0deg, #fff, #fff 4px, transparent 4px, transparent 8px);
-  opacity: 0.7;
-  pointer-events: none;
-}
-.cw-left { left: 18%; }
-.cw-mid { left: 50%; transform: translateX(-50%); }
-.cw-right { right: 18%; }
-
-/* Cars in Separate Vertical Lanes */
-.road span {
-  position: absolute; 
-  font-size: 16px; 
-  display: block; 
-  line-height: 1;
-  z-index: 2;
-}
-.car-top { 
-  top: 2px; 
-  transform: scaleX(-1); 
-  animation: drive-right 8.5s linear infinite; 
-}
-.car-bottom { 
-  top: 22px; 
-  animation: drive-left 10.5s linear infinite; 
-}
-@keyframes drive-right { from { left: -10%; } to { left: 110%; } }
-@keyframes drive-left { from { left: 110%; } to { left: -10%; } }
-
-@keyframes hammerSwing {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-35deg); }
-}
-@keyframes scaffoldPulse {
-  0%, 100% { opacity: 0.85; }
-  50% { opacity: 0.45; }
-}
-
-.construction-hammer {
-  animation: hammerSwing 0.5s infinite ease-in-out;
-  transform-origin: 80% 80%;
-  display: inline-block;
-}
-.scaffold-line {
-  animation: scaffoldPulse 1.2s infinite ease-in-out;
-}
-
-/* Lot Container */
-.lot {
-  background: #73b853; 
-  border: 2px dashed #488433; 
-  border-radius: 10px;
-  padding: 4px; 
-  cursor: pointer; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center;
-  color: var(--text); 
-  font: inherit; 
-  transition: transform 0.15s, border-color 0.2s, background-color 0.2s;
-  position: relative; 
-  height: 155px; 
-  justify-content: space-between; 
-  overflow: hidden;
-  user-select: none; 
-  -webkit-user-select: none;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
-}
-.lot.purchased {
-  background: var(--card);
-  border: 2px solid var(--line);
-}
-.lot.ai-owned {
-  background: #33261a;
-  border: 2px solid #8d6e63;
-}
-.lot:hover { border-color: #fff; transform: translateY(-2px); }
-.lot.hot { border-color: var(--gold); animation: pulse 1.5s infinite; }
-@keyframes pulse { 50% { border-color: var(--acc); } }
-
-/* Badges */
-.boost-badge {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  background: rgba(171, 71, 188, 0.95);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 800;
-  padding: 1px 4px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  z-index: 5;
-  pointer-events: none;
-}
-.ai-badge {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  background: #d84315;
-  color: #fff;
-  font-size: 8px;
-  font-weight: 800;
-  padding: 1px 4px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  z-index: 5;
-  pointer-events: none;
-}
-.ai-sale-tag {
-  background: #ff6f00 !important;
-  color: #fff !important;
-  font-weight: 900 !important;
-  animation: flashTag 1s infinite alternate;
-}
-@keyframes flashTag { from { filter: brightness(1); } to { filter: brightness(1.25); } }
-
-.lot svg { width: 100%; height: 58px; display: block; flex-shrink: 0; pointer-events: none; }
-.lot-info { 
-  width: 100%; 
-  text-align: center; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 2px; 
-  flex-shrink: 0; 
-  height: 50px; 
-  justify-content: center; 
-}
-.lot-action {
-  background: rgba(0,0,0,0.35); 
-  border-radius: 5px; 
-  padding: 2px;
-  font-size: 9px; 
-  font-weight: 800; 
-  width: 100%; 
-  line-height: 1.15;
-  text-align: center;
-  color: #fff;
-}
-
-/* Lot Header Emoji Button Bar */
-.lot-header-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  height: 20px;
-  flex-shrink: 0;
-}
-.lot-icon-btn {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  width: 24px;
-  height: 20px;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.1s, background 0.15s, border-color 0.15s;
-}
-.lot-icon-btn:hover {
-  transform: scale(1.15);
-  background: rgba(255,255,255,0.25);
-  border-color: var(--gold);
-}
-
-.lot .pb { width: 100%; height: 4px; background: rgba(0,0,0,0.3); border-radius: 2px; overflow: hidden; flex-shrink: 0; pointer-events: none; }
-.lot .pb i { display: block; height: 100%; background: var(--gold); width: 0; }
-
-/* Inline Offer Overlay Window */
-.house-offer-overlay {
-  position: absolute; 
-  inset: 0; 
-  background: rgba(18, 26, 16, 0.95); 
-  backdrop-filter: blur(2px);
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 2px; 
-  z-index: 30; 
-  padding: 3px; 
-  text-align: center;
-  cursor: default;
-  border-radius: 8px;
-}
-.house-offer-title { 
-  font-size: 9px; 
-  color: var(--mut); 
-  font-weight: 800; 
-  text-transform: uppercase; 
-  letter-spacing: 0.5px;
-  line-height: 1;
-}
-.house-offer-price { 
-  font-size: 13px; 
-  font-weight: 900; 
-  color: var(--gold); 
-  line-height: 1.1;
-}
-.house-offer-sub { 
-  font-size: 8px; 
-  color: var(--acc); 
-  font-weight: 700; 
-  line-height: 1;
-}
-.house-offer-btns { 
-  display: flex; 
-  gap: 4px; 
-  margin-top: 2px; 
-}
-.house-offer-btns button {
-  border: 0; 
-  border-radius: 5px; 
-  width: 26px; 
-  height: 24px; 
-  font-size: 13px; 
-  cursor: pointer; 
-  font-weight: 800;
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  transition: transform 0.1s, filter 0.15s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-}
-.house-offer-btns button:hover { transform: scale(1.1); filter: brightness(1.1); }
-.accept-offer { background: var(--acc); color: #fff; }
-.reject-offer { background: var(--warn); color: #fff; }
-
-.pop {
-  position: absolute; top: 6px; right: 6px; font-weight: 800; color: var(--acc);
-  background: var(--card); border: 1px solid var(--acc); border-radius: 5px;
-  padding: 1px 4px; font-size: 10px; animation: popanim 1s ease-out forwards; pointer-events: none; z-index: 40;
-}
-@keyframes popanim { to { transform: translateY(-18px); opacity: 0; } }
-
-/* Action Toolbar */
-.shop { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-button.b {
-  background: var(--card); color: var(--text); border: 2px solid var(--line);
-  border-radius: 10px; padding: 8px 6px; font: inherit; font-size: 12px;
-  cursor: pointer; text-align: center; font-weight: 700; transition: background 0.2s, border-color 0.2s;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-button.b:disabled { opacity: 0.4; cursor: default; border-color: var(--line); }
-button.b:not(:disabled):hover { background: var(--card-hover); border-color: var(--acc); }
-button.b.active { border-color: var(--blue); background: rgba(41, 182, 246, 0.15); color: var(--blue); }
-
-#msg { font-size: 12px; color: var(--mut); min-height: 18px; text-align: center; font-weight: 600; }
-
-/* Overlay Modal */
-.modal-ov {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
-  display: flex; align-items: center; justify-content: center; padding: 12px; z-index: 100;
-}
-.modal-ov .box {
-  background: var(--card); border: 2px solid var(--line); border-radius: 16px;
-  padding: 20px; max-width: 420px; width: 100%; text-align: center; display: flex; flex-direction: column; gap: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-}
-.modal-ov h2 { margin: 0; font-size: 22px; color: var(--gold); }
-.modal-ov p { margin: 0; color: var(--mut); font-size: 13px; line-height: 1.4; }
-
-.mode-select {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 4px 0;
-}
-.mode-btn {
-  background: var(--card-hover);
-  border: 2px solid var(--line);
-  border-radius: 10px;
-  padding: 8px 6px;
-  color: var(--text);
-  font: inherit;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  transition: border-color 0.2s, background 0.2s;
-}
-.mode-btn:hover { border-color: var(--acc); }
-.mode-btn.active { border-color: var(--gold); background: rgba(255, 179, 0, 0.15); }
-.mode-btn b { font-size: 13px; color: var(--gold); }
-.mode-btn small { font-size: 10px; color: var(--mut); }
-
-button.menu-btn {
-  background: var(--acc); color: #fff; border: 0; border-radius: 10px;
-  padding: 10px; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s, transform 0.1s;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-}
-button.menu-btn:hover { background: var(--acc-hover); transform: translateY(-1px); }
-button.menu-btn.blue-btn { background: #0288d1; }
-button.menu-btn.blue-btn:hover { background: #0277bd; }
-button.menu-btn.gold-btn { background: #f57c00; }
-button.menu-btn.gold-btn:hover { background: #ef6c00; }
-button.menu-btn.line-btn { background: var(--line); color: var(--text); }
-button.menu-btn.line-btn:hover { background: var(--card-hover); }
-
-/* Selector Drawer */
-#choice { position: fixed; bottom: 12px; left: 12px; right: 12px; max-width: 920px; margin: 0 auto; z-index: 50; }
-.choice-drawer {
-  background: var(--card); border: 2px solid var(--acc); border-radius: 14px;
-  padding: 12px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.7); flex-wrap: wrap; max-height: 85vh; overflow-y: auto;
-}
-.drawer-section { display: flex; flex-direction: column; gap: 5px; }
-.drawer-section-title { font-size: 10px; color: var(--gold); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-.style-options { display: flex; gap: 6px; flex-wrap: wrap; }
-.style-btn {
-  background: var(--card-hover); border: 1px solid var(--line); border-radius: 8px;
-  padding: 6px 10px; color: var(--text); font: inherit; cursor: pointer; text-align: left;
-  display: flex; flex-direction: column; gap: 2px; transition: border-color 0.15s, transform 0.1s;
-}
-.style-btn:hover { border-color: var(--acc); transform: translateY(-1px); }
-.style-btn b { font-size: 12px; color: var(--gold); }
-.style-btn small { font-size: 10px; color: var(--mut); }
-.close-btn { background: var(--line); color: var(--text); border: 0; border-radius: 6px; padding: 8px 12px; font-weight: 700; cursor: pointer; align-self: center; font-size: 12px; }
-
-@media (max-width: 768px) and (orientation: portrait) {
-  .lot { height: 132px; padding: 3px; }
-  .lot svg { height: 46px; }
-  .lot-info { height: 46px; gap: 1px; }
-  .lot-action { font-size: 8px; padding: 1px; }
-  .lot-header-bar { height: 18px; gap: 4px; }
-  .lot-icon-btn { width: 22px; height: 18px; font-size: 10px; }
-  .road { height: 36px; }
-  .road::before { top: 17px; }
-  .road span { font-size: 14px; }
-  .car-top { top: 1px; }
-  .car-bottom { top: 18px; }
-}
+:root{--bg:#1a2417;--card:#263622;--hov:#32462d;--text:#f0f7ec;--mut:#a0b894;--acc:#4caf50;--line:#3a5032;--warn:#e53935;--gold:#ffb300;--blue:#29b6f6;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.3 system-ui,-apple-system,sans-serif;display:flex;justify-content:center;padding:6px;touch-action:manipulation}
+body.so{padding-bottom:300px}
+#app{width:100%;max-width:920px;display:flex;flex-direction:column;gap:6px}
+header{display:flex;justify-content:space-between;align-items:center;padding:0 2px}
+h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
+#lvl{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-weight:800;font-size:12px}
+.ribbon{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:6px 10px;gap:6px}
+.ri{display:flex;flex-direction:column;align-items:center;min-width:48px}
+.ri span{font-size:10px;color:var(--mut);text-transform:uppercase;font-weight:700}
+.ri b{font-size:15px;font-weight:800}
+#money{color:var(--gold);display:inline-block}
+#money.flash{animation:flash .5s}
+@keyframes flash{30%{transform:scale(1.35);color:#fff}}
+.pbtn{background:var(--hov);border:1px solid var(--gold);color:var(--gold);border-radius:8px;min-height:40px;padding:0 12px;font-weight:800;font-size:13px}
+.prog{background:var(--card);border:2px solid var(--line);border-radius:8px;padding:4px 10px}
+.pl{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);font-weight:600;margin-bottom:2px}
+.bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+#bonus,#evt{font-size:12px;font-weight:700;text-align:center;color:var(--gold);min-height:0}
+#evt{color:var(--blue)}
+#scene{background:#62aa48;border:3px solid #4d8837;border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:6px;box-shadow:inset 0 2px 12px rgba(0,0,0,.3);position:relative;overflow:hidden}
+#scene.pz *{animation-play-state:paused!important}
+.row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.road{height:38px;background:#33383b;border-radius:6px;position:relative;overflow:hidden;border:2px solid #222}
+.road::before{content:"";position:absolute;left:0;right:0;top:17px;border-top:2px dashed #f5d061}
+.cw{position:absolute;top:0;bottom:0;width:16px;background:repeating-linear-gradient(0deg,#fff,#fff 4px,transparent 4px,transparent 8px);opacity:.7}
+.road span{position:absolute;font-size:15px;line-height:1;z-index:2}
+.ct{top:1px;transform:scaleX(-1);animation:dr 8.5s linear infinite}
+.cb{top:19px;animation:dl 10.5s linear infinite 3s}
+@keyframes dr{from{left:-10%}to{left:110%}}
+@keyframes dl{from{left:110%}to{left:-10%}}
+.lot{background:#73b853;border:2px dashed #488433;border-radius:10px;padding:3px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;height:112px;overflow:hidden;user-select:none;-webkit-user-select:none;transition:transform .15s}
+.lot.purchased{background:var(--card);border:2px solid var(--line)}
+.lot.ai-owned{background:#33261a;border:2px solid #8d6e63}
+.lot.tap{transform:scale(.93)}
+.lot.hot{border-color:var(--gold);animation:pulse 1.5s infinite}
+.lot.offer{border-color:var(--blue);animation:op .7s infinite}
+@keyframes pulse{50%{border-color:var(--acc)}}
+@keyframes op{50%{box-shadow:0 0 12px var(--blue)}}
+@media(hover:hover){.lot:hover{border-color:#fff}}
+.lot svg{width:100%;height:62px;display:block;flex-shrink:0;pointer-events:none;transform-origin:50% 100%}
+.pi{animation:pi .5s}
+@keyframes pi{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.act{width:100%;background:rgba(0,0,0,.4);border-radius:5px;padding:3px 1px;font-size:10px;font-weight:800;text-align:center;color:#fff;line-height:1.1}
+.act.ai{background:#ff6f00}
+.pb{width:100%;height:5px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden}
+.pb i{display:block;height:100%;background:var(--gold);width:0}
+.bb,.ab{position:absolute;top:3px;font-size:10px;font-weight:800;padding:1px 4px;border-radius:4px;color:#fff;z-index:5;pointer-events:none;display:none}
+.bb{left:3px;background:rgba(171,71,188,.95)}
+.ab{right:3px;background:#d84315;font-size:9px}
+.pop{position:absolute;top:6px;right:6px;font-weight:800;color:#fff;background:var(--acc);border-radius:10px;padding:1px 6px;font-size:11px;animation:popa 1.1s ease-out forwards;pointer-events:none;z-index:40}
+.pop.big{font-size:14px;background:var(--gold);color:#000}
+@keyframes popa{to{transform:translateY(-26px);opacity:0}}
+.cf{position:absolute;width:6px;height:9px;z-index:45;pointer-events:none;animation:cf .9s ease-out forwards}
+@keyframes cf{to{transform:translate(var(--x),var(--y)) rotate(540deg);opacity:0}}
+.dust{position:absolute;bottom:22px;left:50%;width:14px;height:14px;border-radius:50%;background:rgba(235,230,215,.85);z-index:45;pointer-events:none;animation:dust .7s ease-out forwards}
+@keyframes dust{to{transform:translate(var(--x),-14px) scale(2.2);opacity:0}}
+.smk{animation:smk 2s infinite;transform-box:fill-box}
+.s2{animation-delay:1s}
+@keyframes smk{from{transform:translate(0,0) scale(.6);opacity:.7}to{transform:translate(4px,-10px) scale(1.4);opacity:0}}
+.flag{animation:wave 1s infinite alternate;transform-origin:left center;transform-box:fill-box}
+@keyframes wave{to{transform:scaleX(.7)}}
+.spray{animation:spray 1s infinite alternate}
+@keyframes spray{from{opacity:.3}to{opacity:1}}
+.hm{animation:hm .5s infinite ease-in-out;transform-box:fill-box;transform-origin:80% 80%}
+@keyframes hm{50%{transform:rotate(-35deg)}}
+.scaf{animation:sc 1.2s infinite ease-in-out}
+@keyframes sc{50%{opacity:.4}}
+.stamp{animation:st .45s cubic-bezier(.2,1.6,.4,1);transform-box:fill-box;transform-origin:center}
+@keyframes st{from{transform:scale(3);opacity:0}}
+@media(prefers-reduced-motion:reduce){.smk,.flag,.spray,.scaf{animation:none}}
+.shop{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.b{background:var(--card);color:var(--text);border:2px solid var(--line);border-radius:10px;min-height:48px;padding:6px;font:inherit;font-size:13px;font-weight:700}
+.b:disabled{opacity:.4}
+.b.active{border-color:var(--blue);background:rgba(41,182,246,.15);color:var(--blue)}
+#toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translate(-50%,-20px);background:rgba(20,30,18,.96);border:1px solid var(--gold);color:#fff;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:.25s;z-index:200;max-width:92vw;text-align:center;pointer-events:none}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#sheet{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-width:920px;margin:0 auto;z-index:50}
+.sh{background:var(--card);border:2px solid var(--acc);border-radius:14px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.7);max-height:60vh;overflow-y:auto;animation:up .2s}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.sh h3{margin:0 0 2px;color:var(--gold);font-size:16px}
+.sub{color:var(--mut);font-size:12px;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin-top:6px}
+.opt{min-height:48px;background:var(--hov);border:2px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:13px;padding:6px 8px;text-align:left;display:flex;flex-direction:column;gap:2px;justify-content:center}
+.opt b{color:var(--gold);font-size:13px}.opt small{color:var(--mut);font-size:11px}
+.opt.dim{opacity:.5}.opt.x{align-items:center;text-align:center;font-weight:700}
+.opt.ok{background:rgba(76,175,80,.3);border-color:var(--acc);align-items:center;font-weight:800}
+.opt.no{background:rgba(229,57,53,.25);border-color:var(--warn);align-items:center;font-weight:800}
+.ob{background:rgba(41,182,246,.15);border:1px solid var(--blue);border-radius:8px;padding:8px;font-size:14px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:12px;z-index:100}
+.box{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:20px;max-width:420px;width:100%;text-align:center;display:flex;flex-direction:column;gap:12px}
+.box h2{margin:0;font-size:22px;color:var(--gold)}.box p{margin:0;color:var(--mut);font-size:13px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mb{background:var(--hov);border:2px solid var(--line);border-radius:10px;padding:8px 6px;color:var(--text);font:inherit;display:flex;flex-direction:column;gap:3px;align-items:center}
+.mb.active{border-color:var(--gold);background:rgba(255,179,0,.15)}.mb b{color:var(--gold)}.mb small{font-size:10px;color:var(--mut)}
+.mbtn{background:var(--acc);color:#fff;border:0;border-radius:10px;min-height:48px;font:inherit;font-size:15px;font-weight:800}
+.mbtn.blue{background:#0288d1}.mbtn.gold{background:#f57c00}.mbtn.line{background:var(--line)}
+.stars{font-size:34px;letter-spacing:4px}
+@media(max-width:768px){.lot{height:104px}.lot svg{height:56px}}
 </style>
 </head>
 <body>
 <div id="app">
-  <header>
-    <h1>🏡 Lot Flip</h1>
-    <div id="msg"></div>
-  </header>
-
-  <!-- Top Status Ribbon HUD -->
+  <header><h1>🏡 Lot Flip</h1><span id="lvl">Lv 1</span></header>
   <div class="ribbon">
-    <div class="ribbon-item"><span class="label">Money</span><b id="money" style="color:var(--gold)">$0</b></div>
-    <div class="ribbon-item"><span class="label">Goal</span><b id="goal">$0</b></div>
-    <div class="ribbon-item"><span class="label" id="time-label">Time</span><b id="time">0s</b></div>
-    <div class="ribbon-item"><span class="label">Builders</span><b id="bld">0/0</b></div>
-    <div class="ribbon-item"><span class="label">Rent</span><b id="rent" style="color:var(--acc)">$0/s</b></div>
-    <div class="ribbon-item"><span class="label">Avg Val</span><b id="lp">$0</b></div>
-    <button class="pause-btn" id="btn-pause">⏸️ Pause</button>
+    <div class="ri"><span>Money</span><b id="money">$0</b></div>
+    <div class="ri"><span>Goal</span><b id="goal">$0</b></div>
+    <div class="ri"><span id="tl">Time</span><b id="time">0s</b></div>
+    <div class="ri"><span>Builders</span><b id="bld">0/0</b></div>
+    <div class="ri"><span>Income</span><b id="rent" style="color:var(--acc)">$0/s</b></div>
+    <button class="pbtn" id="bp">⏸ Pause</button>
   </div>
-
-  <div class="progress-container">
-    <div class="progress-labels"><span>Goal Progress</span><span id="pct">0%</span></div>
-    <div class="bar"><i id="gbar"></i></div>
-  </div>
-
-  <!-- Neighborhood Layout -->
+  <div class="prog"><div class="pl"><span>Goal Progress</span><span id="pct">0%</span></div><div class="bar"><i id="gbar"></i></div></div>
+  <div id="bonus"></div><div id="evt"></div>
   <div id="scene"></div>
-
-  <!-- Action Toolbar -->
   <div class="shop">
     <button class="b" id="hire"></button>
     <button class="b" id="tools"></button>
     <button class="b" id="sellmode"></button>
   </div>
 </div>
+<div id="sheet"></div>
+<div id="toast"></div>
 
-<div id="choice"></div>
-
-<!-- Main Menu -->
-<div class="modal-ov" id="ov">
-  <div class="box">
-    <h2>🏡 Lot Flip</h2>
-    <p>Buy plots, build homes that <b>auto-rent immediately</b>, upgrade with Parks & Civic Centers, or buy pre-built AI houses to flip for big profits!</p>
-    
-    <div class="mode-select">
-      <button class="mode-btn active" id="m-timed">
-        <b>⏱️ Timed Mode</b>
-        <small>Reach target before time runs out</small>
-      </button>
-      <button class="mode-btn" id="m-relaxed">
-        <b>🧘 Relaxed Mode</b>
-        <small>No timer, play at your own pace</small>
-      </button>
-    </div>
-
-    <button class="menu-btn gold-btn" id="btn-continue" style="display:none">💾 Continue Saved Game</button>
-    <button class="menu-btn" id="go">🎮 Start New Game</button>
+<div class="ov" id="ov"><div class="box">
+  <h2>🏡 Lot Flip</h2>
+  <p>Buy plots, build homes that <b>auto-rent</b>, add Parks and Civic Centers, buy neighbors’ houses and flip them. Hit each level’s goal, finish the bonus task, and earn up to ⭐⭐⭐!</p>
+  <div class="modes">
+    <button class="mb active" id="mt"><b>⏱️ Timed</b><small>Beat the clock</small></button>
+    <button class="mb" id="mr"><b>🧘 Relaxed</b><small>No timer</small></button>
   </div>
-</div>
+  <button class="mbtn gold" id="bc" style="display:none">💾 Continue Saved Game</button>
+  <button class="mbtn" id="go">Start Level 1</button>
+</div></div>
 
-<!-- Pause Modal -->
-<div class="modal-ov" id="pause-ov" style="display:none">
-  <div class="box">
-    <h2>⏸️ Game Paused</h2>
-    <p>Game timers and construction are currently frozen.</p>
-    <button class="menu-btn" id="btn-resume">▶️ Resume Game</button>
-    <button class="menu-btn blue-btn" id="btn-save">💾 Save Game</button>
-    <button class="menu-btn line-btn" id="btn-menu">🏠 Main Menu</button>
-  </div>
-</div>
+<div class="ov" id="pz" style="display:none"><div class="box">
+  <h2>⏸ Paused</h2><p>Timers and construction are frozen.</p>
+  <button class="mbtn" id="br">▶ Resume</button>
+  <button class="mbtn blue" id="bs">💾 Save Game</button>
+  <button class="mbtn line" id="bm">🏠 Main Menu</button>
+</div></div>
+
+<div class="ov" id="end" style="display:none"><div class="box" id="endbox"></div></div>
 
 <script>
-const STYLES = {
-  ranch: { name: "Ranch", cost: 250, baseVal: 450, rentMult: 1.0, dur: 3, boost: 0, category: "house", icon: "🏡" },
-  colonial: { name: "Colonial", cost: 450, baseVal: 800, rentMult: 1.3, dur: 5, boost: 0.15, category: "house", icon: "🏛️" },
-  mansion: { name: "Mansion", cost: 800, baseVal: 1500, rentMult: 1.8, dur: 8, boost: 0.30, category: "house", icon: "🏰" },
-  park: { name: "Community Park", cost: 400, baseVal: 400, rentMult: 0, dur: 4, boost: 0.25, rentBoost: 0.20, category: "infra", icon: "🌳" },
-  civic: { name: "Civic Center", cost: 800, baseVal: 800, rentMult: 0, dur: 6, boost: 0.15, revenue: 15, category: "infra", icon: "🏛️" }
-};
+const $=id=>document.getElementById(id),fmt=n=>"$"+Math.round(n);
+const S={
+ranch:{n:"Ranch",cost:250,val:450,rm:1,dur:3,boost:0,cat:"h",ic:"🏡",d:"Value $450 · 1.0× rent"},
+colonial:{n:"Colonial",cost:450,val:800,rm:1.3,dur:5,boost:.15,cat:"h",ic:"🏛️",d:"Value $800 · +15% nearby"},
+mansion:{n:"Mansion",cost:800,val:1500,rm:1.8,dur:8,boost:.3,cat:"h",ic:"🏰",d:"Value $1500 · +30% nearby"},
+park:{n:"Park",cost:400,val:400,rm:0,dur:4,boost:.25,rb:.2,cat:"i",ic:"🌳",d:"+25% value, +20% rent nearby"},
+civic:{n:"Civic Center",cost:800,val:800,rm:0,dur:6,boost:.15,rev:15,cat:"i",ic:"🏛️",d:"+15% all lots · +$15/3s"}};
+const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
+const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
+const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s"};
+const KEY="lot_flip_save_v2",BKEY="lot_flip_best_v1",N=10;
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}};
+let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,ev={k:null,t:0,next:30},best={},tt;
+try{best=JSON.parse(store.get(BKEY)||"{}")}catch(e){}
+const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
+const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0});
+const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working").length;
+const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
+function adj(i){const a=[],c=i<5?i:i-5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);a.push(i<5?i+5:i-5);return a}
+const civicB=()=>lots.filter(l=>l.hs==="civic"&&done(l)).length*S.civic.boost;
+function nBoost(i){let b=civicB();adj(i).forEach(n=>{const l=lots[n];if(l&&done(l)&&S[l.hs].boost>0&&l.hs!=="civic")b+=S[l.hs].boost});return b}
+function parkRB(i){let b=0;adj(i).forEach(n=>{const l=lots[n];if(l&&l.hs==="park"&&done(l))b+=S.park.rb});return b}
+function val(i){const l=lots[i];return Math.round((l.land+(l.hs?S[l.hs].val:0)+l.reno.reduce((a,k)=>a+R[k].vb,0))*(1+nBoost(i)))}
+function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working")return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1))}
 
-const RENOVATIONS = {
-  paint: { name: "Fresh Paint", cost: 150, valBonus: 120, dur: 4, colors: ["#aed581", "#81d4fa", "#ffcc80", "#ce93d8", "#ffab91", "#fff59d"] },
-  roof: { name: "Modern Roof", cost: 300, valBonus: 280, dur: 7, tint: "#ff8a65" },
-  luxury: { name: "Luxury Interior", cost: 500, valBonus: 500, dur: 10, tint: "#ba68c8" }
-};
-
-const N = 10;
-const SAVE_KEY = "lot_flip_save_v1";
-
-let lv = 1, money = 0, goal = 0, timeVal = 0, builders = 2, speed = 1, lots = [], els = [], last = 0, run = false, isPaused = false;
-let sellMode = false;
-let gameMode = "timed";
-let activeDrawerLot = null;
-
-const $ = id => document.getElementById(id);
-const fmt = n => "$" + Math.round(n);
-
-const mkLot = () => ({ 
-  st: "empty", 
-  houseStyle: null, 
-  p: 0, 
-  dur: 0, 
-  c: Math.floor(Math.random() * 5), 
-  wait: 0, 
-  offer: null, 
-  rent: 0, 
-  rt: 0, 
-  landPrice: Math.round(120 + Math.random() * 80), 
-  pt: 3 + Math.random() * 4,
-  aiPrice: 0,
-  aiWait: 0,
-  aiTimer: 0,
-  renovations: [],
-  renoProgress: 0,
-  renoDuration: 0,
-  pendingRenoKey: null,
-  paintColor: "#e8d8c3"
-});
-
-const msg = t => $("msg").textContent = t;
-const busy = () => lots.filter(l => l.st === "working" || l.st === "reno_working").length;
-
-function getAdjacentIndices(i) {
-  const adj = [];
-  const isTop = i < 5;
-  const col = isTop ? i : i - 5;
-  
-  if (col > 0) adj.push(i - 1);       
-  if (col < 4) adj.push(i + 1);       
-  adj.push(isTop ? i + 5 : i - 5);    
-  return adj;
+function build(){
+  const sc=$("scene");sc.innerHTML="";
+  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div");d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 65"></svg><div class="act"></div><div class="pb"><i></i></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
+  const rd=document.createElement("div");rd.className="road";
+  rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div><span class="ct">🚗</span><span class="cb">🚙</span>';
+  sc.append(row(0),rd,row(5));els=[...sc.querySelectorAll(".lot")];
 }
 
-function getGlobalCivicBoost() {
-  let count = 0;
-  lots.forEach(l => {
-    if (l.houseStyle === "civic" && l.st !== "empty" && l.st !== "working" && l.st !== "reno_working") {
-      count++;
-    }
-  });
-  return count * STYLES.civic.boost;
+function startLevel(){
+  lots=Array.from({length:N},mkLot);closeSheet();
+  money=600+lv*50;goal=1800+lv*400;total=mode==="timed"?Math.max(90,180-lv*8):0;timeVal=total;elapsed=0;
+  const n=Math.min(4,2+Math.floor(lv/3)),ix=[],ht=["ranch","colonial","mansion"];
+  while(ix.length<n){const r=Math.floor(Math.random()*N);if(!ix.includes(r))ix.push(r)}
+  ix.forEach(k=>{const l=lots[k];l.st="ai_owned";l.hs=ht[Math.floor(Math.random()*3)];l.aiW=3+Math.random()*6});
+  const ks=Object.keys(S),k=ks[Math.floor(Math.random()*ks.length)];
+  bonus={k,n:S[k].cat==="h"?Math.min(3,1+Math.floor(lv/3)):1,r:200+lv*50,c:0,done:false};
+  builders=2;speed=1;sellMode=false;paused=false;ev={k:null,t:0,next:30};
+  build();run=true;last=performance.now();
+  ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("scene").classList.remove("pz");
+  $("tl").textContent=mode==="timed"?"Time":"Elapsed";
+  toast("Level "+lv+": reach "+fmt(goal)+"!");draw();
 }
 
-function getNeighborBoost(i) {
-  const neighbors = getAdjacentIndices(i);
-  let boost = getGlobalCivicBoost();
-  neighbors.forEach(nIdx => {
-    const nLot = lots[nIdx];
-    if (nLot && nLot.houseStyle && nLot.st !== "empty" && nLot.st !== "working" && nLot.st !== "reno_working") {
-      const b = STYLES[nLot.houseStyle].boost;
-      if (b > 0 && nLot.houseStyle !== "civic") boost += b;
-    }
-  });
-  return boost;
+function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
+function saveGame(){toast(store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus}))?"Game saved!":"Couldn’t save in this browser.")}
+function loadGame(){
+  try{const d=JSON.parse(store.get(KEY));lv=d.lv;money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;bonus=d.bonus;
+    ev={k:null,t:0,next:30};setMode(mode);build();run=true;paused=false;last=performance.now();
+    ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();return true}catch(e){toast("Couldn’t load save.");return false}
+}
+function updMenu(){const s=!!store.get(KEY);$("bc").style.display=s?"flex":"none";$("go").textContent=s?"🎮 Start New Game":"Start Level 1"}
+function setMode(m){mode=m;$("mt").classList.toggle("active",m==="timed");$("mr").classList.toggle("active",m==="relaxed")}
+
+function fx(i,t){
+  const e=els[i];if(!e)return;
+  if(t==="done"){const s=e.querySelector("svg");s.classList.remove("pi");void s.getBoundingClientRect();s.classList.add("pi");
+    for(let k=0;k<7;k++){const d=document.createElement("span");d.className="dust";d.style.setProperty("--x",((k-3)*9)+"px");e.appendChild(d);setTimeout(()=>d.remove(),700)}}
+  if(t==="sold")for(let k=0;k<18;k++){const c=document.createElement("span");c.className="cf";c.style.cssText="--x:"+((Math.random()-.5)*130)+"px;--y:"+(-30-Math.random()*50)+"px;left:50%;top:55%;background:hsl("+Math.random()*360+",85%,60%)";e.appendChild(c);setTimeout(()=>c.remove(),900)}
+}
+function pop(i,t,big){const e=els[i];if(!e)return;const s=document.createElement("span");s.className="pop"+(big?" big":"");s.textContent=t;e.appendChild(s);setTimeout(()=>s.remove(),1100)}
+function flash(){const m=$("money");m.classList.remove("flash");void m.offsetWidth;m.classList.add("flash")}
+
+function tapLot(i){
+  if(!run||paused)return;const l=lots[i],e=els[i];e.classList.add("tap");setTimeout(()=>e.classList.remove("tap"),180);
+  if(sellMode){if(l.st==="owned"){money+=l.land;pop(i,"+"+fmt(l.land),1);toast("Sold unbuilt lot for "+fmt(l.land));reset(l);flash()}else toast("Sell Mode only works on bought, unbuilt lots.");draw();return}
+  if(l.st==="empty"){if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");money-=l.land;l.st="owned";toast("Lot bought! Tap it to build.");draw();return}
+  if(l.st==="ai_owned")return toast("A neighbor lives here. Watch for it to go up for sale!");
+  if(l.st==="working"||l.st==="reno_working")return toast("Under construction…");
+  if(l.st==="sold")return;
+  sheet(i);
 }
 
-function getParkRentBoost(i) {
-  const neighbors = getAdjacentIndices(i);
-  let boost = 0;
-  neighbors.forEach(nIdx => {
-    const nLot = lots[nIdx];
-    if (nLot && nLot.houseStyle === "park" && nLot.st !== "empty" && nLot.st !== "working" && nLot.st !== "reno_working") {
-      boost += STYLES.park.rentBoost;
-    }
-  });
-  return boost;
-}
-
-function getLotValue(i) {
-  const l = lots[i];
-  if (!l) return 0;
-  let base = l.landPrice;
-  let houseVal = 0;
-  if (l.houseStyle && STYLES[l.houseStyle]) {
-    houseVal = STYLES[l.houseStyle].baseVal;
+function closeSheet(){sel=null;$("sheet").innerHTML="";document.body.classList.remove("so")}
+function sheet(i,conf){
+  const l=lots[i];sel=i;document.body.classList.add("so");
+  const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl='<button class="opt x" data-a="close">Close</button>';let h="";
+  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy()))+'<div class="opts">'+Object.keys(S).map(k=>'<button class="opt'+(money<S[k].cost?" dim":"")+'" data-a="'+k+'"><b>'+S[k].ic+" "+S[k].n+" "+fmt(S[k].cost)+"</b><small>"+S[k].d+"</small></button>").join("")+cl+"</div>"}
+  else if(l.st==="ai_for_sale"){h=hd("Buy "+S[l.hs].n+" · Lot "+(i+1),"Asking "+fmt(l.aiP)+" · Value "+fmt(val(i)))+'<div class="opts"><button class="opt ok" data-a="buyai">🛒 Buy & Auto-Rent</button>'+cl+"</div>"}
+  else if(conf){h=hd("⚠️ Demolish Lot "+(i+1)+"?","Costs $100 and clears the property.")+'<div class="opts"><button class="opt no" data-a="demo2">Confirm Demolish</button><button class="opt x" data-a="demo0">Cancel</button></div>'}
+  else if(["rented","listed","ready"].includes(l.st)){
+    const inf=S[l.hs].cat==="i",nx=ORD.find(k=>!l.reno.includes(k));
+    h=hd("Lot "+(i+1)+" · "+S[l.hs].n,"Value "+fmt(val(i))+(inf?"":" · Rent "+fmt(rentOf(i))+"/3s")+(l.reno.length?" · "+"⭐".repeat(l.reno.length):""));
+    if(l.offer)h+='<div class="ob">💰 Buyer offers <b>'+fmt(l.offer.price)+'</b> (value '+fmt(val(i))+')</div><div class="opts"><button class="opt ok" data-a="accept">✓ Accept</button><button class="opt no" data-a="reject">✕ Reject</button></div>';
+    h+='<div class="opts">';
+    if(l.st==="rented"&&!inf&&nx)h+='<button class="opt'+(money<R[nx].cost?" dim":"")+'" data-a="upgrade"><b>👷 '+R[nx].n+" "+fmt(R[nx].cost)+"</b><small>+"+fmt(R[nx].vb)+" value</small></button>";
+    if(l.st==="rented"&&!inf)h+='<button class="opt" data-a="list"><b>🏷️ List for Sale</b><small>Pauses rent</small></button>';
+    if(l.st==="listed")h+='<button class="opt" data-a="unlist"><b>🛑 Unlist</b><small>Resume rent</small></button>';
+    h+='<button class="opt" data-a="demo"><b>🏗️ Demolish $100</b><small>Back to empty land</small></button>'+cl+"</div>";
   }
-  let renoBonus = l.renovations.reduce((sum, rKey) => sum + RENOVATIONS[rKey].valBonus, 0);
-  const boost = getNeighborBoost(i);
-  return Math.round((base + houseVal + renoBonus) * (1 + boost));
+  $("sheet").innerHTML='<div class="sh">'+h+"</div>";
+}
+$("sheet").onclick=e=>{const b=e.target.closest("[data-a]");if(b&&sel!=null)act(sel,b.dataset.a)};
+
+function act(i,a){
+  const l=lots[i];
+  if(S[a]){if(l.st==="owned")startBuild(i,a);return}
+  if(a==="close")closeSheet();
+  else if(a==="upgrade")reno(i);
+  else if(a==="list"&&l.st==="rented"){l.st="listed";l.wait=1.5+Math.random()*2;closeSheet();toast("Listed! Rent is paused until it sells.");draw()}
+  else if(a==="unlist"&&l.st==="listed"){l.st="rented";l.offer=null;l.rent=rentOf(i);l.rt=3;closeSheet();toast("Unlisted. Rent resumed.");draw()}
+  else if(a==="demo")sheet(i,true);
+  else if(a==="demo0")sheet(i);
+  else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");money-=100;reset(l);closeSheet();toast("Property demolished.");draw()}
+  else if(a==="accept")resolveOffer(i,true);
+  else if(a==="reject")resolveOffer(i,false);
+  else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
+}
+function startBuild(i,k){const s=S[k],l=lots[i];if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");money-=s.cost;l.hs=k;l.st="working";l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
+function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return toast("Fully upgraded!");if(busy()>=builders)return toast("All builders are busy!");if(money<R[k].cost)return toast("Need "+fmt(R[k].cost)+" for "+R[k].n+".");money-=R[k].cost;l.st="reno_working";l.pend=k;l.rp=0;l.rd=R[k].dur/speed;closeSheet();toast(R[k].n+" started…");draw()}
+function spawnOffer(i){const l=lots[i],t=7+Math.random()*3,f=ev.k==="boom"?1.25:ev.k==="crash"?.8:1;l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". Tap to respond.");draw()}
+function resolveOffer(i,acc){
+  const l=lots[i];if(!l.offer)return;const p=l.offer.price;l.offer=null;
+  if(acc&&run){money+=p;l.st="sold";l.soldT=1.6;fx(i,"sold");pop(i,"+"+fmt(p),1);flash();toast("Sold Lot "+(i+1)+" for "+fmt(p)+"!")}
+  else{l.wait=2+Math.random()*3;toast("Offer rejected. Waiting for the next buyer…")}
+  closeSheet();draw();
 }
 
-function calcRent(i) {
-  const l = lots[i];
-  if (!l || !l.houseStyle || STYLES[l.houseStyle].category === "infra" || l.st === "reno_working") return 0;
-  const val = getLotValue(i);
-  const rentMult = STYLES[l.houseStyle].rentMult;
-  const parkRentBoost = getParkRentBoost(i);
-  return Math.round(val * 0.035 * rentMult * (1 + parkRentBoost));
-}
-
-function buildScene() {
-  const sc = $("scene"); sc.innerHTML = "";
-  let idx = 0;
-
-  const mkRow = count => {
-    const r = document.createElement("div"); r.className = "lot-row";
-    for (let k = 0; k < count; k++) {
-      const i = idx++, bt = document.createElement("div"); 
-      bt.className = "lot";
-      bt.innerHTML = `
-        <div class="boost-badge" style="display:none"></div>
-        <div class="ai-badge" style="display:none">NEIGHBOR</div>
-        <svg viewBox="0 0 100 65"></svg>
-        <div class="lot-info">
-          <div class="lot-header-bar" style="display:none">
-            <button class="lot-icon-btn btn-action-list" title="List/Unlist">🏷️</button>
-            <button class="lot-icon-btn btn-action-demolish" title="Demolish">🏗️</button>
-            <button class="lot-icon-btn btn-action-upgrade" title="Upgrade">👷</button>
-          </div>
-          <div class="lot-action"></div>
-        </div>
-        <div class="pb"><i></i></div>
-      `;
-      bt.onclick = (e) => {
-        if (e.target.closest('button')) return;
-        clickLot(i);
-      };
-
-      bt.querySelector(".btn-action-list").onclick = (e) => {
-        e.stopPropagation();
-        handleListAction(i);
-      };
-      bt.querySelector(".btn-action-demolish").onclick = (e) => {
-        e.stopPropagation();
-        handleDemolishAction(i);
-      };
-      bt.querySelector(".btn-action-upgrade").onclick = (e) => {
-        e.stopPropagation();
-        handleUpgradeAction(i);
-      };
-
-      r.appendChild(bt);
-    }
-    return r;
-  };
-
-  const mkRoad = () => {
-    const rd = document.createElement("div"); rd.className = "road";
-    rd.innerHTML = `
-      <div class="crosswalk cw-left"></div>
-      <div class="crosswalk cw-mid"></div>
-      <div class="crosswalk cw-right"></div>
-      <span class="car-top">🚗</span>
-      <span class="car-bottom" style="animation-delay: 3s">🚙</span>
-    `; 
-    return rd;
-  };
-
-  sc.appendChild(mkRow(5));
-  sc.appendChild(mkRoad());
-  sc.appendChild(mkRow(5));
-  els = [...sc.querySelectorAll(".lot")];
-}
-
-function startLevel() {
-  lots = Array.from({ length: N }, mkLot);
-  $("choice").innerHTML = "";
-  money = 600 + lv * 50; 
-  goal = 1800 + lv * 400; 
-  timeVal = gameMode === "timed" ? Math.max(90, 180 - lv * 8) : 0;
-  
-  let aiIndices = [];
-  while(aiIndices.length < 2) {
-    let r = Math.floor(Math.random() * N);
-    if (!aiIndices.includes(r)) aiIndices.push(r);
-  }
-  const houseTypes = ["ranch", "colonial", "mansion"];
-  aiIndices.forEach(idx => {
-    const l = lots[idx];
-    l.st = "ai_owned";
-    l.houseStyle = houseTypes[Math.floor(Math.random() * houseTypes.length)];
-    l.aiWait = 3 + Math.random() * 6;
-  });
-
-  builders = 2; speed = 1; sellMode = false; isPaused = false; activeDrawerLot = null;
-  buildScene(); run = true; last = performance.now();
-  $("ov").style.display = "none";
-  $("pause-ov").style.display = "none";
-  $("scene").classList.remove("paused-cars");
-  
-  $("time-label").textContent = gameMode === "timed" ? "Time" : "Elapsed";
-  msg("Level " + lv + " (" + (gameMode === "timed" ? "Timed" : "Relaxed") + "): Reach " + fmt(goal) + "!");
-  draw();
-}
-
-function togglePause() {
-  if (!run) return;
-  isPaused = !isPaused;
-  if (isPaused) {
-    $("pause-ov").style.display = "flex";
-    $("scene").classList.add("paused-cars");
-    msg("Game Paused.");
-  } else {
-    $("pause-ov").style.display = "none";
-    $("scene").classList.remove("paused-cars");
-    last = performance.now();
-    msg("Game Resumed.");
-  }
-}
-
-function saveGame() {
-  const saveData = {
-    lv, money, goal, timeVal, builders, speed, gameMode, sellMode, lots
-  };
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
-    msg("Game successfully saved!");
-  } catch (e) {
-    msg("Failed to save game state to storage.");
-  }
-}
-
-function hasSavedGame() {
-  return localStorage.getItem(SAVE_KEY) !== null;
-}
-
-function loadGame() {
-  const dataStr = localStorage.getItem(SAVE_KEY);
-  if (!dataStr) return false;
-  try {
-    const data = JSON.parse(dataStr);
-    lv = data.lv || 1;
-    money = data.money || 0;
-    goal = data.goal || 1000;
-    timeVal = data.timeVal || 0;
-    builders = data.builders || 2;
-    speed = data.speed || 1;
-    gameMode = data.gameMode || "timed";
-    sellMode = data.sellMode || false;
-    lots = data.lots || Array.from({ length: N }, mkLot);
-
-    if (gameMode === "timed") {
-      $("m-timed").classList.add("active");
-      $("m-relaxed").classList.remove("active");
-    } else {
-      $("m-relaxed").classList.add("active");
-      $("m-timed").classList.remove("active");
-    }
-
-    buildScene();
-    run = true;
-    isPaused = false;
-    last = performance.now();
-    $("ov").style.display = "none";
-    $("pause-ov").style.display = "none";
-    $("scene").classList.remove("paused-cars");
-    $("time-label").textContent = gameMode === "timed" ? "Time" : "Elapsed";
-    msg("Loaded saved game (Level " + lv + ")!");
-    draw();
-    return true;
-  } catch(e) {
-    msg("Error loading save file.");
-    return false;
-  }
-}
-
-function updateMainMenu() {
-  if (hasSavedGame()) {
-    $("btn-continue").style.display = "flex";
-    $("go").textContent = "🎮 Start New Game";
-  } else {
-    $("btn-continue").style.display = "none";
-    $("go").textContent = "Start Level 1";
-  }
-}
-
-function triggerNextRenovation(i) {
-  const l = lots[i];
-  if (STYLES[l.houseStyle].category === "infra") return msg("Infrastructure cannot be renovated.");
-  if (busy() >= builders) return msg("All builders are busy!");
-  
-  let nextUpgradeKey = null;
-  let cost = 0;
-  let duration = 0;
-  if (!l.renovations.includes('paint')) {
-    nextUpgradeKey = 'paint';
-    cost = RENOVATIONS.paint.cost;
-    duration = RENOVATIONS.paint.dur / speed;
-  } else if (!l.renovations.includes('roof')) {
-    nextUpgradeKey = 'roof';
-    cost = RENOVATIONS.roof.cost;
-    duration = RENOVATIONS.roof.dur / speed;
-  } else if (!l.renovations.includes('luxury')) {
-    nextUpgradeKey = 'luxury';
-    cost = RENOVATIONS.luxury.cost;
-    duration = RENOVATIONS.luxury.dur / speed;
-  } else {
-    return msg("Lot " + (i + 1) + " is already fully upgraded with all renovations!");
-  }
-
-  if (money < cost) return msg("Not enough money for " + RENOVATIONS[nextUpgradeKey].name + " (" + fmt(cost) + ").");
-  money -= cost;
-  l.st = "reno_working";
-  l.pendingRenoKey = nextUpgradeKey;
-  l.renoProgress = 0;
-  l.renoDuration = duration;
-  activeDrawerLot = null;
-  $("choice").innerHTML = "";
-  msg("Started " + RENOVATIONS[nextUpgradeKey].name + " on Lot " + (i + 1) + " (" + Math.round(duration) + "s)...");
-  draw();
-}
-
-function handleListAction(i) {
-  const l = lots[i];
-  if (l.st === "rented") {
-    if (l.houseStyle && STYLES[l.houseStyle].category === "infra") return msg("Infrastructure cannot be listed for sale.");
-    l.st = "listed";
-    l.wait = 1.5 + Math.random() * 2;
-    msg("Listed Lot " + (i + 1) + " for sale! Rent income paused.");
-    draw();
-  } else if (l.st === "listed") {
-    l.st = "rented";
-    l.rent = calcRent(i);
-    l.rt = 3;
-    if (l.offer) l.offer = null;
-    msg("Unlisted Lot " + (i + 1) + ". Resumed rental income.");
-    draw();
-  } else {
-    msg("Listing is only available for rented properties.");
-  }
-}
-
-function handleDemolishAction(i) {
-  const l = lots[i];
-  if (l.st === "empty" || l.st === "ai_owned" || l.st === "ai_for_sale") return msg("Nothing to demolish here.");
-  
-  // Confirmation drawer prompt
-  const c = $("choice");
-  c.innerHTML = `
-    <div class="choice-drawer">
-      <div>
-        <b style="font-size:14px;color:var(--warn);">⚠️ Demolish Lot ${i + 1}?</b>
-        <div style="font-size:11px;color:var(--mut);">Cost: <b style="color:#fff">$100</b>. This will clear the property.</div>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button class="style-btn" id="confirm-demolish" style="border-color:var(--warn);background:rgba(229,57,53,0.2)">
-          <b>Confirm Demolish</b>
-        </button>
-        <button class="close-btn" id="cancel-demolish">Cancel</button>
-      </div>
-    </div>
-  `;
-
-  $("confirm-demolish").onclick = () => {
-    if (money < 100) {
-      c.innerHTML = "";
-      return msg("Not enough money to demolish property ($100 required).");
-    }
-    money -= 100;
-    const p = l.landPrice, t = l.pt;
-    Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
-    activeDrawerLot = null;
-    c.innerHTML = "";
-    msg("Demolished property on Lot " + (i + 1) + ".");
-    draw();
-  };
-
-  $("cancel-demolish").onclick = () => {
-    c.innerHTML = "";
-  };
-}
-
-function handleUpgradeAction(i) {
-  const l = lots[i];
-  if (l.st === "rented") {
-    triggerNextRenovation(i);
-  } else {
-    msg("Property must be fully built and rented before upgrading.");
-  }
-}
-
-function clickLot(i) {
-  if (!run || isPaused) return;
-  const l = lots[i];
-  if (l.offer) return;
-
-  if (l.st === "ai_for_sale") {
-    showAiBuyDrawer(i);
-    return;
-  }
-  if (l.st === "ai_owned") {
-    return msg("Lot " + (i + 1) + " is owned by a neighbor. Watch for it to go up for sale!");
-  }
-
-  if (sellMode) {
-    if (l.st === "owned") {
-      money += l.landPrice;
-      const p = l.landPrice, t = l.pt;
-      Object.assign(l, mkLot(), { landPrice: p, pt: t });
-      msg("Sold unbuilt lot for " + fmt(p) + ".");
-    } else {
-      msg("Sell mode only applies to empty unbuilt lots.");
-    }
-    draw(); return;
-  }
-
-  if (l.st === "empty") {
-    if (money < l.landPrice) return msg("Not enough money to buy lot (" + fmt(l.landPrice) + ").");
-    money -= l.landPrice; 
-    l.st = "owned";
-    msg("Bought Lot " + (i + 1) + "! Click to choose house style or community upgrade.");
-  } else if (l.st === "owned") {
-    showStyleSelector(i);
-  } else if (l.st === "rented" || l.st === "listed" || l.st === "ready") {
-    activeDrawerLot = (activeDrawerLot === i) ? null : i;
-    showActionDrawer(i);
-  }
-  draw();
-}
-
-function showActionDrawer(i) {
-  const l = lots[i];
-  const c = $("choice");
-  if (activeDrawerLot !== i) {
-    c.innerHTML = "";
-    return;
-  }
-
-  const isInfra = l.houseStyle && STYLES[l.houseStyle].category === "infra";
-  const houseName = STYLES[l.houseStyle] ? STYLES[l.houseStyle].name : "Property";
-  const canUpgrade = l.st === "rented" && !isInfra && l.renovations.length < 3;
-  
-  let nextUpgradeName = "";
-  let nextUpgradeCost = 0;
-  if (!l.renovations.includes('paint')) {
-    nextUpgradeName = RENOVATIONS.paint.name;
-    nextUpgradeCost = RENOVATIONS.paint.cost;
-  } else if (!l.renovations.includes('roof')) {
-    nextUpgradeName = RENOVATIONS.roof.name;
-    nextUpgradeCost = RENOVATIONS.roof.cost;
-  } else if (!l.renovations.includes('luxury')) {
-    nextUpgradeName = RENOVATIONS.luxury.name;
-    nextUpgradeCost = RENOVATIONS.luxury.cost;
-  }
-
-  c.innerHTML = `
-    <div class="choice-drawer">
-      <div>
-        <b style="font-size:14px;color:var(--gold);">Lot ${i + 1}: ${houseName}</b>
-        <div style="font-size:11px;color:var(--mut);">Valuation: <b style="color:#fff">${fmt(getLotValue(i))}</b></div>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${canUpgrade ? `
-          <button class="style-btn" id="drawer-upgrade" style="border-color:var(--gold);background:rgba(255,179,0,0.15)">
-            <b>👷 Upgrade: ${nextUpgradeName} (${fmt(nextUpgradeCost)})</b>
-            <small>Boost home value & rent</small>
-          </button>
-        ` : ''}
-        ${l.st === "rented" && !isInfra ? `
-          <button class="style-btn" id="drawer-list" style="border-color:var(--blue);background:rgba(41,182,246,0.15)">
-            <b>🏷️ List for Sale</b>
-            <small>Put on market for buyers</small>
-          </button>
-        ` : ''}
-        ${l.st === "listed" ? `
-          <button class="style-btn" id="drawer-unlist" style="border-color:var(--acc);background:rgba(76,175,80,0.15)">
-            <b>🛑 Unlist Property</b>
-            <small>Resume rental income</small>
-          </button>
-        ` : ''}
-        <button class="style-btn" id="drawer-demolish" style="border-color:var(--warn);background:rgba(229,57,53,0.15)">
-          <b>🏗️ Demolish ($100)</b>
-          <small>Clear lot back to empty land</small>
-        </button>
-        <button class="close-btn" id="drawer-close">Close</button>
-      </div>
-    </div>
-  `;
-
-  if ($("drawer-upgrade")) {
-    $("drawer-upgrade").onclick = () => triggerNextRenovation(i);
-  }
-
-  if ($("drawer-list")) {
-    $("drawer-list").onclick = () => {
-      l.st = "listed";
-      l.wait = 1.5 + Math.random() * 2;
-      activeDrawerLot = null;
-      c.innerHTML = "";
-      msg("Listed Lot " + (i + 1) + " for sale! Rent income paused.");
-      draw();
-    };
-  }
-
-  if ($("drawer-unlist")) {
-    $("drawer-unlist").onclick = () => {
-      l.st = "rented";
-      l.rent = calcRent(i);
-      l.rt = 3;
-      if (l.offer) l.offer = null;
-      activeDrawerLot = null;
-      c.innerHTML = "";
-      msg("Unlisted Lot " + (i + 1) + ". Resumed rental income.");
-      draw();
-    };
-  }
-
-  $("drawer-demolish").onclick = () => {
-    activeDrawerLot = null;
-    c.innerHTML = "";
-    handleDemolishAction(i);
-  };
-
-  $("drawer-close").onclick = () => {
-    activeDrawerLot = null;
-    c.innerHTML = "";
-  };
-}
-
-function showAiBuyDrawer(i) {
-  const l = lots[i];
-  const c = $("choice");
-  const style = STYLES[l.houseStyle];
-  c.innerHTML = `
-    <div class="choice-drawer">
-      <div>
-        <b style="font-size:14px;color:var(--gold);">Buy Pre-Built House (Lot ${i + 1})</b>
-        <div style="font-size:11px;color:var(--mut);">${style.name} · Asking Price: <b style="color:#fff">${fmt(l.aiPrice)}</b></div>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button class="style-btn" id="b-aibuynow" style="border-color:var(--gold);background:rgba(255,179,0,0.15)">
-          <b>🛒 Buy & Auto-Rent (${fmt(l.aiPrice)})</b>
-          <small>Instant ownership</small>
-        </button>
-        <button class="close-btn" id="b-aiclose">Cancel</button>
-      </div>
-    </div>
-  `;
-
-  $("b-aibuynow").onclick = () => {
-    if (money < l.aiPrice) return msg("Not enough money to buy this pre-built house (" + fmt(l.aiPrice) + ").");
-    money -= l.aiPrice;
-    l.st = "rented";
-    l.rent = calcRent(i);
-    l.rt = 3;
-    msg("Purchased pre-built " + style.name + " on Lot " + (i + 1) + "! Auto-renting for " + fmt(l.rent) + "/3s.");
-    c.innerHTML = "";
-    draw();
-  };
-  $("b-aiclose").onclick = () => c.innerHTML = "";
-}
-
-function showStyleSelector(i) {
-  const l = lots[i];
-  const c = $("choice");
-  c.innerHTML = `
-    <div class="choice-drawer">
-      <div class="drawer-section">
-        <div class="drawer-section-title">Residential Houses</div>
-        <div class="style-options">
-          <button class="style-btn" id="b-ranch">
-            <b>🏡 Ranch (${fmt(STYLES.ranch.cost)})</b>
-            <small>Val: ${fmt(STYLES.ranch.baseVal)} · 1.0x Rent</small>
-          </button>
-          <button class="style-btn" id="b-colonial">
-            <b>🏛️ Colonial (${fmt(STYLES.colonial.cost)})</b>
-            <small>Val: ${fmt(STYLES.colonial.baseVal)} · +15% Boost</small>
-          </button>
-          <button class="style-btn" id="b-mansion">
-            <b>🏰 Mansion (${fmt(STYLES.mansion.cost)})</b>
-            <small>Val: ${fmt(STYLES.mansion.baseVal)} · +30% Boost</small>
-          </button>
-        </div>
-      </div>
-
-      <div class="drawer-section">
-        <div class="drawer-section-title">Community Infrastructure</div>
-        <div class="style-options">
-          <button class="style-btn" id="b-park" style="border-color:var(--acc)">
-            <b>🌳 Park (${fmt(STYLES.park.cost)})</b>
-            <small>+25% Neighbors · +20% Rent</small>
-          </button>
-          <button class="style-btn" id="b-civic" style="border-color:var(--teal)">
-            <b>🏛️ Civic Center (${fmt(STYLES.civic.cost)})</b>
-            <small>+15% Global · +$15/s</small>
-          </button>
-        </div>
-      </div>
-
-      <button class="close-btn" id="b-close">Close</button>
-    </div>
-  `;
-
-  const startBuild = styleKey => {
-    const style = STYLES[styleKey];
-    if (busy() >= builders) return msg("All builders are busy!");
-    if (money < style.cost) return msg("Not enough money for " + style.name + " (" + fmt(style.cost) + ").");
-    money -= style.cost;
-    l.houseStyle = styleKey;
-    l.st = "working";
-    l.p = 0;
-    l.dur = style.dur / speed;
-    c.innerHTML = "";
-    msg("Started constructing " + style.name + " on Lot " + (i + 1) + "!");
-    draw();
-  };
-
-  $("b-ranch").onclick = () => startBuild("ranch");
-  $("b-colonial").onclick = () => startBuild("colonial");
-  $("b-mansion").onclick = () => startBuild("mansion");
-  $("b-park").onclick = () => startBuild("park");
-  $("b-civic").onclick = () => startBuild("civic");
-  $("b-close").onclick = () => c.innerHTML = "";
-}
-
-function spawnOffer(i) {
-  const l = lots[i];
-  const totalVal = getLotValue(i);
-  const price = Math.round(totalVal * (0.88 + Math.random() * 0.42));
-  const t = 7 + Math.random() * 3;
-  l.offer = { price, ttl: t, max: t };
-  draw();
-}
-
-function resolveOffer(i, accept) {
-  const l = lots[i];
-  if (!l.offer) return;
-  const price = l.offer.price;
-  l.offer = null;
-
-  if (accept && run) {
-    money += price;
-    l.st = "sold";
-    msg("Sold Lot " + (i + 1) + " for " + fmt(price) + "!");
-  } else {
-    l.wait = 2 + Math.random() * 3;
-    msg("Offer rejected. Remaining listed for next buyer...");
-  }
-  draw();
-}
-
-function popText(i, text) {
-  const e = els[i]; if (!e) return;
-  const s = document.createElement("span"); s.className = "pop"; s.textContent = text;
-  e.appendChild(s); setTimeout(() => s.remove(), 1000);
-}
-
-function tick(now) {
-  const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  
-  if (run && !isPaused) {
-    if (gameMode === "timed") {
-      timeVal -= dt;
-    } else {
-      timeVal += dt;
-    }
-
-    lots.forEach((l, i) => {
-      if (l.houseStyle === "civic" && l.st !== "empty" && l.st !== "working" && l.st !== "reno_working") {
-        l.rt = (l.rt || 0) - dt;
-        if (l.rt <= 0) {
-          l.rt = 3;
-          money += STYLES.civic.revenue;
-          popText(i, "+" + fmt(STYLES.civic.revenue));
-        }
-      }
+function tick(now){
+  const dt=Math.min(.1,(now-last)/1000);last=now;
+  if(run&&!paused){
+    elapsed+=dt;if(mode==="timed")timeVal-=dt;
+    if(ev.k){ev.t-=dt;if(ev.t<=0){ev.k=null;toast("Market is back to normal.")}}
+    else{ev.next-=dt;if(ev.next<=0){ev.k=["boom","crash","rent"][Math.floor(Math.random()*3)];ev.t=15;ev.next=35+Math.random()*20;toast(EV[ev.k])}}
+    lots.forEach((l,i)=>{
+      if(l.hs==="civic"&&l.st==="ready"){l.rt-=dt;if(l.rt<=0){l.rt=3;money+=S.civic.rev;pop(i,"+"+fmt(S.civic.rev))}}
+      l.pt-=dt;if(l.pt<=0){l.pt=5+Math.random()*3;l.land=Math.round(Math.min(240,Math.max(90,l.land+(Math.random()-.5)*40)))}
+      if(l.st==="ai_owned"){l.aiW-=dt;if(l.aiW<=0){l.st="ai_for_sale";l.aiP=Math.round(val(i)*(.85+Math.random()*.3));l.aiT=12+Math.random()*8;l.wait=2;toast("🏠 Lot "+(i+1)+" ("+S[l.hs].n+") is for sale: "+fmt(l.aiP))}}
+      else if(l.st==="ai_for_sale"){l.aiT-=dt;l.wait-=dt;
+        if(l.wait<=0){l.wait=2+Math.random()*2;l.aiP=Math.round(Math.max(100,l.aiP+(Math.random()-.48)*35));if(sel===i)sheet(i)}
+        if(l.aiT<=0){l.st="ai_owned";l.aiW=10+Math.random()*12;if(sel===i)closeSheet()}}
+      else if(l.st==="rented"){l.rent=rentOf(i);l.rt-=dt;if(l.rt<=0){l.rt+=3;money+=l.rent;pop(i,"+"+fmt(l.rent))}}
+      else if(l.st==="working"){l.p+=dt/l.dur;if(l.p>=1){l.p=0;l.rt=3;if(S[l.hs].cat==="i"){l.st="ready";toast(S[l.hs].n+" finished on Lot "+(i+1)+"!")}else{l.st="rented";l.rent=rentOf(i);toast(S[l.hs].n+" finished! Renting for "+fmt(l.rent)+"/3s.")}fx(i,"done")}}
+      else if(l.st==="reno_working"){l.rp+=dt/l.rd;if(l.rp>=1){l.reno.push(l.pend);if(l.pend==="paint")l.paint=PAINT[Math.floor(Math.random()*PAINT.length)];toast(R[l.pend].n+" done on Lot "+(i+1)+"!");l.pend=null;l.rp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;fx(i,"done")}}
+      else if(l.st==="listed"){
+        if(!l.offer){l.wait-=dt;if(l.wait<=0)spawnOffer(i)}
+        else{l.offer.ttl-=dt;if(l.offer.ttl<=0){l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired.");if(sel===i)sheet(i)}}}
+      else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0)reset(l)}
     });
-
-    lots.forEach((l, i) => {
-      l.pt -= dt; 
-      if (l.pt <= 0) { 
-        l.pt = 5 + Math.random() * 3; 
-        l.landPrice = Math.round(Math.min(240, Math.max(90, l.landPrice + (Math.random() - 0.5) * 40))); 
-      }
-
-      if (l.st === "ai_owned") {
-        l.aiWait -= dt;
-        if (l.aiWait <= 0) {
-          l.st = "ai_for_sale";
-          const baseV = getLotValue(i);
-          l.aiPrice = Math.round(baseV * (0.85 + Math.random() * 0.3));
-          l.aiTimer = 12 + Math.random() * 8;
-          l.pt = 2 + Math.random() * 2;
-          msg("Lot " + (i + 1) + " (" + STYLES[l.houseStyle].name + ") listed by neighbor for " + fmt(l.aiPrice) + "!");
-        }
-      } else if (l.st === "ai_for_sale") {
-        l.aiTimer -= dt;
-        l.pt -= dt;
-        if (l.pt <= 0) {
-          l.pt = 2 + Math.random() * 2;
-          l.aiPrice = Math.round(Math.max(100, l.aiPrice + (Math.random() - 0.48) * 35));
-        }
-        if (l.aiTimer <= 0) {
-          l.st = "ai_owned";
-          l.aiWait = 10 + Math.random() * 12;
-          msg("Pre-built house on Lot " + (i + 1) + " taken off market.");
-        }
-      }
-
-      if (l.st === "rented") {
-        l.rent = calcRent(i); 
-        l.rt -= dt;
-        if (l.rt <= 0) {
-          l.rt += 3;
-          money += l.rent;
-          popText(i, "+" + fmt(l.rent));
-        }
-      }
-
-      if (l.st === "working") {
-        l.p += dt / l.dur;
-        if (l.p >= 1) {
-          l.p = 0;
-          if (STYLES[l.houseStyle].category === "infra") {
-            l.st = "ready";
-            msg("Completed " + STYLES[l.houseStyle].name + " on Lot " + (i + 1) + "!");
-          } else {
-            l.st = "rented";
-            l.rent = calcRent(i);
-            l.rt = 3;
-            msg("Completed " + STYLES[l.houseStyle].name + " on Lot " + (i + 1) + "! Auto-renting for " + fmt(l.rent) + "/3s.");
-          }
-        }
-      } else if (l.st === "reno_working") {
-        l.renoProgress += dt / l.renoDuration;
-        if (l.renoProgress >= 1) {
-          l.renovations.push(l.pendingRenoKey);
-          const renoName = RENOVATIONS[l.pendingRenoKey].name;
-          if (l.pendingRenoKey === 'paint') {
-            const colors = RENOVATIONS.paint.colors;
-            l.paintColor = colors[Math.floor(Math.random() * colors.length)];
-          }
-          l.st = "rented";
-          l.rent = calcRent(i);
-          l.rt = 3;
-          l.pendingRenoKey = null;
-          msg("Completed " + renoName + " on Lot " + (i + 1) + "! Valuation increased.");
-        }
-      } else if (l.st === "listed" && !l.offer) {
-        l.wait -= dt;
-        if (l.wait <= 0) spawnOffer(i);
-      } else if (l.st === "listed" && l.offer) {
-        l.offer.ttl -= dt;
-        if (l.offer.ttl <= 0) {
-          l.offer = null;
-          l.wait = 2 + Math.random() * 3;
-          msg("Buyer offer on Lot " + (i + 1) + " expired.");
-        }
-      }
-    });
-
-    if (money >= goal) { 
-      run = false; 
-      endGame(true); 
-    } else if (gameMode === "timed" && timeVal <= 0) { 
-      run = false; 
-      endGame(false); 
-    }
+    if(bonus&&!bonus.done){bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
+    if(money>=goal){run=false;endGame(true)}else if(mode==="timed"&&timeVal<=0){run=false;endGame(false)}
     draw();
   }
   requestAnimationFrame(tick);
 }
 
-function endGame(win) {
-  const ov = $("ov"); ov.style.display = "flex";
-  
-  let msgContent = "";
-  if (win) {
-    const timeSpent = gameMode === "timed" ? Math.round(timeVal) + "s left" : Math.round(timeVal) + "s taken";
-    msgContent = `<h2>🎉 Level ${lv} Complete!</h2><p>Neighborhood thriving! Goal reached with ${timeSpent}.</p><button class="menu-btn" id="go">Next Level</button>`;
-  } else {
-    msgContent = `<h2>⏰ Time’s Up</h2><p>You made ${fmt(money)} of ${fmt(goal)}.</p><button class="menu-btn" id="go">Retry Level ${lv}</button>`;
-  }
-
-  ov.innerHTML = `
-    <div class="box">
-      ${msgContent}
-    </div>
-  `;
-  $("go").onclick = () => { if (win) lv++; startLevel(); };
+function endGame(win){
+  closeSheet();let h;
+  if(win){const st=1+(bonus&&bonus.done?1:0)+(elapsed<=90+lv*10?1:0);best[lv]=Math.max(best[lv]||0,st);store.set(BKEY,JSON.stringify(best));
+    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p>"}
+  else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.</p>';
+  h+='<button class="mbtn" id="nx">'+(win?"Next Level":"Retry Level "+lv)+'</button><button class="mbtn line" id="em">🏠 Main Menu</button>';
+  $("endbox").innerHTML=h;$("end").style.display="flex";
+  $("nx").onclick=()=>{if(win)lv++;startLevel()};
+  $("em").onclick=()=>{$("end").style.display="none";$("ov").style.display="flex";updMenu()};
 }
 
-// Highly Detailed Cartoon Architecture & Improved Architectural Graphics
-function renderArt(l, idx) {
-  const st = l.st;
-  const styleKey = l.houseStyle;
-
-  if (st === "empty") {
-    const isReduced = l.landPrice < 125;
-    return `
-      <g transform="translate(10, 2) scale(1.65)">
-        <line x1="16" y1="10" x2="16" y2="38" stroke="#4e342e" stroke-width="3" stroke-linecap="round"/>
-        <line x1="16" y1="12" x2="32" y2="12" stroke="#4e342e" stroke-width="2.5"/>
-        
-        <rect x="16" y="14" width="36" height="22" rx="3" fill="#ffffff" stroke="#1b5e20" stroke-width="2"/>
-        <rect x="16" y="14" width="36" height="8" fill="#2e7d32"/>
-        <text x="34" y="20" font-size="5" font-weight="900" text-anchor="middle" fill="#ffffff">FOR SALE</text>
-        <text x="34" y="30" font-size="8" font-weight="900" text-anchor="middle" fill="#000000">${fmt(l.landPrice)}</text>
-      </g>
-      
-      ${isReduced ? `
-        <g transform="translate(68, 16) rotate(-12)">
-          <rect x="-16" y="-6" width="32" height="12" rx="2.5" fill="#d32f2f" stroke="#ffffff" stroke-width="1.2"/>
-          <text x="0" y="2.5" font-size="5" font-weight="900" text-anchor="middle" fill="#ffffff" letter-spacing="0.5">REDUCED</text>
-        </g>
-      ` : ''}
-    `;
+const WN=(x,y,w,h)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="1" fill="#bde3f5" stroke="#3e2723"/><path d="M'+(x+w/2)+" "+y+"v"+h+"M"+x+" "+(y+h/2)+"h"+w+'" stroke="#3e2723" stroke-width=".7"/>';
+const STAR=(cx,cy)=>'<polygon points="'+[...Array(10)].map((_,k)=>{const a=-Math.PI/2+k*Math.PI/5,r=k%2?2:5;return (cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1)}).join(" ")+'" fill="#ffc107" stroke="#b26a00" stroke-width=".6"/>';
+const TREE=(x,y)=>'<rect x="'+(x-1)+'" y="'+y+'" width="2" height="6" fill="#6d4c41"/><circle cx="'+x+'" cy="'+(y-2)+'" r="6" fill="#2e7d32"/><circle cx="'+(x-2)+'" cy="'+(y-4)+'" r="3" fill="#43a047"/>';
+const GROUND='<ellipse cx="50" cy="56" rx="46" ry="7" fill="#000" opacity=".22"/><rect x="5" y="46" width="90" height="13" rx="5" fill="#5aa23e"/><polygon points="44,46 56,46 62,59 38,59" fill="#d7ccc8"/>';
+const BUSH='<circle cx="9" cy="47" r="4" fill="#388e3c"/><circle cx="91" cy="47" r="4" fill="#388e3c"/>';
+function art(l,i){
+  const st=l.st,k=l.hs;
+  if(st==="empty"){const rd=l.land<125;return '<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".15"/><g transform="translate(10,2) scale(1.65)"><path d="M16 10v28M16 12h16" stroke="#4e342e" stroke-width="3" stroke-linecap="round"/><rect x="16" y="14" width="36" height="22" rx="3" fill="#fff" stroke="#1b5e20" stroke-width="2"/><rect x="16" y="14" width="36" height="8" fill="#2e7d32"/><text x="34" y="20" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">FOR SALE</text><text x="34" y="30" font-size="8" font-weight="900" text-anchor="middle">'+fmt(l.land)+'</text></g>'+(rd?'<g transform="translate(70,14) rotate(-12)"><rect x="-16" y="-6" width="32" height="12" rx="2.5" fill="#d32f2f" stroke="#fff" stroke-width="1.2"/><text y="2.5" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">REDUCED</text></g>':"")}
+  if(st==="owned")return '<ellipse cx="50" cy="56" rx="40" ry="6" fill="#000" opacity=".2"/><circle cx="50" cy="30" r="15" fill="#ffb300"/><text x="50" y="38" font-size="22" font-weight="900" text-anchor="middle" fill="#fff">+</text>';
+  const b=l.paint,r=l.reno.includes("roof")?"#ff7043":"#a8483a";let s=GROUND,T='stroke="#3e2723" stroke-width="1.5"';
+  if(k==="ranch")s+='<rect x="68" y="16" width="8" height="12" fill="#8d6e63" stroke="#3e2723"/><circle class="smk" cx="72" cy="13" r="3" fill="#fff"/><circle class="smk s2" cx="74" cy="13" r="2.5" fill="#fff"/><rect x="16" y="24" width="68" height="22" fill="'+b+'" '+T+'/><rect x="16" y="40" width="68" height="6" fill="#000" opacity=".08"/><polygon points="10,25 50,10 90,25" fill="'+r+'" '+T+'/><polygon points="10,25 50,10 50,25" fill="#fff" opacity=".13"/><rect x="52" y="28" width="28" height="18" fill="#cfd8dc" stroke="#3e2723"/><path d="M52 33h28M52 38h28M52 43h28" stroke="#90a4ae"/><rect x="38" y="32" width="10" height="14" fill="#5c3826"/><circle cx="45" cy="39" r="1" fill="#ffb300"/><rect x="17" y="28" width="3" height="12" fill="#37474f"/><rect x="34" y="28" width="3" height="12" fill="#37474f"/>'+WN(20,28,14,12);
+  else if(k==="colonial")s+='<rect x="18" y="16" width="64" height="30" fill="'+b+'" '+T+'/><rect x="18" y="40" width="64" height="6" fill="#000" opacity=".08"/><polygon points="14,18 50,4 86,18" fill="'+r+'" '+T+'/><polygon points="14,18 50,4 50,18" fill="#fff" opacity=".13"/><polygon points="50,7 44,13 56,13" fill="'+r+'" stroke="#3e2723"/>'+WN(47,10,6,5)+'<rect x="38" y="24" width="24" height="22" fill="#fff" stroke="#3e2723"/><path d="M40 24v22M60 24v22" stroke="#cfd8dc" stroke-width="2"/><rect x="44" y="32" width="12" height="14" fill="#4e342e"/><circle cx="53" cy="39" r="1" fill="#ffb300"/>'+WN(24,20,10,10)+WN(66,20,10,10)+WN(24,33,10,10)+WN(66,33,10,10);
+  else if(k==="mansion")s+='<rect x="12" y="20" width="22" height="26" fill="'+b+'" stroke="#3e2723"/><polygon points="10,20 23,10 36,20" fill="'+r+'" stroke="#3e2723"/><rect x="66" y="20" width="22" height="26" fill="'+b+'" stroke="#3e2723"/><polygon points="64,20 77,10 90,20" fill="'+r+'" stroke="#3e2723"/><rect x="28" y="16" width="44" height="30" fill="'+b+'" '+T+'/><rect x="12" y="40" width="76" height="6" fill="#000" opacity=".08"/><polygon points="25,17 50,5 75,17" fill="'+r+'" '+T+'/><polygon points="25,17 50,5 50,17" fill="#fff" opacity=".13"/><rect x="40" y="30" width="20" height="16" fill="#fff" stroke="#3e2723"/><rect x="44" y="32" width="6" height="14" fill="#4e342e"/><rect x="50" y="32" width="6" height="14" fill="#4e342e"/><path d="M38 30h24" stroke="#3e2723" stroke-width="1.5"/>'+WN(16,24,14,10)+WN(70,24,14,10)+WN(34,20,12,9)+WN(54,20,12,9);
+  else if(k==="park")s='<rect x="6" y="10" width="88" height="48" rx="8" fill="#5cb85c" stroke="#2e7d32" stroke-width="1.5"/><path d="M6 52Q50 36 94 52" stroke="#e0cfa8" stroke-width="5" fill="none"/>'+TREE(18,22)+TREE(82,22)+TREE(70,14)+'<ellipse cx="46" cy="34" rx="12" ry="5" fill="#b0bec5" stroke="#546e7a"/><ellipse cx="46" cy="33" rx="9" ry="3.5" fill="#4fc3f7"/><path class="spray" d="M46 33v-9M46 27q-4 0-5 5M46 27q4 0 5 5" stroke="#e1f5fe" stroke-width="1.2" fill="none"/><rect x="68" y="40" width="16" height="3" fill="#795548"/><rect x="69" y="43" width="2" height="4" fill="#5d4037"/><rect x="81" y="43" width="2" height="4" fill="#5d4037"/>';
+  else if(k==="civic")s+='<rect x="16" y="22" width="68" height="24" fill="#eceff1" '+T+'/><path d="M24 24v22M38 24v22M60 24v22M74 24v22" stroke="#b0bec5" stroke-width="5"/><polygon points="12,22 50,8 88,22" fill="#78909c" '+T+'/><polygon points="12,22 50,8 50,22" fill="#fff" opacity=".13"/><rect x="40" y="32" width="20" height="14" fill="#4e342e"/><rect x="10" y="44" width="80" height="4" fill="#cfd8dc"/><path d="M50 8V1" stroke="#37474f" stroke-width="1.5"/><polygon class="flag" points="50,1 58,4 50,7" fill="#e53935"/>';
+  if(["ranch","colonial","mansion","civic"].includes(k))s+=BUSH;
+  const c=l.reno.length;for(let q=0;q<c;q++)s+=STAR(50-(c-1)*7+q*14,7);
+  if(st==="working"||st==="reno_working"){
+    const pr=Math.max(.05,Math.min(1,st==="working"?l.p:l.rp)),ry=60-pr*56,rh=pr*56;
+    return '<defs><clipPath id="c'+i+'"><rect x="0" y="'+ry+'" width="100" height="'+rh+'"/></clipPath></defs><rect x="10" y="46" width="80" height="8" rx="2" fill="#8d6e63" stroke="#5d4037"/><g clip-path="url(#c'+i+')">'+s+'</g><g class="scaf" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none"><rect x="12" y="'+Math.max(10,ry-4)+'" width="76" height="'+Math.min(40,rh+6)+'" rx="2"/><path d="M12 '+ry+'h76M30 10v40M70 10v40"/></g><text class="hm" x="68" y="'+Math.max(24,ry+6)+'" font-size="16">🔨</text>';
   }
-
-  if (st === "owned") {
-    return `
-      <circle cx="50" cy="30" r="14" fill="#ffb300" opacity="0.9"/>
-      <text x="50" y="35" font-size="14" font-weight="900" text-anchor="middle" fill="#fff">+</text>
-      <text x="50" y="58" font-size="8" font-weight="800" text-anchor="middle" fill="#fff">BUILD HERE</text>
-    `;
-  }
-
-  let baseFill = l.paintColor || "#e8d8c3";
-  let roofFill = "#a8483a";
-  if (l.renovations.includes('roof')) roofFill = "#ff7043";
-
-  let completedBuildingSvg = '<rect x="6" y="44" width="88" height="12" rx="3" fill="#589e3e"/><rect x="8" y="42" width="84" height="4" fill="#78909c"/>';
-
-  if (styleKey === "ranch") {
-    // Detailed Single-Story Suburban Ranch with Garage, Trim, Shingles & Chimney
-    completedBuildingSvg += `
-      <!-- Chimney -->
-      <rect x="68" y="16" width="8" height="12" fill="#8d6e63" stroke="#3e2723" stroke-width="1"/>
-      <!-- Main House Body -->
-      <rect x="16" y="24" width="68" height="22" fill="${baseFill}" rx="1" stroke="#3e2723" stroke-width="1.5"/>
-      <!-- Detailed Roof with Overhang & Shingle lines -->
-      <polygon points="10,25 50,10 90,25" fill="${roofFill}" stroke="#3e2723" stroke-width="1.5"/>
-      <line x1="30" y1="17" x2="70" y2="17" stroke="#7b1fa2" stroke-width="1" opacity="0.4"/>
-      <line x1="20" y1="21" x2="80" y2="21" stroke="#7b1fa2" stroke-width="1" opacity="0.4"/>
-      <!-- Garage Section -->
-      <rect x="52" y="28" width="28" height="18" fill="#cfd8dc" stroke="#3e2723" stroke-width="1.2"/>
-      <line x1="52" y1="33" x2="80" y2="33" stroke="#90a4ae" stroke-width="1"/>
-      <line x1="52" y1="38" x2="80" y2="38" stroke="#90a4ae" stroke-width="1"/>
-      <line x1="52" y1="43" x2="80" y2="43" stroke="#90a4ae" stroke-width="1"/>
-      <!-- Front Door -->
-      <rect x="38" y="32" width="10" height="14" fill="#5c3826" stroke="#271c12" stroke-width="1"/>
-      <circle cx="45" cy="39" r="1" fill="#ffb300"/>
-      <!-- Windows with Panes & Shutters -->
-      <rect x="20" y="28" width="14" height="12" fill="#bde3f5" stroke="#3e2723" stroke-width="1.2"/>
-      <line x1="27" y1="28" x2="27" y2="40" stroke="#3e2723" stroke-width="1"/>
-      <line x1="20" y1="34" x2="34" y2="34" stroke="#3e2723" stroke-width="1"/>
-      <rect x="17" y="28" width="3" height="12" fill="#37474f"/>
-      <rect x="34" y="28" width="3" height="12" fill="#37474f"/>
-    `;
-  } else if (styleKey === "colonial") {
-    // Detailed Two-Story Colonial with Columns, Dormer Windows & Symmetry
-    completedBuildingSvg += `
-      <!-- House Body -->
-      <rect x="18" y="16" width="64" height="30" fill="${baseFill}" stroke="#3e2723" stroke-width="1.5"/>
-      <!-- Gable Roof -->
-      <polygon points="14,18 50,4 86,18" fill="${roofFill}" stroke="#3e2723" stroke-width="1.5"/>
-      <!-- Roof Dormer Windows -->
-      <polygon points="50,7 44,13 56,13" fill="${roofFill}" stroke="#3e2723" stroke-width="1"/>
-      <rect x="47" y="10" width="6" height="5" fill="#bde3f5" stroke="#3e2723" stroke-width="0.8"/>
-      <!-- Classic Front Porch / Center Entry -->
-      <rect x="38" y="24" width="24" height="22" fill="#ffffff" stroke="#3e2723" stroke-width="1.2"/>
-      <rect x="44" y="32" width="12" height="14" fill="#4e342e" stroke="#271c12" stroke-width="1"/>
-      <circle cx="53" cy="39" r="1" fill="#ffb300"/>
-      <!-- Upper Windows -->
-      <rect x="24" y="20" width="10" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width="1"/>
-      <line x1="29" y1="20" x2="29" y2="30" stroke="#3e2723" stroke-width="0.8"/>
-      <line x1="24" y1="25" x2="34" y2="25" stroke="#3e2723" stroke-width="0.8"/>
-      
-      <rect x="66" y="20" width="10" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width="1"/>
-      <line x1="71" y1="20" x2="71" y2="30" stroke="#3e2723" stroke-width="0.8"/>
-      <line x1="66" y1="25" x2="76" y2="25" stroke="#3e2723" stroke-width="0.8"/>
-      <!-- Lower Side Windows -->
-      <rect x="24" y="33" width="10" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width="1"/>
-      <line x1="29" y1="33" x2="29" y2="43" stroke="#3e2723" stroke-width="0.8"/>
-      <line x1="24" y1="38" x2="34" y2="38" stroke="#3e2723" stroke-width="0.8"/>
-
-      <rect x="66" y="33" width="10" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width="1"/>
-      <line x1="71" y1="33" x2="71" y2="43" stroke="#3e2723" stroke-width="0.8"/>
-      <line x1="66" y1="38" x2="76" y2="38" stroke="#3e2723" stroke-width="0.8"/>
-    `;
-  } else if (styleKey === "mansion") {
-    // Grand Estate Mansion with Twin Wing Towers, Arch Entry & Balcony
-    completedBuildingSvg += `
-      <!-- Left Wing -->
-      <rect x="12" y="20" width="22" height="26" fill="${baseFill}" stroke="#3e2723" stroke-width="1.2"/>
-      <polygon points="10,20 23,10 36,20" fill="${roofFill}" stroke="#3e2723" stroke-width="1.2"/>
-      <!-- Right Wing -->
-      <rect x="66" y="20" width="22" height="26" fill="${baseFill}" stroke="#3e2723" stroke-width="1.2"/>
-      <polygon points="64,20 77,10 90,20" fill="${roofFill}" stroke="#3e2723" stroke-width="1.2"/>
-      <!-- Center Main Hall -->
-      <rect x="28" y="16" width="44" height="30" fill="${baseFill}" stroke="#3e2723" stroke-width="1.5"/>
-      <polygon points="25,17 50,5 75,17" fill="${roofFill}" stroke="#3e2723" stroke-width="1.5"/>
-      <!-- Grand Entrance Double Doors & Pillars -->
-      <rect x="40" y="30" width="20" height="16" fill="#ffffff" stroke="#3e2723" stroke-width="1"/>
-      <rect x="44" y="32" width="6" height="14" fill="#4e342e" stroke="#271c12" stroke-width="1"/>
-      <rect x="50" y="32" width="6" height="14" fill="#4e342e" stroke="#271c12" stroke-width="1"/>
-      <line x1="38" y1="30" x2="62" y2="30" stroke="#3e2723" stroke-width="1.5"/>
-      <!-- Luxury Windows -->
-      <rect x="16" y="24" width="14" height="10" fill="#bbdefb" stroke="#3e2723" stroke-width="1"/>
-      <rect x="70" y="24" width="14" height="10" fill="#bbdefb" stroke="#3e2723" stroke-width="1"/>
-      <rect x="34" y="20" width="12" height="10" fill="#bbdefb" stroke="#3e2723" stroke-width="1"/>
-      <rect x="54" y="20" width="12" height="10" fill="#bbdefb" stroke="#3e2723" stroke-width="1"/>
-    `;
-  } else if (styleKey === "park") {
-    completedBuildingSvg += `
-      <rect x="12" y="12" width="76" height="38" rx="6" fill="#4caf50" stroke="#2e7d32" stroke-width="1.5"/>
-      <circle cx="24" cy="24" r="10" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
-      <circle cx="76" cy="24" r="10" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
-      <circle cx="50" cy="18" r="9" fill="#388e3c" stroke="#1b5e20" stroke-width="1"/>
-      <rect x="42" y="34" width="16" height="4" fill="#795548" rx="1"/>
-      <circle cx="28" cy="38" r="5" fill="#29b6f6" stroke="#0288d1" stroke-width="1"/>
-    `;
-  } else if (styleKey === "civic") {
-    completedBuildingSvg += `
-      <rect x="16" y="22" width="68" height="24" fill="#eceff1" stroke="#37474f" stroke-width="1.5"/>
-      <rect x="22" y="24" width="5" height="22" fill="#b0bec5"/>
-      <rect x="36" y="24" width="5" height="22" fill="#b0bec5"/>
-      <rect x="58" y="24" width="5" height="22" fill="#b0bec5"/>
-      <rect x="72" y="24" width="5" height="22" fill="#b0bec5"/>
-      <polygon points="12,22 50,8 88,22" fill="#78909c" stroke="#37474f" stroke-width="1.5"/>
-      <rect x="12" y="44" width="76" height="4" fill="#cfd8dc"/>
-      <line x1="50" y1="8" x2="50" y2="1" stroke="#37474f" stroke-width="1.5"/>
-      <polygon points="50,1 58,4 50,7" fill="#e53935"/>
-    `;
-  }
-
-  // Centered Star System for Upgrades
-  if (l.renovations.length > 0) {
-    let count = l.renovations.length;
-    let totalWidth = count * 12;
-    let startX = 50 - (totalWidth / 2) + 6;
-    let starsStr = "";
-    for (let s = 0; s < count; s++) {
-      starsStr += `<text x="${startX + (s * 12)}" y="8" font-size="10" text-anchor="middle">⭐</text>`;
-    }
-    completedBuildingSvg += `<g>${starsStr}</g>`;
-  }
-
-  // Active Construction State
-  if (st === "working" || st === "reno_working") {
-    const prog = st === "working" ? Math.max(0.05, Math.min(1, l.p)) : Math.max(0.05, Math.min(1, l.renoProgress));
-    const revealY = 60 - (prog * 56);
-    const revealH = prog * 56;
-    const clipId = `build-clip-${idx}`;
-
-    return `
-      <defs>
-        <clipPath id="${clipId}">
-          <rect x="0" y="${revealY}" width="100" height="${revealH}"/>
-        </clipPath>
-      </defs>
-      
-      <rect x="10" y="46" width="80" height="8" rx="2" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
-      
-      <g clip-path="url(#${clipId})">
-        ${completedBuildingSvg}
-      </g>
-
-      <g class="scaffold-line" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none">
-        <rect x="12" y="${Math.max(10, revealY - 4)}" width="76" height="${Math.min(40, revealH + 6)}" rx="2"/>
-        <line x1="12" y1="${revealY}" x2="88" y2="${revealY}"/>
-        <line x1="30" y1="10" x2="30" y2="50"/>
-        <line x1="70" y1="10" x2="70" y2="50"/>
-      </g>
-
-      <g transform="translate(68, ${Math.max(12, revealY - 10)})">
-        <text class="construction-hammer" font-size="16">🔨</text>
-      </g>
-    `;
-  }
-
-  // Realtor Yard Sign with Dynamic "REDUCED" Sticker
-  if (st === "listed") {
-    const isReduced = l.landPrice < 125;
-
-    completedBuildingSvg += `
-      <g transform="translate(18, 5) scale(1.25)">
-        <line x1="18" y1="18" x2="18" y2="44" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="18" y1="20" x2="32" y2="20" stroke="#5d4037" stroke-width="2"/>
-        
-        <rect x="18" y="22" width="28" height="18" rx="2" fill="#ffffff" stroke="#1565c0" stroke-width="1.5"/>
-        <rect x="18" y="22" width="28" height="6" fill="#1565c0"/>
-        <text x="32" y="26.5" font-size="4" font-weight="900" text-anchor="middle" fill="#ffffff">REALTY</text>
-        <text x="32" y="34" font-size="5" font-weight="900" text-anchor="middle" fill="#d32f2f">FOR SALE</text>
-      </g>
-      
-      ${isReduced ? `
-        <g transform="translate(56, 26) rotate(-12)">
-          <rect x="-14" y="-4" width="28" height="8" rx="1.5" fill="#d32f2f" stroke="#ffffff" stroke-width="0.8"/>
-          <text x="0" y="1.8" font-size="4.2" font-weight="900" text-anchor="middle" fill="#ffffff" letter-spacing="0.2">REDUCED</text>
-        </g>
-      ` : ''}
-    `;
-  }
-
-  if (st === "sold") completedBuildingSvg += '<rect x="2" y="32" width="24" height="10" rx="2" fill="#e53935"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">SOLD</text>';
-  if (st === "rented") completedBuildingSvg += '<rect x="2" y="32" width="24" height="10" rx="2" fill="#4caf50"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">RENT</text>';
-
-  return completedBuildingSvg;
+  if(st==="listed"||st==="ai_for_sale")s+='<g transform="translate(18,5) scale(1.25)"><path d="M18 18v26M18 20h14" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/><rect x="18" y="22" width="28" height="18" rx="2" fill="#fff" stroke="#1565c0" stroke-width="1.5"/><rect x="18" y="22" width="28" height="6" fill="#1565c0"/><text x="32" y="26.5" font-size="4" font-weight="900" text-anchor="middle" fill="#fff">REALTY</text><text x="32" y="34" font-size="5" font-weight="900" text-anchor="middle" fill="#d32f2f">FOR SALE</text></g>';
+  if(st==="rented")s+='<rect x="2" y="32" width="24" height="10" rx="2" fill="#4caf50"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">RENT</text>';
+  if(st==="sold")s+='<g class="stamp"><g transform="rotate(-12 50 32)"><rect x="12" y="23" width="76" height="18" rx="3" fill="#e53935" stroke="#fff" stroke-width="1.5"/><text x="50" y="37" font-size="13" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="2">SOLD</text></g></g>';
+  return s;
 }
 
-function draw() {
-  $("money").textContent = fmt(money); 
-  $("goal").textContent = fmt(goal);
-  $("time").textContent = Math.max(0, Math.ceil(timeVal)) + "s";
-  $("bld").textContent = (builders - busy()) + "/" + builders;
-  
-  const totalRentPerSec = lots.reduce((a, l, i) => a + (l.st === "rented" ? calcRent(i) / 3 : 0), 0);
-  $("rent").textContent = "$" + totalRentPerSec.toFixed(1) + "/s";
-  
-  const avgVal = lots.reduce((a, l, i) => a + getLotValue(i), 0) / (lots.length || 1);
-  $("lp").textContent = fmt(avgVal);
-
-  const pct = Math.min(100, Math.round(money / goal * 100));
-  $("gbar").style.width = pct + "%"; 
-  $("pct").textContent = pct + "%";
-
-  $("hire").textContent = "Hire Builder ($300)"; $("hire").disabled = !run || money < 300 || builders >= 5;
-  $("tools").textContent = "Better Tools ($250)"; $("tools").disabled = !run || money < 250 || speed >= 2;
-  $("sellmode").textContent = sellMode ? "Sell Mode: ON" : "Sell Empty Lots";
-  $("sellmode").classList.toggle("active", sellMode);
-
-  lots.forEach((l, i) => {
-    const el = els[i]; if (!el) return;
-
-    const isPurchased = l.st !== "empty" && l.st !== "ai_owned" && l.st !== "ai_for_sale";
-    el.classList.toggle("purchased", isPurchased);
-    el.classList.toggle("ai-owned", l.st === "ai_owned" || l.st === "ai_for_sale");
-
-    // Only display top emoji button bar if purchased & property is built/active
-    const headerBar = el.querySelector(".lot-header-bar");
-    if (isPurchased && l.st !== "owned" && l.st !== "working" && l.st !== "reno_working") {
-      headerBar.style.display = "flex";
-    } else {
-      headerBar.style.display = "none";
-    }
-
-    const boostPct = Math.round(getNeighborBoost(i) * 100);
-    const boostBadge = el.querySelector(".boost-badge");
-    if (boostPct > 0) {
-      boostBadge.style.display = "block";
-      boostBadge.textContent = "+" + boostPct + "%";
-    } else {
-      boostBadge.style.display = "none";
-    }
-
-    const aiBadge = el.querySelector(".ai-badge");
-    if (l.st === "ai_owned" || l.st === "ai_for_sale") {
-      aiBadge.style.display = "block";
-      aiBadge.textContent = l.st === "ai_for_sale" ? "AI SALE" : "NEIGHBOR";
-      aiBadge.style.background = l.st === "ai_for_sale" ? "#ff6f00" : "#d84315";
-    } else {
-      aiBadge.style.display = "none";
-    }
-
-    let offerOverlay = el.querySelector(".house-offer-overlay");
-    if (l.offer) {
-      if (!offerOverlay) {
-        offerOverlay = document.createElement("div");
-        offerOverlay.className = "house-offer-overlay";
-        offerOverlay.innerHTML = `
-          <div class="house-offer-title">Offer Received</div>
-          <div class="house-offer-price"></div>
-          <div class="house-offer-sub">Val: ${fmt(getLotValue(i))}</div>
-          <div class="house-offer-btns">
-            <button class="accept-offer" title="Accept">✓</button>
-            <button class="reject-offer" title="Reject">✕</button>
-          </div>
-        `;
-        el.appendChild(offerOverlay);
-
-        offerOverlay.querySelector(".accept-offer").onclick = (e) => {
-          e.stopPropagation();
-          resolveOffer(i, true);
-        };
-        offerOverlay.querySelector(".reject-offer").onclick = (e) => {
-          e.stopPropagation();
-          resolveOffer(i, false);
-        };
-      }
-      offerOverlay.querySelector(".house-offer-price").textContent = fmt(l.offer.price);
-    } else if (offerOverlay) {
-      offerOverlay.remove();
-    }
-
-    let lbl = "", pb = 0;
-    if (l.st === "empty") lbl = "Buy";
-    else if (l.st === "owned") lbl = sellMode ? "Sell Lot" : "Build Here";
-    else if (l.st === "working") { lbl = STYLES[l.houseStyle].name + "..."; pb = l.p; }
-    else if (l.st === "reno_working") { lbl = "Upgrading..."; pb = l.renoProgress; }
-    else if (l.st === "ready") lbl = STYLES[l.houseStyle].category === "infra" ? "Community Upgrade" : "Ready!";
-    else if (l.st === "rented") lbl = "Rented (" + fmt(calcRent(i)) + "/3s)";
-    else if (l.st === "listed") lbl = l.offer ? "Offer Below!" : "On Market (Tap)";
-    else if (l.st === "ai_owned") lbl = STYLES[l.houseStyle].name;
-    else if (l.st === "ai_for_sale") lbl = "Buy House<br><span style='color:#fff'>" + fmt(l.aiPrice) + "</span>";
-    else lbl = "Sold ✔";
-
-    const key = l.st + (l.houseStyle || "") + Math.round((l.p || l.renoProgress) * 15) + l.landPrice + l.renovations.join() + (activeDrawerLot === i) + l.c + l.paintColor;
-    if (el._k !== key) { el._k = key; el.querySelector("svg").innerHTML = renderArt(l, i); }
-    const actEl = el.querySelector(".lot-action");
-    actEl.innerHTML = lbl;
-    if (l.st === "ai_for_sale") actEl.classList.add("ai-sale-tag"); else actEl.classList.remove("ai-sale-tag");
-
-    el.querySelector(".pb i").style.width = pb * 100 + "%";
-    el.classList.toggle("hot", l.st === "owned" || l.st === "rented" || l.st === "ai_for_sale" || !!l.offer);
+function draw(){
+  $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
+  $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent="Lv "+lv;
+  $("bld").textContent=(builders-busy())+"/"+builders;
+  $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs==="civic"&&l.st==="ready"?S.civic.rev/3:0),0).toFixed(1)+"/s";
+  const pc=Math.min(100,Math.round(money/goal*100));$("gbar").style.width=pc+"%";$("pct").textContent=pc+"%";
+  $("bonus").textContent=bonus?(bonus.done?"✔ Bonus complete!":"⭐ Bonus: build "+bonus.n+" "+S[bonus.k].n+(bonus.n>1?"s":"")+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r)):"";
+  $("evt").textContent=ev.k?EV[ev.k]+" ("+Math.ceil(ev.t)+"s)":"";
+  $("hire").textContent="Hire Builder $300";$("hire").disabled=!run||money<300||builders>=5;
+  $("tools").textContent="Better Tools $250 ("+speed+"×)";$("tools").disabled=!run||money<250||speed>=2;
+  $("sellmode").textContent=sellMode?"Sell Mode: ON":"Sell Empty Lots";$("sellmode").classList.toggle("active",sellMode);
+  lots.forEach((l,i)=>{
+    const e=els[i];if(!e)return;
+    const ai=l.st==="ai_owned"||l.st==="ai_for_sale";
+    e.classList.toggle("purchased",l.st!=="empty"&&!ai);e.classList.toggle("ai-owned",ai);
+    const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
+    const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
+    const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.p)*15),l.st==="empty"?l.land:0,l.reno.join(),l.paint].join("|");
+    if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
+    let lb="",pb=0;const sn=l.hs?S[l.hs].n.split(" ")[0]:"";
+    if(l.st==="empty")lb="Buy "+fmt(l.land);else if(l.st==="owned")lb=sellMode?"Sell lot":"Build here";
+    else if(l.st==="working"){lb=sn+"…";pb=l.p}else if(l.st==="reno_working"){lb="Upgrading…";pb=l.rp}
+    else if(l.st==="ready")lb=sn+" ✔";else if(l.st==="rented")lb=fmt(rentOf(i))+"/3s";
+    else if(l.st==="listed")lb=l.offer?"💰 "+fmt(l.offer.price):"On market";else if(l.st==="ai_owned")lb=sn;
+    else if(l.st==="ai_for_sale")lb="Buy "+fmt(l.aiP);else lb="Sold ✔";
+    if(l.offer)pb=l.offer.ttl/l.offer.max;
+    const a=e.querySelector(".act");a.textContent=lb;a.classList.toggle("ai",l.st==="ai_for_sale");
+    const bi=e.querySelector(".pb i");bi.style.width=pb*100+"%";bi.style.background=l.offer?"var(--blue)":"var(--gold)";
+    e.classList.toggle("offer",!!l.offer);e.classList.toggle("hot",!l.offer&&(l.st==="owned"||l.st==="rented"||l.st==="ai_for_sale"));
   });
 }
 
-$("m-timed").onclick = () => {
-  gameMode = "timed";
-  $("m-timed").classList.add("active");
-  $("m-relaxed").classList.remove("active");
-};
-$("m-relaxed").onclick = () => {
-  gameMode = "relaxed";
-  $("m-relaxed").classList.add("active");
-  $("m-timed").classList.remove("active");
-};
-
-$("btn-pause").onclick = togglePause;
-$("btn-resume").onclick = togglePause;
-$("btn-save").onclick = saveGame;
-$("btn-menu").onclick = () => {
-  isPaused = false;
-  run = false;
-  $("pause-ov").style.display = "none";
-  $("ov").style.display = "flex";
-  $("choice").innerHTML = "";
-  updateMainMenu();
-};
-
-$("btn-continue").onclick = () => {
-  if (loadGame()) {
-    updateMainMenu();
-  }
-};
-
-$("hire").onclick = () => { if (money >= 300) { money -= 300; builders++; draw(); } };
-$("tools").onclick = () => { if (money >= 250) { money -= 250; speed += 0.25; draw(); } };
-$("sellmode").onclick = () => { sellMode = !sellMode; msg(sellMode ? "Sell Mode ON: Tap any owned empty lot to sell it." : "Sell Mode OFF."); draw(); };
-$("go").onclick = () => {
-  startLevel();
-  updateMainMenu();
-};
-
-updateMainMenu();
-
-requestAnimationFrame(tick);
+$("mt").onclick=()=>setMode("timed");$("mr").onclick=()=>setMode("relaxed");
+$("bp").onclick=togglePause;$("br").onclick=togglePause;$("bs").onclick=saveGame;
+$("bm").onclick=()=>{paused=false;run=false;closeSheet();$("pz").style.display="none";$("ov").style.display="flex";updMenu()};
+$("bc").onclick=loadGame;
+$("hire").onclick=()=>{if(money>=300){money-=300;builders++;draw()}};
+$("tools").onclick=()=>{if(money>=250){money-=250;speed+=.25;draw()}};
+$("sellmode").onclick=()=>{sellMode=!sellMode;toast(sellMode?"Sell Mode ON: tap a bought, unbuilt lot to sell it.":"Sell Mode OFF.");draw()};
+$("go").onclick=()=>{lv=1;startLevel()};
+updMenu();requestAnimationFrame(tick);
 </script>
 </body>
 </html>
