@@ -1208,7 +1208,7 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
-// Progressive Building Construction, Organic Billowing Dust & Realtor Sign with Reduced Sticker
+// Progressive Building Construction, Organic Billowing Dust & Enlarged Centered Realtor Sign
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
@@ -1216,16 +1216,18 @@ function renderArt(l, idx) {
   if (st === "empty") {
     const isReduced = l.landPrice < 125;
     return `
-      <line x1="25" y1="30" x2="25" y2="54" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="25" y1="32" x2="42" y2="32" stroke="#5d4037" stroke-width="2"/>
-      
-      <rect x="25" y="34" width="30" height="18" rx="2" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
-      <rect x="25" y="34" width="30" height="6" fill="#2e7d32"/>
-      <text x="40" y="38.5" font-size="4" font-weight="900" text-anchor="middle" fill="#ffffff">FOR SALE</text>
-      <text x="40" y="47" font-size="5.5" font-weight="900" text-anchor="middle" fill="#1b5e20">${fmt(l.landPrice)}</text>
+      <g transform="translate(18, 5) scale(1.35)">
+        <line x1="24" y1="12" x2="24" y2="38" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="24" y1="14" x2="38" y2="14" stroke="#5d4037" stroke-width="2"/>
+        
+        <rect x="24" y="16" width="32" height="20" rx="2" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
+        <rect x="24" y="16" width="32" height="7" fill="#2e7d32"/>
+        <text x="40" y="21.5" font-size="4.5" font-weight="900" text-anchor="middle" fill="#ffffff">FOR SALE</text>
+        <text x="40" y="30" font-size="6.5" font-weight="900" text-anchor="middle" fill="#1b5e20">${fmt(l.landPrice)}</text>
+      </g>
       
       ${isReduced ? `
-        <g transform="translate(68, 38) rotate(-10)">
+        <g transform="translate(62, 14) rotate(-10)">
           <rect x="-14" y="-5" width="28" height="10" rx="2" fill="#d32f2f" stroke="#ffffff" stroke-width="1"/>
           <text x="0" y="2" font-size="4.5" font-weight="900" text-anchor="middle" fill="#ffffff" letter-spacing="0.2">REDUCED</text>
         </g>
@@ -1355,16 +1357,18 @@ function renderArt(l, idx) {
     const isReduced = l.landPrice < 125;
 
     completedBuildingSvg += `
-      <line x1="18" y1="28" x2="18" y2="54" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="18" y1="30" x2="36" y2="30" stroke="#5d4037" stroke-width="2"/>
-      
-      <rect x="18" y="32" width="28" height="18" rx="2" fill="#ffffff" stroke="#1565c0" stroke-width="1.5"/>
-      <rect x="18" y="32" width="28" height="6" fill="#1565c0"/>
-      <text x="32" y="36.5" font-size="4" font-weight="900" text-anchor="middle" fill="#ffffff">REALTY</text>
-      <text x="32" y="44" font-size="5" font-weight="900" text-anchor="middle" fill="#d32f2f">FOR SALE</text>
+      <g transform="translate(18, 5) scale(1.25)">
+        <line x1="18" y1="18" x2="18" y2="44" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="18" y1="20" x2="32" y2="20" stroke="#5d4037" stroke-width="2"/>
+        
+        <rect x="18" y="22" width="28" height="18" rx="2" fill="#ffffff" stroke="#1565c0" stroke-width="1.5"/>
+        <rect x="18" y="22" width="28" height="6" fill="#1565c0"/>
+        <text x="32" y="26.5" font-size="4" font-weight="900" text-anchor="middle" fill="#ffffff">REALTY</text>
+        <text x="32" y="34" font-size="5" font-weight="900" text-anchor="middle" fill="#d32f2f">FOR SALE</text>
+      </g>
       
       ${isReduced ? `
-        <g transform="translate(32, 42) rotate(-12)">
+        <g transform="translate(56, 26) rotate(-12)">
           <rect x="-14" y="-4" width="28" height="8" rx="1.5" fill="#d32f2f" stroke="#ffffff" stroke-width="0.8"/>
           <text x="0" y="1.8" font-size="4.2" font-weight="900" text-anchor="middle" fill="#ffffff" letter-spacing="0.2">REDUCED</text>
         </g>
@@ -1536,7 +1540,7 @@ function draw() {
     }
 
     let lbl = "", pb = 0;
-    if (l.st === "empty") lbl = "Buy<br><span style='color:var(--gold)'>" + fmt(l.landPrice) + "</span>";
+    if (l.st === "empty") lbl = "Buy";
     else if (l.st === "owned") lbl = sellMode ? "Sell Lot" : "Build Here";
     else if (l.st === "working") { lbl = STYLES[l.houseStyle].name + "..."; pb = l.p; }
     else if (l.st === "reno_working") { lbl = "Upgrading..."; pb = l.renoProgress; }
