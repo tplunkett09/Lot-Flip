@@ -108,12 +108,10 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   overflow: hidden;
 }
 
-/* Pause State CSS helper for vehicle animations */
 #scene.paused-cars span {
   animation-play-state: paused !important;
 }
 
-/* 5 Top Lots, Central Asphalt Road, 5 Bottom Lots */
 .lot-row { 
   display: grid; 
   grid-template-columns: repeat(5, 1fr); 
@@ -169,7 +167,25 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 @keyframes drive-right { from { left: -10%; } to { left: 110%; } }
 @keyframes drive-left { from { left: 110%; } to { left: -10%; } }
 
-/* Lot Container (<div> to avoid nested button issues) */
+/* Construction Animations */
+@keyframes hammerSwing {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-35deg); }
+}
+@keyframes scaffoldPulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 0.45; }
+}
+.construction-hammer {
+  animation: hammerSwing 0.5s infinite ease-in-out;
+  transform-origin: 80% 80%;
+  display: inline-block;
+}
+.scaffold-line {
+  animation: scaffoldPulse 1.2s infinite ease-in-out;
+}
+
+/* Lot Container */
 .lot {
   background: #73b853; 
   border: 3px dashed #488433; 
@@ -348,7 +364,7 @@ button.b.active { border-color: var(--blue); background: rgba(41, 182, 246, 0.15
 
 #msg { font-size: 13px; color: var(--mut); min-height: 20px; text-align: center; font-weight: 600; }
 
-/* Overlay Modal & Game Mode Switcher */
+/* Overlay Modal */
 .modal-ov {
   position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
   display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 100;
@@ -399,7 +415,7 @@ button.menu-btn.gold-btn:hover { background: #ef6c00; }
 button.menu-btn.line-btn { background: var(--line); color: var(--text); }
 button.menu-btn.line-btn:hover { background: var(--card-hover); }
 
-/* House Style & Community Upgrade Selector Drawer */
+/* Selector Drawer */
 #choice { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 920px; margin: 0 auto; z-index: 50; }
 .choice-drawer {
   background: var(--card); border: 2px solid var(--acc); border-radius: 16px;
@@ -458,7 +474,7 @@ button.menu-btn.line-btn:hover { background: var(--card-hover); }
     <div class="bar"><i id="gbar"></i></div>
   </div>
 
-  <!-- Neighborhood Layout (10 Lots in 2 Rows of 5) -->
+  <!-- Neighborhood Layout -->
   <div id="scene"></div>
 
   <!-- Action Toolbar -->
@@ -471,13 +487,12 @@ button.menu-btn.line-btn:hover { background: var(--card-hover); }
 
 <div id="choice"></div>
 
-<!-- Main Menu / Level Start Overlay -->
+<!-- Main Menu -->
 <div class="modal-ov" id="ov">
   <div class="box">
     <h2>🏡 Lot Flip</h2>
     <p>Buy plots, build homes that <b>auto-rent immediately</b>, upgrade with Parks & Civic Centers, or buy pre-built AI houses to flip for big profits!</p>
     
-    <!-- Mode Selection -->
     <div class="mode-select">
       <button class="mode-btn active" id="m-timed">
         <b>⏱️ Timed Mode</b>
@@ -494,7 +509,7 @@ button.menu-btn.line-btn:hover { background: var(--card-hover); }
   </div>
 </div>
 
-<!-- Pause Overlay Modal -->
+<!-- Pause Modal -->
 <div class="modal-ov" id="pause-ov" style="display:none">
   <div class="box">
     <h2>⏸️ Game Paused</h2>
@@ -506,7 +521,6 @@ button.menu-btn.line-btn:hover { background: var(--card-hover); }
 </div>
 
 <script>
-// Building & Upgrade Configurations
 const STYLES = {
   ranch: { name: "Ranch", cost: 250, baseVal: 450, rentMult: 1.0, dur: 3, boost: 0, category: "house", icon: "🏡" },
   colonial: { name: "Colonial", cost: 450, baseVal: 800, rentMult: 1.3, dur: 5, boost: 0.15, category: "house", icon: "🏛️" },
@@ -515,19 +529,18 @@ const STYLES = {
   civic: { name: "Civic Center", cost: 800, baseVal: 800, rentMult: 0, dur: 6, boost: 0.15, revenue: 15, category: "infra", icon: "🏛️" }
 };
 
-const N = 10; // 10 Lots (5 Top, 5 Bottom)
+const N = 10;
 const SAVE_KEY = "lot_flip_save_v1";
 
 let lv = 1, money = 0, goal = 0, timeVal = 0, builders = 2, speed = 1, lots = [], els = [], last = 0, run = false, isPaused = false;
 let sellMode = false;
-let gameMode = "timed"; // "timed" or "relaxed"
+let gameMode = "timed";
 
 const $ = id => document.getElementById(id);
 const fmt = n => "$" + Math.round(n);
 
-// Lot Factory
 const mkLot = () => ({ 
-  st: "empty", // empty, owned, working, ready, rented, listed, sold, ai_owned, ai_for_sale
+  st: "empty", 
   houseStyle: null, 
   p: 0, 
   dur: 0, 
@@ -546,19 +559,17 @@ const mkLot = () => ({
 const msg = t => $("msg").textContent = t;
 const busy = () => lots.filter(l => l.st === "working").length;
 
-// Neighbor Adjacency Logic
 function getAdjacentIndices(i) {
   const adj = [];
   const isTop = i < 5;
   const col = isTop ? i : i - 5;
   
-  if (col > 0) adj.push(i - 1);       // Left neighbor
-  if (col < 4) adj.push(i + 1);       // Right neighbor
-  adj.push(isTop ? i + 5 : i - 5);    // Across the street neighbor
+  if (col > 0) adj.push(i - 1);       
+  if (col < 4) adj.push(i + 1);       
+  adj.push(isTop ? i + 5 : i - 5);    
   return adj;
 }
 
-// Calculate Global Civic Center Boost
 function getGlobalCivicBoost() {
   let count = 0;
   lots.forEach(l => {
@@ -569,7 +580,6 @@ function getGlobalCivicBoost() {
   return count * STYLES.civic.boost;
 }
 
-// Calculate Total Neighbor Property Boost for Lot i
 function getNeighborBoost(i) {
   const neighbors = getAdjacentIndices(i);
   let boost = getGlobalCivicBoost();
@@ -583,7 +593,6 @@ function getNeighborBoost(i) {
   return boost;
 }
 
-// Calculate Adjacent Park Rent Boost for Lot i
 function getParkRentBoost(i) {
   const neighbors = getAdjacentIndices(i);
   let boost = 0;
@@ -596,7 +605,6 @@ function getParkRentBoost(i) {
   return boost;
 }
 
-// Total Lot Valuation
 function getLotValue(i) {
   const l = lots[i];
   if (!l) return 0;
@@ -609,7 +617,6 @@ function getLotValue(i) {
   return Math.round((base + houseVal) * (1 + boost));
 }
 
-// Calculate Dynamic Rent Income for Lot i
 function calcRent(i) {
   const l = lots[i];
   if (!l || !l.houseStyle || STYLES[l.houseStyle].category === "infra") return 0;
@@ -644,7 +651,6 @@ function buildScene() {
     return r;
   };
 
-  // Fixed 2-Lane Road System
   const mkRoad = () => {
     const rd = document.createElement("div"); rd.className = "road";
     rd.innerHTML = `
@@ -670,7 +676,6 @@ function startLevel() {
   goal = 1800 + lv * 400; 
   timeVal = gameMode === "timed" ? Math.max(90, 180 - lv * 8) : 0;
   
-  // Spawn 2 AI Pre-built Houses
   let aiIndices = [];
   while(aiIndices.length < 2) {
     let r = Math.floor(Math.random() * N);
@@ -681,7 +686,7 @@ function startLevel() {
     const l = lots[idx];
     l.st = "ai_owned";
     l.houseStyle = houseTypes[Math.floor(Math.random() * houseTypes.length)];
-    l.aiWait = 3 + Math.random() * 6; // Time until AI lists it for sale
+    l.aiWait = 3 + Math.random() * 6;
   });
 
   builders = 2; speed = 1; sellMode = false; isPaused = false;
@@ -705,7 +710,7 @@ function togglePause() {
   } else {
     $("pause-ov").style.display = "none";
     $("scene").classList.remove("paused-cars");
-    last = performance.now(); // reset last frame time to avoid sudden dt jump
+    last = performance.now();
     msg("Game Resumed.");
   }
 }
@@ -741,7 +746,6 @@ function loadGame() {
     sellMode = data.sellMode || false;
     lots = data.lots || Array.from({ length: N }, mkLot);
 
-    // Sync Game mode selection buttons
     if (gameMode === "timed") {
       $("m-timed").classList.add("active");
       $("m-relaxed").classList.remove("active");
@@ -780,7 +784,7 @@ function updateMainMenu() {
 function clickLot(i) {
   if (!run || isPaused) return;
   const l = lots[i];
-  if (l.offer) return; // Offer handles buttons directly
+  if (l.offer) return;
 
   if (l.st === "ai_for_sale") {
     showAiBuyDrawer(i);
@@ -838,8 +842,6 @@ function showAiBuyDrawer(i) {
   $("b-aibuynow").onclick = () => {
     if (money < l.aiPrice) return msg("Not enough money to buy this pre-built house (" + fmt(l.aiPrice) + ").");
     money -= l.aiPrice;
-    
-    // Auto-rent on player purchase!
     l.st = "rented";
     l.rent = calcRent(i);
     l.rt = 3;
@@ -1017,7 +1019,6 @@ function popText(i, text) {
 function tick(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   
-  // Freeze delta updates if game is paused or not running
   if (run && !isPaused) {
     if (gameMode === "timed") {
       timeVal -= dt;
@@ -1025,7 +1026,6 @@ function tick(now) {
       timeVal += dt;
     }
 
-    // Civic Center Global Municipal Revenue Tick
     lots.forEach((l, i) => {
       if (l.houseStyle === "civic" && l.st !== "empty" && l.st !== "working") {
         l.rt = (l.rt || 0) - dt;
@@ -1038,21 +1038,19 @@ function tick(now) {
     });
 
     lots.forEach((l, i) => {
-      // Land Value Fluctuation
       l.pt -= dt; 
       if (l.pt <= 0) { 
         l.pt = 5 + Math.random() * 3; 
         l.landPrice = Math.round(Math.min(240, Math.max(90, l.landPrice + (Math.random() - 0.5) * 40))); 
       }
 
-      // Pre-built AI Houses Logic
       if (l.st === "ai_owned") {
         l.aiWait -= dt;
         if (l.aiWait <= 0) {
           l.st = "ai_for_sale";
           const baseV = getLotValue(i);
           l.aiPrice = Math.round(baseV * (0.85 + Math.random() * 0.3));
-          l.aiTimer = 12 + Math.random() * 8; // On sale for 12-20s
+          l.aiTimer = 12 + Math.random() * 8;
           l.pt = 2 + Math.random() * 2;
           msg("Lot " + (i + 1) + " (" + STYLES[l.houseStyle].name + ") listed by neighbor for " + fmt(l.aiPrice) + "!");
         }
@@ -1070,7 +1068,6 @@ function tick(now) {
         }
       }
 
-      // Rental Income Tick
       if (l.st === "rented") {
         l.rent = calcRent(i); 
         l.rt -= dt;
@@ -1081,7 +1078,6 @@ function tick(now) {
         }
       }
 
-      // Player Construction Finish -> AUTO-RENT IMMEDIATELY!
       if (l.st === "working") {
         l.p += dt / l.dur;
         if (l.p >= 1) {
@@ -1140,6 +1136,7 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
+// Progressive Building Construction Art Generator
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
@@ -1160,73 +1157,102 @@ function renderArt(l, idx) {
     `;
   }
 
-  let svg = '';
-  svg += '<rect x="8" y="44" width="84" height="12" rx="3" fill="#589e3e"/>';
+  let completedBuildingSvg = '<rect x="8" y="44" width="84" height="12" rx="3" fill="#589e3e"/>';
 
-  if (st === "working") {
-    svg += `
-      <rect x="25" y="24" width="50" height="22" fill="none" stroke="#b08d57" stroke-width="2" stroke-dasharray="4 3"/>
-      <text x="50" y="38" font-size="18" text-anchor="middle">👷</text>
+  if (styleKey === "ranch") {
+    completedBuildingSvg += `
+      <rect x="18" y="26" width="64" height="20" fill="#e8d8c3" rx="1"/>
+      <polygon points="12,27 50,12 88,27" fill="#a8483a"/>
+      <rect x="44" y="32" width="12" height="14" fill="#5c3826"/>
+      <rect x="24" y="31" width="12" height="9" fill="#bde3f5" stroke="#777" stroke-width="1"/>
+      <rect x="64" y="31" width="12" height="9" fill="#bde3f5" stroke="#777" stroke-width="1"/>
     `;
-  } else {
-    if (styleKey === "ranch") {
-      svg += `
-        <rect x="18" y="26" width="64" height="20" fill="#e8d8c3" rx="1"/>
-        <polygon points="12,27 50,12 88,27" fill="#a8483a"/>
-        <rect x="44" y="32" width="12" height="14" fill="#5c3826"/>
-        <rect x="24" y="31" width="12" height="9" fill="#bde3f5" stroke="#777" stroke-width="1"/>
-        <rect x="64" y="31" width="12" height="9" fill="#bde3f5" stroke="#777" stroke-width="1"/>
-      `;
-    } else if (styleKey === "colonial") {
-      svg += `
-        <rect x="22" y="18" width="56" height="28" fill="#f0e6d2"/>
-        <polygon points="18,19 50,6 82,19" fill="#3e5063"/>
-        <rect x="45" y="32" width="10" height="14" fill="#6e2d25"/>
-        <rect x="28" y="22" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
-        <rect x="62" y="22" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
-        <rect x="28" y="33" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
-        <rect x="62" y="33" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
-      `;
-    } else if (styleKey === "mansion") {
-      svg += `
-        <rect x="14" y="20" width="72" height="26" fill="#e0e0e0"/>
-        <polygon points="10,21 34,10 58,21" fill="#7b1fa2"/>
-        <polygon points="42,21 66,10 90,21" fill="#7b1fa2"/>
-        <rect x="42" y="24" width="16" height="22" fill="#ffffff"/>
-        <line x1="45" y1="24" x2="45" y2="46" stroke="#ccc" stroke-width="2"/>
-        <line x1="55" y1="24" x2="55" y2="46" stroke="#ccc" stroke-width="2"/>
-        <rect x="20" y="26" width="12" height="10" fill="#bbdefb" stroke="#333" stroke-width="1"/>
-        <rect x="68" y="26" width="12" height="10" fill="#bbdefb" stroke="#333" stroke-width="1"/>
-      `;
-    } else if (styleKey === "park") {
-      svg += `
-        <rect x="12" y="12" width="76" height="38" rx="6" fill="#4caf50"/>
-        <circle cx="24" cy="24" r="9" fill="#2e7d32"/>
-        <circle cx="76" cy="24" r="9" fill="#2e7d32"/>
-        <circle cx="50" cy="20" r="8" fill="#388e3c"/>
-        <rect x="42" y="34" width="16" height="4" fill="#795548"/>
-        <circle cx="28" cy="38" r="4" fill="#29b6f6"/>
-      `;
-    } else if (styleKey === "civic") {
-      svg += `
-        <rect x="16" y="22" width="68" height="24" fill="#eceff1"/>
-        <rect x="22" y="24" width="5" height="22" fill="#b0bec5"/>
-        <rect x="36" y="24" width="5" height="22" fill="#b0bec5"/>
-        <rect x="58" y="24" width="5" height="22" fill="#b0bec5"/>
-        <rect x="72" y="24" width="5" height="22" fill="#b0bec5"/>
-        <polygon points="12,22 50,8 88,22" fill="#78909c"/>
-        <rect x="12" y="44" width="76" height="4" fill="#cfd8dc"/>
-        <line x1="50" y1="8" x2="50" y2="1" stroke="#37474f" stroke-width="1.5"/>
-        <polygon points="50,1 58,4 50,7" fill="#e53935"/>
-      `;
-    }
+  } else if (styleKey === "colonial") {
+    completedBuildingSvg += `
+      <rect x="22" y="18" width="56" height="28" fill="#f0e6d2"/>
+      <polygon points="18,19 50,6 82,19" fill="#3e5063"/>
+      <rect x="45" y="32" width="10" height="14" fill="#6e2d25"/>
+      <rect x="28" y="22" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
+      <rect x="62" y="22" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
+      <rect x="28" y="33" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
+      <rect x="62" y="33" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
+    `;
+  } else if (styleKey === "mansion") {
+    completedBuildingSvg += `
+      <rect x="14" y="20" width="72" height="26" fill="#e0e0e0"/>
+      <polygon points="10,21 34,10 58,21" fill="#7b1fa2"/>
+      <polygon points="42,21 66,10 90,21" fill="#7b1fa2"/>
+      <rect x="42" y="24" width="16" height="22" fill="#ffffff"/>
+      <line x1="45" y1="24" x2="45" y2="46" stroke="#ccc" stroke-width="2"/>
+      <line x1="55" y1="24" x2="55" y2="46" stroke="#ccc" stroke-width="2"/>
+      <rect x="20" y="26" width="12" height="10" fill="#bbdefb" stroke="#333" stroke-width="1"/>
+      <rect x="68" y="26" width="12" height="10" fill="#bbdefb" stroke="#333" stroke-width="1"/>
+    `;
+  } else if (styleKey === "park") {
+    completedBuildingSvg += `
+      <rect x="12" y="12" width="76" height="38" rx="6" fill="#4caf50"/>
+      <circle cx="24" cy="24" r="9" fill="#2e7d32"/>
+      <circle cx="76" cy="24" r="9" fill="#2e7d32"/>
+      <circle cx="50" cy="20" r="8" fill="#388e3c"/>
+      <rect x="42" y="34" width="16" height="4" fill="#795548"/>
+      <circle cx="28" cy="38" r="4" fill="#29b6f6"/>
+    `;
+  } else if (styleKey === "civic") {
+    completedBuildingSvg += `
+      <rect x="16" y="22" width="68" height="24" fill="#eceff1"/>
+      <rect x="22" y="24" width="5" height="22" fill="#b0bec5"/>
+      <rect x="36" y="24" width="5" height="22" fill="#b0bec5"/>
+      <rect x="58" y="24" width="5" height="22" fill="#b0bec5"/>
+      <rect x="72" y="24" width="5" height="22" fill="#b0bec5"/>
+      <polygon points="12,22 50,8 88,22" fill="#78909c"/>
+      <rect x="12" y="44" width="76" height="4" fill="#cfd8dc"/>
+      <line x1="50" y1="8" x2="50" y2="1" stroke="#37474f" stroke-width="1.5"/>
+      <polygon points="50,1 58,4 50,7" fill="#e53935"/>
+    `;
   }
 
-  if (st === "listed") svg += '<rect x="2" y="32" width="24" height="10" rx="2" fill="#fff"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#e53935">SALE</text>';
-  if (st === "sold") svg += '<rect x="2" y="32" width="24" height="10" rx="2" fill="#e53935"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">SOLD</text>';
-  if (st === "rented") svg += '<rect x="2" y="32" width="24" height="10" rx="2" fill="#4caf50"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">RENT</text>';
+  // Active Construction Animation Rendering
+  if (st === "working") {
+    const prog = Math.max(0.05, Math.min(1, l.p));
+    const revealY = 60 - (prog * 56);
+    const revealH = prog * 56;
+    const clipId = `build-clip-${idx}`;
 
-  return svg;
+    return `
+      <defs>
+        <clipPath id="${clipId}">
+          <rect x="0" y="${revealY}" width="100" height="${revealH}"/>
+        </clipPath>
+      </defs>
+      
+      <!-- Foundation Pad -->
+      <rect x="10" y="46" width="80" height="8" rx="2" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+      
+      <!-- Progressive Building Reveal -->
+      <g clip-path="url(#${clipId})">
+        ${completedBuildingSvg}
+      </g>
+      
+      <!-- Scaffolding Overlay -->
+      <g class="scaffold-line" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none">
+        <rect x="12" y="${Math.max(10, revealY - 4)}" width="76" height="${Math.min(40, revealH + 6)}" rx="2"/>
+        <line x1="12" y1="${revealY}" x2="88" y2="${revealY}"/>
+        <line x1="30" y1="10" x2="30" y2="50"/>
+        <line x1="70" y1="10" x2="70" y2="50"/>
+      </g>
+
+      <!-- Animated Hammering Icon -->
+      <g transform="translate(68, ${Math.max(12, revealY - 10)})">
+        <text class="construction-hammer" font-size="16">🔨</text>
+      </g>
+    `;
+  }
+
+  if (st === "listed") completedBuildingSvg += '<rect x="2" y="32" width="24" height="10" rx="2" fill="#fff"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#e53935">SALE</text>';
+  if (st === "sold") completedBuildingSvg += '<rect x="2" y="32" width="24" height="10" rx="2" fill="#e53935"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">SOLD</text>';
+  if (st === "rented") completedBuildingSvg += '<rect x="2" y="32" width="24" height="10" rx="2" fill="#4caf50"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">RENT</text>';
+
+  return completedBuildingSvg;
 }
 
 function draw() {
@@ -1235,7 +1261,6 @@ function draw() {
   $("time").textContent = Math.max(0, Math.ceil(timeVal)) + "s";
   $("bld").textContent = (builders - busy()) + "/" + builders;
   
-  // Total passive rent income per second
   const totalRentPerSec = lots.reduce((a, l, i) => a + (l.st === "rented" ? calcRent(i) / 3 : 0), 0);
   $("rent").textContent = "$" + totalRentPerSec.toFixed(1) + "/s";
   
@@ -1275,7 +1300,6 @@ function draw() {
       aiBadge.style.display = "none";
     }
 
-    // Inline Offer Overlay (Player Sales)
     let offerOverlay = el.querySelector(".house-offer-overlay");
     if (l.offer) {
       if (!offerOverlay) {
@@ -1306,7 +1330,6 @@ function draw() {
       offerOverlay.remove();
     }
 
-    // Stacked Label: "Buy" on top, price stacked underneath
     let lbl = "", pb = 0;
     if (l.st === "empty") lbl = "Buy<br><span style='color:var(--gold)'>" + fmt(l.landPrice) + "</span>";
     else if (l.st === "owned") lbl = sellMode ? "Sell Lot" : "Build Here";
@@ -1318,7 +1341,7 @@ function draw() {
     else if (l.st === "ai_for_sale") lbl = "Buy House<br><span style='color:#fff'>" + fmt(l.aiPrice) + "</span>";
     else lbl = "Sold ✔";
 
-    const key = l.st + (l.houseStyle || "") + l.c;
+    const key = l.st + (l.houseStyle || "") + Math.round(l.p * 15) + l.c;
     if (el._k !== key) { el._k = key; el.querySelector("svg").innerHTML = renderArt(l, i); }
     const actEl = el.querySelector(".lot-action");
     actEl.innerHTML = lbl;
@@ -1329,7 +1352,6 @@ function draw() {
   });
 }
 
-// Mode Selection Handlers
 $("m-timed").onclick = () => {
   gameMode = "timed";
   $("m-timed").classList.add("active");
@@ -1341,7 +1363,6 @@ $("m-relaxed").onclick = () => {
   $("m-timed").classList.remove("active");
 };
 
-// Pause & Menu Event Listeners
 $("btn-pause").onclick = togglePause;
 $("btn-resume").onclick = togglePause;
 $("btn-save").onclick = saveGame;
@@ -1368,7 +1389,6 @@ $("go").onclick = () => {
   updateMainMenu();
 };
 
-// Check for existing save file on startup
 updateMainMenu();
 
 requestAnimationFrame(tick);
