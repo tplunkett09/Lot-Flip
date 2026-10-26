@@ -556,7 +556,7 @@ const STYLES = {
 };
 
 const RENOVATIONS = {
-  paint: { name: "Fresh Paint", cost: 150, valBonus: 120, dur: 4, tint: "#81c784" },
+  paint: { name: "Fresh Paint", cost: 150, valBonus: 120, dur: 4, colors: ["#aed581", "#81d4fa", "#ffcc80", "#ce93d8", "#ffab91", "#fff59d"] },
   roof: { name: "Modern Roof", cost: 300, valBonus: 280, dur: 7, tint: "#ff8a65" },
   luxury: { name: "Luxury Interior", cost: 500, valBonus: 500, dur: 10, tint: "#ba68c8" }
 };
@@ -590,7 +590,8 @@ const mkLot = () => ({
   renovations: [],
   renoProgress: 0,
   renoDuration: 0,
-  pendingRenoKey: null
+  pendingRenoKey: null,
+  paintColor: "#e8d8c3"
 });
 
 const msg = t => $("msg").textContent = t;
@@ -678,7 +679,7 @@ function buildScene() {
         <div class="ai-badge" style="display:none">NEIGHBOR</div>
         <svg viewBox="0 0 100 65"></svg>
         <div class="lot-info">
-          <div class="lot-header-bar">
+          <div class="lot-header-bar" style="display:none">
             <button class="lot-icon-btn btn-action-list" title="List/Unlist">🏷️</button>
             <button class="lot-icon-btn btn-action-demolish" title="Demolish">🏗️</button>
             <button class="lot-icon-btn btn-action-upgrade" title="Upgrade">👷</button>
@@ -899,14 +900,41 @@ function handleListAction(i) {
 function handleDemolishAction(i) {
   const l = lots[i];
   if (l.st === "empty" || l.st === "ai_owned" || l.st === "ai_for_sale") return msg("Nothing to demolish here.");
-  if (money < 100) return msg("Not enough money to demolish property ($100 required).");
-  money -= 100;
-  const p = l.landPrice, t = l.pt;
-  Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
-  activeDrawerLot = null;
-  $("choice").innerHTML = "";
-  msg("Demolished property on Lot " + (i + 1) + ".");
-  draw();
+  
+  // Confirmation drawer prompt
+  const c = $("choice");
+  c.innerHTML = `
+    <div class="choice-drawer">
+      <div>
+        <b style="font-size:14px;color:var(--warn);">⚠️ Demolish Lot ${i + 1}?</b>
+        <div style="font-size:11px;color:var(--mut);">Cost: <b style="color:#fff">$100</b>. This will clear the property.</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="style-btn" id="confirm-demolish" style="border-color:var(--warn);background:rgba(229,57,53,0.2)">
+          <b>Confirm Demolish</b>
+        </button>
+        <button class="close-btn" id="cancel-demolish">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  $("confirm-demolish").onclick = () => {
+    if (money < 100) {
+      c.innerHTML = "";
+      return msg("Not enough money to demolish property ($100 required).");
+    }
+    money -= 100;
+    const p = l.landPrice, t = l.pt;
+    Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
+    activeDrawerLot = null;
+    c.innerHTML = "";
+    msg("Demolished property on Lot " + (i + 1) + ".");
+    draw();
+  };
+
+  $("cancel-demolish").onclick = () => {
+    c.innerHTML = "";
+  };
 }
 
 function handleUpgradeAction(i) {
@@ -1045,14 +1073,9 @@ function showActionDrawer(i) {
   }
 
   $("drawer-demolish").onclick = () => {
-    if (money < 100) return msg("Not enough money to demolish property ($100 required).");
-    money -= 100;
-    const p = l.landPrice, t = l.pt;
-    Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
     activeDrawerLot = null;
     c.innerHTML = "";
-    msg("Demolished property on Lot " + (i + 1) + ".");
-    draw();
+    handleDemolishAction(i);
   };
 
   $("drawer-close").onclick = () => {
@@ -1270,6 +1293,10 @@ function tick(now) {
         if (l.renoProgress >= 1) {
           l.renovations.push(l.pendingRenoKey);
           const renoName = RENOVATIONS[l.pendingRenoKey].name;
+          if (l.pendingRenoKey === 'paint') {
+            const colors = RENOVATIONS.paint.colors;
+            l.paintColor = colors[Math.floor(Math.random() * colors.length)];
+          }
           l.st = "rented";
           l.rent = calcRent(i);
           l.rt = 3;
@@ -1320,7 +1347,7 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
-// Progressive Building Construction & Large Centered Realtor Signs
+// Highly Detailed Cartoon Architecture & Improved Architectural Graphics
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
@@ -1355,59 +1382,109 @@ function renderArt(l, idx) {
     `;
   }
 
-  let baseFill = "#e8d8c3";
+  let baseFill = l.paintColor || "#e8d8c3";
   let roofFill = "#a8483a";
-  if (l.renovations.includes('paint')) baseFill = "#aed581";
   if (l.renovations.includes('roof')) roofFill = "#ff7043";
 
-  let completedBuildingSvg = '<rect x="8" y="44" width="84" height="12" rx="3" fill="#589e3e"/>';
+  let completedBuildingSvg = '<rect x="6" y="44" width="88" height="12" rx="3" fill="#589e3e"/><rect x="8" y="42" width="84" height="4" fill="#78909c"/>';
 
   if (styleKey === "ranch") {
+    // Detailed Single-Story Suburban Ranch with Garage, Trim, Shingles & Chimney
     completedBuildingSvg += `
-      <rect x="18" y="26" width="64" height="20" fill="${baseFill}" rx="1"/>
-      <polygon points="12,27 50,12 88,27" fill="${roofFill}"/>
-      <rect x="44" y="32" width="12" height="14" fill="#5c3826"/>
-      <rect x="24" y="31" width="12" height="9" fill="#bde3f5" stroke="#777" stroke-width="1"/>
-      <rect x="64" y="31" width="12" height="9" fill="#bde3f5" stroke="#777" stroke-width="1"/>
+      <!-- Chimney -->
+      <rect x="68" y="16" width="8" height="12" fill="#8d6e63" stroke="#3e2723" stroke-width="1"/>
+      <!-- Main House Body -->
+      <rect x="16" y="24" width="68" height="22" fill="${baseFill}" rx="1" stroke="#3e2723" stroke-width="1.5"/>
+      <!-- Detailed Roof with Overhang & Shingle lines -->
+      <polygon points="10,25 50,10 90,25" fill="${roofFill}" stroke="#3e2723" stroke-width="1.5"/>
+      <line x1="30" y1="17" x2="70" y2="17" stroke="#7b1fa2" stroke-width="1" opacity="0.4"/>
+      <line x1="20" y1="21" x2="80" y2="21" stroke="#7b1fa2" stroke-width="1" opacity="0.4"/>
+      <!-- Garage Section -->
+      <rect x="52" y="28" width="28" height="18" fill="#cfd8dc" stroke="#3e2723" stroke-width="1.2"/>
+      <line x1="52" y1="33" x2="80" y2="33" stroke="#90a4ae" stroke-width="1"/>
+      <line x1="52" y1="38" x2="80" y2="38" stroke="#90a4ae" stroke-width="1"/>
+      <line x1="52" y1="43" x2="80" y2="43" stroke="#90a4ae" stroke-width="1"/>
+      <!-- Front Door -->
+      <rect x="38" y="32" width="10" height="14" fill="#5c3826" stroke="#271c12" stroke-width="1"/>
+      <circle cx="45" cy="39" r="1" fill="#ffb300"/>
+      <!-- Windows with Panes & Shutters -->
+      <rect x="20" y="28" width="14" height="12" fill="#bde3f5" stroke="#3e2723" stroke-width="1.2"/>
+      <line x1="27" y1="28" x2="27" y2="40" stroke="#3e2723" stroke-width="1"/>
+      <line x1="20" y1="34" x2="34" y2="34" stroke="#3e2723" stroke-width="1"/>
+      <rect x="17" y="28" width="3" height="12" fill="#37474f"/>
+      <rect x="34" y="28" width="3" height="12" fill="#37474f"/>
     `;
   } else if (styleKey === "colonial") {
+    // Detailed Two-Story Colonial with Columns, Dormer Windows & Symmetry
     completedBuildingSvg += `
-      <rect x="22" y="18" width="56" height="28" fill="${baseFill}"/>
-      <polygon points="18,19 50,6 82,19" fill="${roofFill}"/>
-      <rect x="45" y="32" width="10" height="14" fill="#6e2d25"/>
-      <rect x="28" y="22" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
-      <rect x="62" y="22" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
-      <rect x="28" y="33" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
-      <rect x="62" y="33" width="10" height="8" fill="#bde3f5" stroke="#444" stroke-width="1"/>
+      <!-- House Body -->
+      <rect x="18" y="16" width="64" height="30" fill="${baseFill}" stroke="#3e2723" stroke-width="1.5"/>
+      <!-- Gable Roof -->
+      <polygon points="14,18 50,4 86,18" fill="${roofFill}" stroke="#3e2723" stroke-width="1.5"/>
+      <!-- Roof Dormer Windows -->
+      <polygon points="50,7 44,13 56,13" fill="${roofFill}" stroke="#3e2723" stroke-width="1"/>
+      <rect x="47" y="10" width="6" height="5" fill="#bde3f5" stroke="#3e2723" stroke-width="0.8"/>
+      <!-- Classic Front Porch / Center Entry -->
+      <rect x="38" y="24" width="24" height="22" fill="#ffffff" stroke="#3e2723" stroke-width="1.2"/>
+      <rect x="44" y="32" width="12" height="14" fill="#4e342e" stroke="#271c12" stroke-width="1"/>
+      <circle cx="53" cy="39" r="1" fill="#ffb300"/>
+      <!-- Upper Windows -->
+      <rect x="24" y="20" width="10" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width="1"/>
+      <line x1="29" y1="20" x2="29" y2="30" stroke="#3e2723" stroke-width="0.8"/>
+      <line x1="24" y1="25" x2="34" y2="25" stroke="#3e2723" stroke-width="0.8"/>
+      
+      <rect x="66" y="20" width="10" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width="1"/>
+      <line x1="71" y1="20" x2="71" y2="30" stroke="#3e2723" stroke-width="0.8"/>
+      <line x1="66" y1="25" x2="76" y2="25" stroke="#3e2723" stroke-width="0.8"/>
+      <!-- Lower Side Windows -->
+      <rect x="24" y="33" width="10" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width="1"/>
+      <line x1="29" y1="33" x2="29" y2="43" stroke="#3e2723" stroke-width="0.8"/>
+      <line x1="24" y1="38" x2="34" y2="38" stroke="#3e2723" stroke-width="0.8"/>
+
+      <rect x="66" y="33" width="10" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width="1"/>
+      <line x1="71" y1="33" x2="71" y2="43" stroke="#3e2723" stroke-width="0.8"/>
+      <line x1="66" y1="38" x2="76" y2="38" stroke="#3e2723" stroke-width="0.8"/>
     `;
   } else if (styleKey === "mansion") {
+    // Grand Estate Mansion with Twin Wing Towers, Arch Entry & Balcony
     completedBuildingSvg += `
-      <rect x="14" y="20" width="72" height="26" fill="${baseFill}"/>
-      <polygon points="10,21 34,10 58,21" fill="${roofFill}"/>
-      <polygon points="42,21 66,10 90,21" fill="${roofFill}"/>
-      <rect x="42" y="24" width="16" height="22" fill="#ffffff"/>
-      <line x1="45" y1="24" x2="45" y2="46" stroke="#ccc" stroke-width="2"/>
-      <line x1="55" y1="24" x2="55" y2="46" stroke="#ccc" stroke-width="2"/>
-      <rect x="20" y="26" width="12" height="10" fill="#bbdefb" stroke="#333" stroke-width="1"/>
-      <rect x="68" y="26" width="12" height="10" fill="#bbdefb" stroke="#333" stroke-width="1"/>
+      <!-- Left Wing -->
+      <rect x="12" y="20" width="22" height="26" fill="${baseFill}" stroke="#3e2723" stroke-width="1.2"/>
+      <polygon points="10,20 23,10 36,20" fill="${roofFill}" stroke="#3e2723" stroke-width="1.2"/>
+      <!-- Right Wing -->
+      <rect x="66" y="20" width="22" height="26" fill="${baseFill}" stroke="#3e2723" stroke-width="1.2"/>
+      <polygon points="64,20 77,10 90,20" fill="${roofFill}" stroke="#3e2723" stroke-width="1.2"/>
+      <!-- Center Main Hall -->
+      <rect x="28" y="16" width="44" height="30" fill="${baseFill}" stroke="#3e2723" stroke-width="1.5"/>
+      <polygon points="25,17 50,5 75,17" fill="${roofFill}" stroke="#3e2723" stroke-width="1.5"/>
+      <!-- Grand Entrance Double Doors & Pillars -->
+      <rect x="40" y="30" width="20" height="16" fill="#ffffff" stroke="#3e2723" stroke-width="1"/>
+      <rect x="44" y="32" width="6" height="14" fill="#4e342e" stroke="#271c12" stroke-width="1"/>
+      <rect x="50" y="32" width="6" height="14" fill="#4e342e" stroke="#271c12" stroke-width="1"/>
+      <line x1="38" y1="30" x2="62" y2="30" stroke="#3e2723" stroke-width="1.5"/>
+      <!-- Luxury Windows -->
+      <rect x="16" y="24" width="14" height="10" fill="#bbdefb" stroke="#3e2723" stroke-width="1"/>
+      <rect x="70" y="24" width="14" height="10" fill="#bbdefb" stroke="#3e2723" stroke-width="1"/>
+      <rect x="34" y="20" width="12" height="10" fill="#bbdefb" stroke="#3e2723" stroke-width="1"/>
+      <rect x="54" y="20" width="12" height="10" fill="#bbdefb" stroke="#3e2723" stroke-width="1"/>
     `;
   } else if (styleKey === "park") {
     completedBuildingSvg += `
-      <rect x="12" y="12" width="76" height="38" rx="6" fill="#4caf50"/>
-      <circle cx="24" cy="24" r="9" fill="#2e7d32"/>
-      <circle cx="76" cy="24" r="9" fill="#2e7d32"/>
-      <circle cx="50" cy="20" r="8" fill="#388e3c"/>
-      <rect x="42" y="34" width="16" height="4" fill="#795548"/>
-      <circle cx="28" cy="38" r="4" fill="#29b6f6"/>
+      <rect x="12" y="12" width="76" height="38" rx="6" fill="#4caf50" stroke="#2e7d32" stroke-width="1.5"/>
+      <circle cx="24" cy="24" r="10" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+      <circle cx="76" cy="24" r="10" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+      <circle cx="50" cy="18" r="9" fill="#388e3c" stroke="#1b5e20" stroke-width="1"/>
+      <rect x="42" y="34" width="16" height="4" fill="#795548" rx="1"/>
+      <circle cx="28" cy="38" r="5" fill="#29b6f6" stroke="#0288d1" stroke-width="1"/>
     `;
   } else if (styleKey === "civic") {
     completedBuildingSvg += `
-      <rect x="16" y="22" width="68" height="24" fill="#eceff1"/>
+      <rect x="16" y="22" width="68" height="24" fill="#eceff1" stroke="#37474f" stroke-width="1.5"/>
       <rect x="22" y="24" width="5" height="22" fill="#b0bec5"/>
       <rect x="36" y="24" width="5" height="22" fill="#b0bec5"/>
       <rect x="58" y="24" width="5" height="22" fill="#b0bec5"/>
       <rect x="72" y="24" width="5" height="22" fill="#b0bec5"/>
-      <polygon points="12,22 50,8 88,22" fill="#78909c"/>
+      <polygon points="12,22 50,8 88,22" fill="#78909c" stroke="#37474f" stroke-width="1.5"/>
       <rect x="12" y="44" width="76" height="4" fill="#cfd8dc"/>
       <line x1="50" y1="8" x2="50" y2="1" stroke="#37474f" stroke-width="1.5"/>
       <polygon points="50,1 58,4 50,7" fill="#e53935"/>
@@ -1513,8 +1590,17 @@ function draw() {
   lots.forEach((l, i) => {
     const el = els[i]; if (!el) return;
 
-    el.classList.toggle("purchased", l.st !== "empty" && l.st !== "ai_owned" && l.st !== "ai_for_sale");
+    const isPurchased = l.st !== "empty" && l.st !== "ai_owned" && l.st !== "ai_for_sale";
+    el.classList.toggle("purchased", isPurchased);
     el.classList.toggle("ai-owned", l.st === "ai_owned" || l.st === "ai_for_sale");
+
+    // Only display top emoji button bar if purchased & property is built/active
+    const headerBar = el.querySelector(".lot-header-bar");
+    if (isPurchased && l.st !== "owned" && l.st !== "working" && l.st !== "reno_working") {
+      headerBar.style.display = "flex";
+    } else {
+      headerBar.style.display = "none";
+    }
 
     const boostPct = Math.round(getNeighborBoost(i) * 100);
     const boostBadge = el.querySelector(".boost-badge");
@@ -1576,7 +1662,7 @@ function draw() {
     else if (l.st === "ai_for_sale") lbl = "Buy House<br><span style='color:#fff'>" + fmt(l.aiPrice) + "</span>";
     else lbl = "Sold ✔";
 
-    const key = l.st + (l.houseStyle || "") + Math.round((l.p || l.renoProgress) * 15) + l.landPrice + l.renovations.join() + (activeDrawerLot === i) + l.c;
+    const key = l.st + (l.houseStyle || "") + Math.round((l.p || l.renoProgress) * 15) + l.landPrice + l.renovations.join() + (activeDrawerLot === i) + l.c + l.paintColor;
     if (el._k !== key) { el._k = key; el.querySelector("svg").innerHTML = renderArt(l, i); }
     const actEl = el.querySelector(".lot-action");
     actEl.innerHTML = lbl;
