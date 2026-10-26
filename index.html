@@ -163,6 +163,7 @@ button.b.active { border-color: var(--blue); background: rgba(41, 182, 246, 0.15
 .build-btn:hover { border-color: var(--acc); }
 .build-btn b { display: block; color: var(--gold); font-size: 13px; }
 .close-btn { background: var(--line); color: var(--text); border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 700; }
+.acc-btn { background: var(--acc); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -356,16 +357,29 @@ function click(i) {
 }
 
 function openBuildDrawer(i) {
-  const l = lots[i], c = $("choice");
-  let html = '<div class="choice-drawer"><div><b style="font-size:15px;">Build on Lot ' + (i + 1) + '</b></div><div class="build-opts">';
+  const c = $("choice");
+  c.innerHTML = "";
+  const drawer = document.createElement("div");
+  drawer.className = "choice-drawer";
+  drawer.innerHTML = '<div><b style="font-size:15px;">Build on Lot ' + (i + 1) + '</b></div><div class="build-opts"></div>';
   
+  const opts = drawer.querySelector(".build-opts");
   Object.keys(SPECS).forEach(key => {
     const s = SPECS[key];
-    html += '<button class="build-btn" onclick="startBuild(' + i + ','' + key + '')">' + s.icon + ' ' + s.name + '<br><b>' + fmt(s.cost) + '</b></button>';
+    const btn = document.createElement("button");
+    btn.className = "build-btn";
+    btn.innerHTML = s.icon + ' ' + s.name + '<br><b>' + fmt(s.cost) + '</b>';
+    btn.onclick = () => startBuild(i, key);
+    opts.appendChild(btn);
   });
 
-  html += '</div><button class="close-btn" onclick="$('choice').innerHTML=''">Cancel</button></div>';
-  c.innerHTML = html;
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "close-btn";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.onclick = () => { c.innerHTML = ""; };
+  drawer.appendChild(cancelBtn);
+  
+  c.appendChild(drawer);
 }
 
 function startBuild(i, typeKey) {
@@ -382,7 +396,26 @@ function startBuild(i, typeKey) {
 function toggleSaleList(i) {
   const l = lots[i], c = $("choice");
   const isListed = l.st === "listed";
-  c.innerHTML = '<div class="choice-drawer"><div><b style="font-size:15px;">Lot ' + (i + 1) + ' (' + (l.style ? SPECS[l.style].name : 'House') + ')</b><br><small style="color:var(--mut);">' + (isListed ? 'Currently listed for sale.' : 'Earning ' + fmt(l.rent) + '/3s rent.') + '</small></div><div class="ab"><button class="acc-btn" onclick="doList(' + i + ',' + (!isListed) + ')">' + (isListed ? 'Unlist / Resume Renting' : 'List for Sale') + '</button><button class="close-btn" onclick="$('choice').innerHTML=''">Close</button></div></div>';
+  c.innerHTML = "";
+  
+  const drawer = document.createElement("div");
+  drawer.className = "choice-drawer";
+  drawer.innerHTML = '<div><b style="font-size:15px;">Lot ' + (i + 1) + ' (' + (l.style ? SPECS[l.style].name : 'House') + ')</b><br><small style="color:var(--mut);">' + (isListed ? 'Currently listed for sale.' : 'Earning ' + fmt(l.rent) + '/3s rent.') + '</small></div><div class="ab"></div>';
+  
+  const ab = drawer.querySelector(".ab");
+  const listBtn = document.createElement("button");
+  listBtn.className = "acc-btn";
+  listBtn.textContent = isListed ? "Unlist / Resume Renting" : "List for Sale";
+  listBtn.onclick = () => doList(i, !isListed);
+  ab.appendChild(listBtn);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "close-btn";
+  closeBtn.textContent = "Close";
+  closeBtn.onclick = () => { c.innerHTML = ""; };
+  ab.appendChild(closeBtn);
+
+  c.appendChild(drawer);
 }
 
 function doList(i, makeListed) {
