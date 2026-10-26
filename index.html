@@ -167,7 +167,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 @keyframes drive-right { from { left: -10%; } to { left: 110%; } }
 @keyframes drive-left { from { left: 110%; } to { left: -10%; } }
 
-/* Organic Billowing Dust Animations */
+/* Polished Cartoon Dust Animations */
 @keyframes hammerSwing {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(-35deg); }
@@ -177,16 +177,16 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   50% { opacity: 0.45; }
 }
 
-@keyframes organicDust {
-  0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
-  25% { opacity: 0.65; }
-  70% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 0.35; }
-  100% { transform: translate(calc(var(--dx) * 1.5), calc(var(--dy) * 1.5)) scale(1.7); opacity: 0; }
+@keyframes smoothDust {
+  0% { transform: scale(0.3) translate(0, 0); opacity: 0; }
+  30% { opacity: 0.8; }
+  70% { transform: scale(1.2) translate(var(--mx), var(--my)); opacity: 0.4; }
+  100% { transform: scale(1.6) translate(calc(var(--mx) * 1.4), calc(var(--my) * 1.4)); opacity: 0; }
 }
 
-.dust-puff-1 { --dx: -12px; --dy: -10px; animation: organicDust 2.2s infinite ease-out; transform-origin: center; }
-.dust-puff-2 { --dx: 14px; --dy: -14px; animation: organicDust 2.6s infinite ease-out 0.4s; transform-origin: center; }
-.dust-puff-3 { --dx: 4px; --dy: -20px; animation: organicDust 1.9s infinite ease-out 0.8s; transform-origin: center; }
+.dust-p1 { --mx: -10px; --dy: -8px; animation: smoothDust 2.0s infinite ease-out; transform-origin: center; }
+.dust-p2 { --mx: 12px; --dy: -12px; animation: smoothDust 2.4s infinite ease-out 0.4s; transform-origin: center; }
+.dust-p3 { --mx: 2px; --dy: -18px; animation: smoothDust 1.8s infinite ease-out 0.7s; transform-origin: center; }
 
 .construction-hammer {
   animation: hammerSwing 0.5s infinite ease-in-out;
@@ -317,50 +317,6 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 .contractor-btn:hover {
   transform: scale(1.15);
   filter: brightness(1.1);
-}
-
-/* Inline Quick Widget Action Bar */
-.lot-widget-bar {
-  position: absolute;
-  bottom: 52px;
-  left: 4px;
-  right: 4px;
-  background: rgba(18, 26, 16, 0.98);
-  border: 2px solid var(--acc);
-  border-radius: 8px;
-  padding: 5px;
-  display: flex;
-  gap: 4px;
-  justify-content: center;
-  z-index: 25;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.7);
-  backdrop-filter: blur(3px);
-}
-.lot-widget-bar button {
-  background: var(--card-hover);
-  border: 1px solid var(--line);
-  color: var(--text);
-  border-radius: 5px;
-  padding: 5px 8px;
-  font-size: 10px;
-  font-weight: 800;
-  cursor: pointer;
-  flex: 1;
-  text-align: center;
-}
-.lot-widget-bar button:hover {
-  border-color: var(--acc);
-  background: var(--acc);
-  color: #fff;
-}
-.lot-widget-bar button.demolish-widget {
-  border-color: var(--warn);
-  background: rgba(229, 57, 53, 0.35);
-  color: #ff8a80;
-}
-.lot-widget-bar button.demolish-widget:hover {
-  background: var(--warn);
-  color: #fff;
 }
 
 /* Inline Offer Overlay Window */
@@ -621,7 +577,7 @@ const SAVE_KEY = "lot_flip_save_v1";
 let lv = 1, money = 0, goal = 0, timeVal = 0, builders = 2, speed = 1, lots = [], els = [], last = 0, run = false, isPaused = false;
 let sellMode = false;
 let gameMode = "timed";
-let activeWidgetLot = null;
+let activeDrawerLot = null;
 
 const $ = id => document.getElementById(id);
 const fmt = n => "$" + Math.round(n);
@@ -738,7 +694,7 @@ function buildScene() {
         <div class="pb"><i></i></div>
       `;
       bt.onclick = (e) => {
-        if (e.target.closest('button') || e.target.closest('.contractor-btn') || e.target.closest('.lot-widget-bar')) return;
+        if (e.target.closest('button') || e.target.closest('.contractor-btn')) return;
         clickLot(i);
       }; 
       r.appendChild(bt);
@@ -784,7 +740,7 @@ function startLevel() {
     l.aiWait = 3 + Math.random() * 6;
   });
 
-  builders = 2; speed = 1; sellMode = false; isPaused = false; activeWidgetLot = null;
+  builders = 2; speed = 1; sellMode = false; isPaused = false; activeDrawerLot = null;
   buildScene(); run = true; last = performance.now();
   $("ov").style.display = "none";
   $("pause-ov").style.display = "none";
@@ -943,10 +899,90 @@ function clickLot(i) {
   } else if (l.st === "owned") {
     showStyleSelector(i);
   } else if (l.st === "rented" || l.st === "listed" || l.st === "ready") {
-    activeWidgetLot = (activeWidgetLot === i) ? null : i;
-    draw();
+    activeDrawerLot = (activeDrawerLot === i) ? null : i;
+    showActionDrawer(i);
   }
   draw();
+}
+
+function showActionDrawer(i) {
+  const l = lots[i];
+  const c = $("choice");
+  if (activeDrawerLot !== i) {
+    c.innerHTML = "";
+    return;
+  }
+
+  const isInfra = l.houseStyle && STYLES[l.houseStyle].category === "infra";
+  const houseName = STYLES[l.houseStyle] ? STYLES[l.houseStyle].name : "Property";
+
+  c.innerHTML = `
+    <div class="choice-drawer">
+      <div>
+        <b style="font-size:15px;color:var(--gold);">Lot ${i + 1}: ${houseName}</b>
+        <div style="font-size:12px;color:var(--mut);">Valuation: <b style="color:#fff">${fmt(getLotValue(i))}</b></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${l.st === "rented" && !isInfra ? `
+          <button class="style-btn" id="drawer-list" style="border-color:var(--blue);background:rgba(41,182,246,0.15)">
+            <b>🏷️ List for Sale</b>
+            <small>Put on market for buyers</small>
+          </button>
+        ` : ''}
+        ${l.st === "listed" ? `
+          <button class="style-btn" id="drawer-unlist" style="border-color:var(--acc);background:rgba(76,175,80,0.15)">
+            <b>🛑 Unlist Property</b>
+            <small>Resume rental income</small>
+          </button>
+        ` : ''}
+        <button class="style-btn" id="drawer-demolish" style="border-color:var(--warn);background:rgba(229,57,53,0.15)">
+          <b>🏗️ Demolish ($100)</b>
+          <small>Clear lot back to empty land</small>
+        </button>
+        <button class="close-btn" id="drawer-close">Close</button>
+      </div>
+    </div>
+  `;
+
+  if ($("drawer-list")) {
+    $("drawer-listanalytical") || ($("drawer-list").onclick = () => {
+      l.st = "listed";
+      l.wait = 1.5 + Math.random() * 2;
+      activeDrawerLot = null;
+      c.innerHTML = "";
+      msg("Listed Lot " + (i + 1) + " for sale! Rent income paused.");
+      draw();
+    });
+  }
+
+  if ($("drawer-unlist")) {
+    $("drawer-unlist").onclick = () => {
+      l.st = "rented";
+      l.rent = calcRent(i);
+      l.rt = 3;
+      if (l.offer) l.offer = null;
+      activeDrawerLot = null;
+      c.innerHTML = "";
+      msg("Unlisted Lot " + (i + 1) + ". Resumed rental income.");
+      draw();
+    };
+  }
+
+  $("drawer-demolish").onclick = () => {
+    if (money < 100) return msg("Not enough money to demolish property ($100 required).");
+    money -= 100;
+    const p = l.landPrice, t = l.pt;
+    Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
+    activeDrawerLot = null;
+    c.innerHTML = "";
+    msg("Demolished property on Lot " + (i + 1) + ".");
+    draw();
+  };
+
+  $("drawer-close").onclick = () => {
+    activeDrawerLot = null;
+    c.innerHTML = "";
+  };
 }
 
 function showAiBuyDrawer(i) {
@@ -1208,7 +1244,7 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
-// Progressive Building Construction, Organic Billowing Dust & Enlarged Centered Realtor Sign
+// Progressive Building Construction, Smooth Cartoon Dust & Realtor Sign
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
@@ -1223,7 +1259,6 @@ function renderArt(l, idx) {
         <rect x="24" y="16" width="32" height="20" rx="2" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
         <rect x="24" y="16" width="32" height="7" fill="#2e7d32"/>
         <text x="40" y="21.5" font-size="4.5" font-weight="900" text-anchor="middle" fill="#ffffff">FOR SALE</text>
-        <text x="40" y="30" font-size="6.5" font-weight="900" text-anchor="middle" fill="#1b5e20">${fmt(l.landPrice)}</text>
       </g>
       
       ${isReduced ? `
@@ -1302,7 +1337,7 @@ function renderArt(l, idx) {
     `;
   }
 
-  // Star System for Upgrades (1 Star per renovation, 3 Stars for fully upgraded)
+  // Star System for Upgrades
   if (l.renovations.length > 0) {
     let starX = 50 - (l.renovations.length * 5);
     let starsStr = "";
@@ -1312,7 +1347,7 @@ function renderArt(l, idx) {
     completedBuildingSvg += `<g>${starsStr}</g>`;
   }
 
-  // Active Construction State (Building or Renovation)
+  // Active Construction State with Smooth Cartoon Dust
   if (st === "working" || st === "reno_working") {
     const prog = st === "working" ? Math.max(0.05, Math.min(1, l.p)) : Math.max(0.05, Math.min(1, l.renoProgress));
     const revealY = 60 - (prog * 56);
@@ -1332,11 +1367,11 @@ function renderArt(l, idx) {
         ${completedBuildingSvg}
       </g>
       
-      <!-- Organic Billowing Dust Cloud Shapes -->
-      <g fill="#dcd6cd" opacity="0.75">
-        <path class="dust-puff-1" d="M22,42 C16,42 14,34 20,30 C24,24 34,26 38,32 C44,32 46,40 40,44 Z"/>
-        <path class="dust-puff-2" d="M68,44 C60,44 58,35 66,30 C72,24 82,28 84,35 C90,38 88,46 78,46 Z"/>
-        <path class="dust-puff-3" d="M42,32 C36,28 36,18 45,16 C52,14 60,22 56,30 C50,34 46,34 42,32 Z"/>
+      <!-- Smooth Cartoon Dust Clouds -->
+      <g fill="#e2ded8" opacity="0.8">
+        <path class="dust-p1" d="M22,42 C16,42 14,35 20,31 C25,25 34,27 38,33 C44,33 46,40 40,44 Z"/>
+        <path class="dust-p2" d="M68,44 C60,44 58,36 65,31 C71,25 81,29 83,35 C89,38 88,46 78,46 Z"/>
+        <path class="dust-p3" d="M42,32 C36,28 36,19 44,17 C51,15 59,23 55,31 C49,35 45,35 42,32 Z"/>
       </g>
 
       <g class="scaffold-line" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none">
@@ -1448,67 +1483,6 @@ function draw() {
       contractorBtn.remove();
     }
 
-    // Inline Quick Widget Action Bar
-    let widgetBar = el.querySelector(".lot-widget-bar");
-    if (activeWidgetLot === i && (l.st === "rented" || l.st === "listed" || l.st === "ready")) {
-      if (!widgetBar) {
-        widgetBar = document.createElement("div");
-        widgetBar.className = "lot-widget-bar";
-        el.appendChild(widgetBar);
-      }
-      
-      let widgetHtml = "";
-      if (l.st === "rented" && !isInfra) {
-        widgetHtml += `<button id="w-list-${i}">🏷️ List</button>`;
-      } else if (l.st === "listed") {
-        widgetHtml += `<button id="w-unlist-${i}">🛑 Unlist</button>`;
-      }
-      widgetHtml += `<button class="demolish-widget" id="w-demolish-${i}">🏗️ Demolish ($100)</button>`;
-      widgetBar.innerHTML = widgetHtml;
-
-      const listBtn = document.getElementById(`w-list-${i}`);
-      if (listBtn) {
-        listBtn.onclick = (e) => {
-          e.stopPropagation();
-          l.st = "listed";
-          l.wait = 1.5 + Math.random() * 2;
-          activeWidgetLot = null;
-          msg("Listed Lot " + (i + 1) + " for sale! Rent income paused.");
-          draw();
-        };
-      }
-
-      const unlistBtn = document.getElementById(`w-unlist-${i}`);
-      if (unlistBtn) {
-        unlistBtn.onclick = (e) => {
-          e.stopPropagation();
-          l.st = "rented";
-          l.rent = calcRent(i);
-          l.rt = 3;
-          if (l.offer) l.offer = null;
-          activeWidgetLot = null;
-          msg("Unlisted Lot " + (i + 1) + ". Resumed rental income.");
-          draw();
-        };
-      }
-
-      const demolishBtn = document.getElementById(`w-demolish-${i}`);
-      if (demolishBtn) {
-        demolishBtn.onclick = (e) => {
-          e.stopPropagation();
-          if (money < 100) return msg("Not enough money to demolish property ($100 required).");
-          money -= 100;
-          const p = l.landPrice, t = l.pt;
-          Object.assign(l, mkLot(), { landPrice: p, pt: t, st: "owned" });
-          activeWidgetLot = null;
-          msg("Demolished property on Lot " + (i + 1) + ".");
-          draw();
-        };
-      }
-    } else if (widgetBar) {
-      widgetBar.remove();
-    }
-
     let offerOverlay = el.querySelector(".house-offer-overlay");
     if (l.offer) {
       if (!offerOverlay) {
@@ -1551,7 +1525,7 @@ function draw() {
     else if (l.st === "ai_for_sale") lbl = "Buy House<br><span style='color:#fff'>" + fmt(l.aiPrice) + "</span>";
     else lbl = "Sold ✔";
 
-    const key = l.st + (l.houseStyle || "") + Math.round((l.p || l.renoProgress) * 15) + l.landPrice + l.renovations.join() + (activeWidgetLot === i) + l.c;
+    const key = l.st + (l.houseStyle || "") + Math.round((l.p || l.renoProgress) * 15) + l.landPrice + l.renovations.join() + (activeDrawerLot === i) + l.c;
     if (el._k !== key) { el._k = key; el.querySelector("svg").innerHTML = renderArt(l, i); }
     const actEl = el.querySelector(".lot-action");
     actEl.innerHTML = lbl;
