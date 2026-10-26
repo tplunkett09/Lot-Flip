@@ -238,7 +238,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   font: inherit; 
   transition: transform 0.15s, border-color 0.2s, background-color 0.2s;
   position: relative; 
-  height: 165px; 
+  height: 175px; 
   justify-content: space-between; 
   overflow: hidden;
   user-select: none; 
@@ -294,7 +294,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 }
 @keyframes flashTag { from { filter: brightness(1); } to { filter: brightness(1.25); } }
 
-.lot svg { width: 100%; height: 72px; display: block; flex-shrink: 0; pointer-events: none; }
+.lot svg { width: 100%; height: 68px; display: block; flex-shrink: 0; pointer-events: none; }
 .lot-info { 
   width: 100%; 
   text-align: center; 
@@ -302,7 +302,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   flex-direction: column; 
   gap: 2px; 
   flex-shrink: 0; 
-  height: 52px; 
+  height: 48px; 
   justify-content: center; 
   pointer-events: none; 
 }
@@ -311,7 +311,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   background: rgba(0,0,0,0.35); 
   border-radius: 6px; 
   padding: 2px 4px;
-  font-size: 11px; 
+  font-size: 10px; 
   font-weight: 800; 
   width: 100%; 
   line-height: 1.15;
@@ -319,7 +319,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   color: #fff;
 }
 
-.lot .pb { width: 100%; height: 6px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; flex-shrink: 0; pointer-events: none; }
+.lot .pb { width: 100%; height: 5px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; flex-shrink: 0; pointer-events: none; }
 .lot .pb i { display: block; height: 100%; background: var(--gold); width: 0; }
 
 /* In-Lot Floating Contractor Helmet Upgrade Button */
@@ -346,20 +346,21 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   filter: brightness(1.1);
 }
 
-/* Inline Quick Widget Action Bar (Expanded on the lot card) */
+/* Inline Quick Widget Action Bar (Cleanly docked above bottom info) */
 .lot-widget-bar {
   position: absolute;
-  bottom: 22px;
+  bottom: 50px;
   left: 4px;
   right: 4px;
-  background: rgba(18, 26, 16, 0.92);
+  background: rgba(18, 26, 16, 0.96);
   border: 1px solid var(--acc);
   border-radius: 6px;
-  padding: 3px;
+  padding: 4px;
   display: flex;
   gap: 4px;
   justify-content: center;
-  z-index: 8;
+  z-index: 12;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
   backdrop-filter: blur(2px);
 }
 .lot-widget-bar button {
@@ -367,10 +368,12 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   border: 1px solid var(--line);
   color: var(--text);
   border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 9px;
+  padding: 4px 6px;
+  font-size: 10px;
   font-weight: 800;
   cursor: pointer;
+  flex: 1;
+  text-align: center;
 }
 .lot-widget-bar button:hover {
   border-color: var(--acc);
@@ -379,7 +382,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 }
 .lot-widget-bar button.demolish-widget {
   border-color: var(--warn);
-  background: rgba(229, 57, 53, 0.2);
+  background: rgba(229, 57, 53, 0.3);
   color: #ff8a80;
 }
 .lot-widget-bar button.demolish-widget:hover {
@@ -541,7 +544,7 @@ button.menu-btn.line-btn:hover { background: var(--card-hover); }
 
 @media (max-width: 600px) {
   .lot-row { grid-template-columns: repeat(5, 1fr); gap: 4px; }
-  .lot { height: 135px; padding: 4px; }
+  .lot { height: 145px; padding: 4px; }
   .lot svg { height: 52px; }
   .lot-title { font-size: 9px; }
   .lot-action { font-size: 9px; padding: 2px; }
@@ -645,7 +648,7 @@ const SAVE_KEY = "lot_flip_save_v1";
 let lv = 1, money = 0, goal = 0, timeVal = 0, builders = 2, speed = 1, lots = [], els = [], last = 0, run = false, isPaused = false;
 let sellMode = false;
 let gameMode = "timed";
-let activeWidgetLot = null; // Tracks which lot has its quick widget bar open
+let activeWidgetLot = null;
 
 const $ = id => document.getElementById(id);
 const fmt = n => "$" + Math.round(n);
@@ -1407,7 +1410,7 @@ function draw() {
       aiBadge.style.display = "none";
     }
 
-    // Contractor Helmet Upgrader Button (Shown on built residential houses that aren't fully maxed)
+    // Contractor Helmet Upgrader Button
     let contractorBtn = el.querySelector(".contractor-btn");
     const isInfra = l.houseStyle && STYLES[l.houseStyle].category === "infra";
     const canUpgrade = l.st === "rented" && !isInfra && l.renovations.length < 3;
@@ -1428,7 +1431,7 @@ function draw() {
       contractorBtn.remove();
     }
 
-    // Inline Quick Widget Action Bar (Expanded when clicked)
+    // Inline Quick Widget Action Bar
     let widgetBar = el.querySelector(".lot-widget-bar");
     if (activeWidgetLot === i && (l.st === "rented" || l.st === "listed" || l.st === "ready")) {
       if (!widgetBar) {
