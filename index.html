@@ -167,7 +167,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 @keyframes drive-right { from { left: -10%; } to { left: 110%; } }
 @keyframes drive-left { from { left: 110%; } to { left: -10%; } }
 
-/* Construction Animations */
+/* Organic Dust Billow Animations */
 @keyframes hammerSwing {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(-35deg); }
@@ -177,26 +177,16 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   50% { opacity: 0.45; }
 }
 
-@keyframes dustPuffLeft {
-  0% { transform: translate(0px, 0px) scale(0.7); opacity: 0; }
-  35% { transform: translate(-14px, -12px) scale(1.6); opacity: 0.55; }
-  100% { transform: translate(-28px, -24px) scale(2.3); opacity: 0; }
+@keyframes organicDust {
+  0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  25% { opacity: 0.65; }
+  70% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 0.35; }
+  100% { transform: translate(calc(var(--dx) * 1.5), calc(var(--dy) * 1.5)) scale(1.7); opacity: 0; }
 }
-@keyframes dustPuffRight {
-  0% { transform: translate(0px, 0px) scale(0.7); opacity: 0; }
-  35% { transform: translate(14px, -10px) scale(1.7); opacity: 0.55; }
-  100% { transform: translate(28px, -22px) scale(2.4); opacity: 0; }
-}
-@keyframes dustPuffCenter {
-  0% { transform: translate(0px, 0px) scale(0.8); opacity: 0; }
-  40% { transform: translate(0px, -14px) scale(1.9); opacity: 0.6; }
-  100% { transform: translate(0px, -28px) scale(2.6); opacity: 0; }
-}
-@keyframes dustPuffTop {
-  0% { transform: translate(0px, 0px) scale(0.6); opacity: 0; }
-  35% { transform: translate(8px, -10px) scale(1.5); opacity: 0.5; }
-  100% { transform: translate(16px, -20px) scale(2.2); opacity: 0; }
-}
+
+.dust-puff-1 { --dx: -12px; --dy: -10px; animation: organicDust 2.2s infinite ease-out; transform-origin: center; }
+.dust-puff-2 { --dx: 14px; --dy: -14px; animation: organicDust 2.6s infinite ease-out 0.4s; transform-origin: center; }
+.dust-puff-3 { --dx: 4px; --dy: -20px; animation: organicDust 1.9s infinite ease-out 0.8s; transform-origin: center; }
 
 .construction-hammer {
   animation: hammerSwing 0.5s infinite ease-in-out;
@@ -205,23 +195,6 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 }
 .scaffold-line {
   animation: scaffoldPulse 1.2s infinite ease-in-out;
-}
-
-.dust-cloud-l {
-  animation: dustPuffLeft 2.2s infinite ease-out;
-  transform-origin: 22px 38px;
-}
-.dust-cloud-r {
-  animation: dustPuffRight 2.5s infinite ease-out 0.5s;
-  transform-origin: 78px 38px;
-}
-.dust-cloud-c {
-  animation: dustPuffCenter 2.0s infinite ease-out 0.2s;
-  transform-origin: 50px 42px;
-}
-.dust-cloud-t {
-  animation: dustPuffTop 2.6s infinite ease-out 0.8s;
-  transform-origin: 40px 24px;
 }
 
 /* Lot Container */
@@ -337,7 +310,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 6;
+  z-index: 15;
   box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   transition: transform 0.1s, filter 0.15s;
 }
@@ -346,29 +319,29 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   filter: brightness(1.1);
 }
 
-/* Inline Quick Widget Action Bar (Cleanly docked above bottom info) */
+/* Inline Quick Widget Action Bar (High z-index to ensure clickability) */
 .lot-widget-bar {
   position: absolute;
-  bottom: 50px;
+  bottom: 52px;
   left: 4px;
   right: 4px;
-  background: rgba(18, 26, 16, 0.96);
-  border: 1px solid var(--acc);
-  border-radius: 6px;
-  padding: 4px;
+  background: rgba(18, 26, 16, 0.98);
+  border: 2px solid var(--acc);
+  border-radius: 8px;
+  padding: 5px;
   display: flex;
   gap: 4px;
   justify-content: center;
-  z-index: 12;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-  backdrop-filter: blur(2px);
+  z-index: 25;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.7);
+  backdrop-filter: blur(3px);
 }
 .lot-widget-bar button {
   background: var(--card-hover);
   border: 1px solid var(--line);
   color: var(--text);
-  border-radius: 4px;
-  padding: 4px 6px;
+  border-radius: 5px;
+  padding: 5px 8px;
   font-size: 10px;
   font-weight: 800;
   cursor: pointer;
@@ -382,7 +355,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 }
 .lot-widget-bar button.demolish-widget {
   border-color: var(--warn);
-  background: rgba(229, 57, 53, 0.3);
+  background: rgba(229, 57, 53, 0.35);
   color: #ff8a80;
 }
 .lot-widget-bar button.demolish-widget:hover {
@@ -401,7 +374,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   align-items: center; 
   justify-content: center; 
   gap: 3px; 
-  z-index: 10; 
+  z-index: 30; 
   padding: 4px; 
   text-align: center;
   cursor: default;
@@ -453,7 +426,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 .pop {
   position: absolute; top: 8px; right: 8px; font-weight: 800; color: var(--acc);
   background: var(--card); border: 1px solid var(--acc); border-radius: 6px;
-  padding: 2px 6px; font-size: 12px; animation: popanim 1s ease-out forwards; pointer-events: none; z-index: 20;
+  padding: 2px 6px; font-size: 12px; animation: popanim 1s ease-out forwards; pointer-events: none; z-index: 40;
 }
 @keyframes popanim { to { transform: translateY(-22px); opacity: 0; } }
 
@@ -762,7 +735,7 @@ function buildScene() {
         <div class="pb"><i></i></div>
       `;
       bt.onclick = (e) => {
-        if (e.target.closest('button') || e.target.closest('.contractor-btn')) return;
+        if (e.target.closest('button') || e.target.closest('.contractor-btn') || e.target.closest('.lot-widget-bar')) return;
         clickLot(i);
       }; 
       r.appendChild(bt);
@@ -1213,7 +1186,7 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
-// Progressive Building Construction, Renovations, Dust Clouds & Realtor Signs
+// Progressive Building Construction, Organic Billowing Dust Clouds & Realtor Signs
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
@@ -1297,7 +1270,7 @@ function renderArt(l, idx) {
     completedBuildingSvg += `<circle cx="50" cy="10" r="4" fill="#ffd700"/><polygon points="50,4 52,9 48,9" fill="#ffb300"/>`;
   }
 
-  // Active Construction State
+  // Active Construction State with Organic Billowing Dust Clouds
   if (st === "working") {
     const prog = Math.max(0.05, Math.min(1, l.p));
     const revealY = 60 - (prog * 56);
@@ -1317,11 +1290,11 @@ function renderArt(l, idx) {
         ${completedBuildingSvg}
       </g>
       
-      <g fill="#d7ccc8">
-        <circle class="dust-cloud-l" cx="22" cy="${Math.min(46, revealY + 16)}" r="13"/>
-        <circle class="dust-cloud-r" cx="78" cy="${Math.min(46, revealY + 16)}" r="14"/>
-        <circle class="dust-cloud-c" cx="50" cy="${Math.min(48, revealY + 18)}" r="16"/>
-        <circle class="dust-cloud-t" cx="42" cy="${Math.max(16, revealY + 2)}" r="12"/>
+      <!-- Organic Billowing Dust Cloud Shapes -->
+      <g fill="#dcd6cd" opacity="0.75">
+        <path class="dust-puff-1" d="M22,42 C16,42 14,34 20,30 C24,24 34,26 38,32 C44,32 46,40 40,44 Z"/>
+        <path class="dust-puff-2" d="M68,44 C60,44 58,35 66,30 C72,24 82,28 84,35 C90,38 88,46 78,46 Z"/>
+        <path class="dust-puff-3" d="M42,32 C36,28 36,18 45,16 C52,14 60,22 56,30 C50,34 46,34 42,32 Z"/>
       </g>
 
       <g class="scaffold-line" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none">
@@ -1442,15 +1415,16 @@ function draw() {
       
       let widgetHtml = "";
       if (l.st === "rented" && !isInfra) {
-        widgetHtml += `<button id="w-list">🏷️ List</button>`;
+        widgetHtml += `<button id="w-list-${i}">🏷️ List</button>`;
       } else if (l.st === "listed") {
-        widgetHtml += `<button id="w-unlist">🛑 Unlist</button>`;
+        widgetHtml += `<button id="w-unlist-${i}">🛑 Unlist</button>`;
       }
-      widgetHtml += `<button class="demolish-widget" id="w-demolish">🏗️ Demolish ($100)</button>`;
+      widgetHtml += `<button class="demolish-widget" id="w-demolish-${i}">🏗️ Demolish ($100)</button>`;
       widgetBar.innerHTML = widgetHtml;
 
-      if ($("w-list")) {
-        $("w-list").onclick = (e) => {
+      const listBtn = document.getElementById(`w-list-${i}`);
+      if (listBtn) {
+        listBtn.onclick = (e) => {
           e.stopPropagation();
           l.st = "listed";
           l.wait = 1.5 + Math.random() * 2;
@@ -1459,8 +1433,10 @@ function draw() {
           draw();
         };
       }
-      if ($("w-unlist")) {
-        $("w-unlist").onclick = (e) => {
+
+      const unlistBtn = document.getElementById(`w-unlist-${i}`);
+      if (unlistBtn) {
+        unlistBtn.onclick = (e) => {
           e.stopPropagation();
           l.st = "rented";
           l.rent = calcRent(i);
@@ -1471,8 +1447,10 @@ function draw() {
           draw();
         };
       }
-      if ($("w-demolish")) {
-        $("w-demolish").onclick = (e) => {
+
+      const demolishBtn = document.getElementById(`w-demolish-${i}`);
+      if (demolishBtn) {
+        demolishBtn.onclick = (e) => {
           e.stopPropagation();
           if (money < 100) return msg("Not enough money to demolish property ($100 required).");
           money -= 100;
