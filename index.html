@@ -167,7 +167,7 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 @keyframes drive-right { from { left: -10%; } to { left: 110%; } }
 @keyframes drive-left { from { left: 110%; } to { left: -10%; } }
 
-/* Polished Cartoon Dust Animations */
+/* Realistic Cartoon Dust Animations */
 @keyframes hammerSwing {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(-35deg); }
@@ -177,16 +177,28 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
   50% { opacity: 0.45; }
 }
 
-@keyframes smoothDust {
-  0% { transform: scale(0.3) translate(0, 0); opacity: 0; }
+@keyframes cloudDrift1 {
+  0% { transform: translate(0px, 0px) scale(0.4); opacity: 0; }
+  25% { opacity: 0.7; }
+  70% { transform: translate(-14px, -12px) scale(1.1); opacity: 0.4; }
+  100% { transform: translate(-28px, -24px) scale(1.5); opacity: 0; }
+}
+@keyframes cloudDrift2 {
+  0% { transform: translate(0px, 0px) scale(0.4); opacity: 0; }
+  25% { opacity: 0.7; }
+  70% { transform: translate(14px, -14px) scale(1.2); opacity: 0.4; }
+  100% { transform: translate(28px, -28px) scale(1.6); opacity: 0; }
+}
+@keyframes cloudDrift3 {
+  0% { transform: translate(0px, 0px) scale(0.3); opacity: 0; }
   30% { opacity: 0.8; }
-  70% { transform: scale(1.2) translate(var(--mx), var(--my)); opacity: 0.4; }
-  100% { transform: scale(1.6) translate(calc(var(--mx) * 1.4), calc(var(--my) * 1.4)); opacity: 0; }
+  75% { transform: translate(2px, -20px) scale(1.3); opacity: 0.35; }
+  100% { transform: translate(4px, -35px) scale(1.7); opacity: 0; }
 }
 
-.dust-p1 { --mx: -10px; --dy: -8px; animation: smoothDust 2.0s infinite ease-out; transform-origin: center; }
-.dust-p2 { --mx: 12px; --dy: -12px; animation: smoothDust 2.4s infinite ease-out 0.4s; transform-origin: center; }
-.dust-p3 { --mx: 2px; --dy: -18px; animation: smoothDust 1.8s infinite ease-out 0.7s; transform-origin: center; }
+.dust-c1 { animation: cloudDrift1 1.8s infinite ease-out; transform-origin: center; }
+.dust-c2 { animation: cloudDrift2 2.2s infinite ease-out 0.3s; transform-origin: center; }
+.dust-c3 { animation: cloudDrift3 2.0s infinite ease-out 0.6s; transform-origin: center; }
 
 .construction-hammer {
   animation: hammerSwing 0.5s infinite ease-in-out;
@@ -294,30 +306,6 @@ h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 8px; f
 
 .lot .pb { width: 100%; height: 5px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; flex-shrink: 0; pointer-events: none; }
 .lot .pb i { display: block; height: 100%; background: var(--gold); width: 0; }
-
-/* In-Lot Floating Contractor Helmet Upgrade Button */
-.contractor-btn {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  background: rgba(255, 152, 0, 0.95);
-  border: 1px solid #fff;
-  border-radius: 6px;
-  width: 24px;
-  height: 24px;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 15;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-  transition: transform 0.1s, filter 0.15s;
-}
-.contractor-btn:hover {
-  transform: scale(1.15);
-  filter: brightness(1.1);
-}
 
 /* Inline Offer Overlay Window */
 .house-offer-overlay {
@@ -694,7 +682,7 @@ function buildScene() {
         <div class="pb"><i></i></div>
       `;
       bt.onclick = (e) => {
-        if (e.target.closest('button') || e.target.closest('.contractor-btn')) return;
+        if (e.target.closest('button')) return;
         clickLot(i);
       }; 
       r.appendChild(bt);
@@ -862,6 +850,8 @@ function triggerNextRenovation(i) {
   l.pendingRenoKey = nextUpgradeKey;
   l.renoProgress = 0;
   l.renoDuration = duration;
+  activeDrawerLot = null;
+  $("choice").innerHTML = "";
   msg("Started " + RENOVATIONS[nextUpgradeKey].name + " on Lot " + (i + 1) + " (" + Math.round(duration) + "s)...");
   draw();
 }
@@ -915,6 +905,20 @@ function showActionDrawer(i) {
 
   const isInfra = l.houseStyle && STYLES[l.houseStyle].category === "infra";
   const houseName = STYLES[l.houseStyle] ? STYLES[l.houseStyle].name : "Property";
+  const canUpgrade = l.st === "rented" && !isInfra && l.renovations.length < 3;
+  
+  let nextUpgradeName = "";
+  let nextUpgradeCost = 0;
+  if (!l.renovations.includes('paint')) {
+    nextUpgradeName = RENOVATIONS.paint.name;
+    nextUpgradeCost = RENOVATIONS.paint.cost;
+  } else if (!l.renovations.includes('roof')) {
+    nextUpgradeName = RENOVATIONS.roof.name;
+    nextUpgradeCost = RENOVATIONS.roof.cost;
+  } else if (!l.renovations.includes('luxury')) {
+    nextUpgradeName = RENOVATIONS.luxury.name;
+    nextUpgradeCost = RENOVATIONS.luxury.cost;
+  }
 
   c.innerHTML = `
     <div class="choice-drawer">
@@ -923,6 +927,12 @@ function showActionDrawer(i) {
         <div style="font-size:12px;color:var(--mut);">Valuation: <b style="color:#fff">${fmt(getLotValue(i))}</b></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${canUpgrade ? `
+          <button class="style-btn" id="drawer-upgrade" style="border-color:var(--gold);background:rgba(255,179,0,0.15)">
+            <b>👷 Upgrade: ${nextUpgradeName} (${fmt(nextUpgradeCost)})</b>
+            <small>Boost home value & rent</small>
+          </button>
+        ` : ''}
         ${l.st === "rented" && !isInfra ? `
           <button class="style-btn" id="drawer-list" style="border-color:var(--blue);background:rgba(41,182,246,0.15)">
             <b>🏷️ List for Sale</b>
@@ -944,15 +954,19 @@ function showActionDrawer(i) {
     </div>
   `;
 
+  if ($("drawer-upgrade")) {
+    $("drawer-upgrade").onclick = () => triggerNextRenovation(i);
+  }
+
   if ($("drawer-list")) {
-    $("drawer-listanalytical") || ($("drawer-list").onclick = () => {
+    $("drawer-list").onclick = () => {
       l.st = "listed";
       l.wait = 1.5 + Math.random() * 2;
       activeDrawerLot = null;
       c.innerHTML = "";
       msg("Listed Lot " + (i + 1) + " for sale! Rent income paused.");
       draw();
-    });
+    };
   }
 
   if ($("drawer-unlist")) {
@@ -1244,7 +1258,7 @@ function endGame(win) {
   $("go").onclick = () => { if (win) lv++; startLevel(); };
 }
 
-// Progressive Building Construction, Smooth Cartoon Dust & Realtor Sign
+// Progressive Building Construction, Cartoon Dust FX & Centered Realtor Signs
 function renderArt(l, idx) {
   const st = l.st;
   const styleKey = l.houseStyle;
@@ -1252,17 +1266,18 @@ function renderArt(l, idx) {
   if (st === "empty") {
     const isReduced = l.landPrice < 125;
     return `
-      <g transform="translate(18, 5) scale(1.35)">
-        <line x1="24" y1="12" x2="24" y2="38" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="24" y1="14" x2="38" y2="14" stroke="#5d4037" stroke-width="2"/>
+      <g transform="translate(25, 6) scale(1.35)">
+        <line x1="18" y1="12" x2="18" y2="38" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="18" y1="14" x2="32" y2="14" stroke="#5d4037" stroke-width="2"/>
         
-        <rect x="24" y="16" width="32" height="20" rx="2" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
-        <rect x="24" y="16" width="32" height="7" fill="#2e7d32"/>
-        <text x="40" y="21.5" font-size="4.5" font-weight="900" text-anchor="middle" fill="#ffffff">FOR SALE</text>
+        <rect x="18" y="16" width="32" height="20" rx="2" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
+        <rect x="18" y="16" width="32" height="7" fill="#2e7d32"/>
+        <text x="34" y="21.5" font-size="4.5" font-weight="900" text-anchor="middle" fill="#ffffff">FOR SALE</text>
+        <text x="34" y="30" font-size="6.5" font-weight="900" text-anchor="middle" fill="#1b5e20">${fmt(l.landPrice)}</text>
       </g>
       
       ${isReduced ? `
-        <g transform="translate(62, 14) rotate(-10)">
+        <g transform="translate(68, 22) rotate(-10)">
           <rect x="-14" y="-5" width="28" height="10" rx="2" fill="#d32f2f" stroke="#ffffff" stroke-width="1"/>
           <text x="0" y="2" font-size="4.5" font-weight="900" text-anchor="middle" fill="#ffffff" letter-spacing="0.2">REDUCED</text>
         </g>
@@ -1337,17 +1352,19 @@ function renderArt(l, idx) {
     `;
   }
 
-  // Star System for Upgrades
+  // Centered Star System for Upgrades
   if (l.renovations.length > 0) {
-    let starX = 50 - (l.renovations.length * 5);
+    let count = l.renovations.length;
+    let totalWidth = count * 12;
+    let startX = 50 - (totalWidth / 2) + 6;
     let starsStr = "";
-    for (let s = 0; s < l.renovations.length; s++) {
-      starsStr += `<text x="${starX + (s * 10)}" y="8" font-size="9" text-anchor="middle">⭐</text>`;
+    for (let s = 0; s < count; s++) {
+      starsStr += `<text x="${startX + (s * 12)}" y="8" font-size="10" text-anchor="middle">⭐</text>`;
     }
     completedBuildingSvg += `<g>${starsStr}</g>`;
   }
 
-  // Active Construction State with Smooth Cartoon Dust
+  // Active Construction State with Clean Cartoon Dust FX
   if (st === "working" || st === "reno_working") {
     const prog = st === "working" ? Math.max(0.05, Math.min(1, l.p)) : Math.max(0.05, Math.min(1, l.renoProgress));
     const revealY = 60 - (prog * 56);
@@ -1367,11 +1384,11 @@ function renderArt(l, idx) {
         ${completedBuildingSvg}
       </g>
       
-      <!-- Smooth Cartoon Dust Clouds -->
-      <g fill="#e2ded8" opacity="0.8">
-        <path class="dust-p1" d="M22,42 C16,42 14,35 20,31 C25,25 34,27 38,33 C44,33 46,40 40,44 Z"/>
-        <path class="dust-p2" d="M68,44 C60,44 58,36 65,31 C71,25 81,29 83,35 C89,38 88,46 78,46 Z"/>
-        <path class="dust-p3" d="M42,32 C36,28 36,19 44,17 C51,15 59,23 55,31 C49,35 45,35 42,32 Z"/>
+      <!-- Cartoon Billowing Dust FX -->
+      <g fill="#e8e2d8" opacity="0.8">
+        <path class="dust-c1" d="M22,42 C16,42 14,35 20,31 C25,25 34,27 38,33 C44,33 46,40 40,44 Z"/>
+        <path class="dust-c2" d="M68,44 C60,44 58,36 65,31 C71,25 81,29 83,35 C89,38 88,46 78,46 Z"/>
+        <path class="dust-c3" d="M42,32 C36,28 36,19 44,17 C51,15 59,23 55,31 C49,35 45,35 42,32 Z"/>
       </g>
 
       <g class="scaffold-line" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none">
@@ -1460,27 +1477,6 @@ function draw() {
       aiBadge.style.background = l.st === "ai_for_sale" ? "#ff6f00" : "#d84315";
     } else {
       aiBadge.style.display = "none";
-    }
-
-    // Contractor Helmet Upgrader Button
-    let contractorBtn = el.querySelector(".contractor-btn");
-    const isInfra = l.houseStyle && STYLES[l.houseStyle].category === "infra";
-    const canUpgrade = l.st === "rented" && !isInfra && l.renovations.length < 3;
-
-    if (canUpgrade) {
-      if (!contractorBtn) {
-        contractorBtn = document.createElement("div");
-        contractorBtn.className = "contractor-btn";
-        contractorBtn.title = "Click to trigger next available upgrade!";
-        contractorBtn.textContent = "👷";
-        el.appendChild(contractorBtn);
-        contractorBtn.onclick = (e) => {
-          e.stopPropagation();
-          triggerNextRenovation(i);
-        };
-      }
-    } else if (contractorBtn) {
-      contractorBtn.remove();
     }
 
     let offerOverlay = el.querySelector(".house-offer-overlay");
