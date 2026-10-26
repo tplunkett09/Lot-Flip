@@ -759,8 +759,7 @@ function buildScene() {
         <div class="pb"><i></i></div>
       `;
       bt.onclick = (e) => {
-        // Prevent toggle if clicking buttons inside the widget bar
-        if (e.target.closest('button')) return;
+        if (e.target.closest('button') || e.target.closest('.contractor-btn')) return;
         clickLot(i);
       }; 
       r.appendChild(bt);
@@ -902,7 +901,6 @@ function triggerNextRenovation(i) {
   const l = lots[i];
   if (STYLES[l.houseStyle].category === "infra") return msg("Infrastructure cannot be renovated.");
   
-  // Sequence order: paint -> roof -> luxury
   let nextUpgradeKey = null;
   let cost = 0;
   if (!l.renovations.includes('paint')) {
@@ -921,7 +919,7 @@ function triggerNextRenovation(i) {
   if (money < cost) return msg("Not enough money for " + RENOVATIONS[nextUpgradeKey].name + " (" + fmt(cost) + ").");
   money -= cost;
   l.renovations.push(nextUpgradeKey);
-  msg("Upgraded Lot " + (i + 1) with + RENOVATIONS[nextUpgradeKey].name + "!");
+  msg("Upgraded Lot " + (i + 1) + " with " + RENOVATIONS[nextUpgradeKey].name + "!");
   draw();
 }
 
@@ -958,7 +956,6 @@ function clickLot(i) {
   } else if (l.st === "owned") {
     showStyleSelector(i);
   } else if (l.st === "rented" || l.st === "listed" || l.st === "ready") {
-    // Toggle inline widget bar
     activeWidgetLot = (activeWidgetLot === i) ? null : i;
     draw();
   }
