@@ -82,6 +82,13 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes tk{0%{transform:translateX(100px)}15%,80%{transform:translateX(50px)}100%{transform:translateX(-45px)}}
 .shk{animation:shk .12s infinite}
 @keyframes shk{25%{transform:translate(-1px,0)}75%{transform:translate(1px,0)}}
+#bonus{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--gold)}
+.chip.ok{border-color:var(--acc);color:#a5d6a7}
+.chip.bad{border-color:var(--warn);color:#ef9a9a;text-decoration:line-through}
+.lgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lt{background:var(--hov);border:2px solid var(--line);border-radius:10px;min-height:78px;color:var(--text);font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.lt b{color:var(--gold)}.lt small{color:var(--mut);font-size:11px}.lt.cur{border-color:var(--gold)}.lt:disabled{opacity:.4}
 @media(prefers-reduced-motion:reduce){.smk,.flag,.spray,.scaf{animation:none}}
 .shop{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .b{background:var(--card);color:var(--text);border:2px solid var(--line);border-radius:10px;min-height:48px;padding:6px;font:inherit;font-size:13px;font-weight:700}
@@ -143,6 +150,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
     <button class="mb active" id="mt"><b>⏱️ Timed</b><small>Beat the clock</small></button>
     <button class="mb" id="mr"><b>🧘 Relaxed</b><small>No timer</small></button>
   </div>
+  <button class="mbtn blue" id="bl" style="display:none">🗺️ Levels & Stars</button>
   <button class="mbtn gold" id="bc" style="display:none">💾 Continue Saved Game</button>
   <button class="mbtn" id="go">Start Level 1</button>
 </div></div>
@@ -157,6 +165,11 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 
 <div class="ov" id="end" style="display:none"><div class="box" id="endbox"></div></div>
 
+<div class="ov" id="lvs" style="display:none"><div class="box" style="max-height:90vh;overflow-y:auto">
+  <h2>🗺️ Levels</h2><p id="lvsub"></p><div class="lgrid" id="lgrid"></div>
+  <button class="mbtn line" id="lback">← Back</button>
+</div></div>
+
 <script>
 const $=id=>document.getElementById(id),fmt=n=>"$"+Math.round(n);
 const S={
@@ -168,10 +181,10 @@ civic:{n:"Civic Center",cost:800,val:800,rm:0,dur:6,boost:.15,rev:15,cat:"i",ic:
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
 const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
 const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s"};
-const KEY="lot_flip_save_v2",BKEY="lot_flip_best_v1",PKEY="lot_flip_progress_v1",N=10;let asv=5;
+let KEY,BKEY,PKEY;const N=10;let asv=5;
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,ev={k:null,t:0,next:30},best={},tt;
-try{best=JSON.parse(store.get(BKEY)||"{}")}catch(e){}
+
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
 const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false});
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo").length;
@@ -210,7 +223,8 @@ function startLevel(){
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
 function snap(){return store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus}))}
 function autosave(){if(run&&!paused&&lots.length)snap()}
-function setProg(n){store.set(PKEY,JSON.stringify({lv:n,mode}))}
+function getProg(){try{return JSON.parse(store.get(PKEY))}catch(e){return null}}
+function setProg(n){const p=getProg();if(!p||n>p.lv)store.set(PKEY,JSON.stringify({lv:n,mode}))}
 function saveGame(){toast(snap()?"Game saved!":"Couldn’t save in this browser.")}
 function loadGame(){
   try{const d=JSON.parse(store.get(KEY));lv=d.lv;money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;bonus=d.bonus;
@@ -218,8 +232,8 @@ function loadGame(){
     ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();return true}catch(e){toast("Couldn’t load save.");return false}
 }
 let wipe=false;
-function updMenu(){wipe=false;let p=null,k=null;try{p=JSON.parse(store.get(PKEY));k=JSON.parse(store.get(KEY))}catch(e){}const s=!!(k||p);$("bc").textContent="▶ Continue · Level "+(k?k.lv:p?p.lv:1);$("bc").style.display=s?"flex":"none";$("go").textContent=s?"🎮 Start New Game":"Start Level 1"}
-function setMode(m){mode=m;$("mt").classList.toggle("active",m==="timed");$("mr").classList.toggle("active",m==="relaxed")}
+function updMenu(){wipe=false;let p=null,k=null;try{p=JSON.parse(store.get(PKEY));k=JSON.parse(store.get(KEY))}catch(e){}const s=!!(k||p);$("bc").textContent="▶ Continue · "+(mode==="timed"?"Timed":"Relaxed")+" Lv "+(k?k.lv:p?p.lv:1);$("bc").style.display=s?"flex":"none";$("bl").style.display=s?"flex":"none";$("go").textContent=s?"🎮 Start New Game":"Start Level 1"}
+function setMode(m){mode=m;KEY="lot_flip_save_v2_"+m;PKEY="lot_flip_progress_v1_"+m;BKEY="lot_flip_best_v1_"+m;best={};try{best=JSON.parse(store.get(BKEY)||"{}")}catch(e){}$("mt").classList.toggle("active",m==="timed");$("mr").classList.toggle("active",m==="relaxed");updMenu()}
 
 function fx(i,t){
   const e=els[i];if(!e)return;
@@ -319,9 +333,9 @@ function endGame(win){
   if(win){const st=1+(bonus&&bonus.done?1:0)+(elapsed<=90+lv*10?1:0);best[lv]=Math.max(best[lv]||0,st);store.set(BKEY,JSON.stringify(best));
     h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p>"}
   else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.</p>';
-  h+='<button class="mbtn" id="nx">'+(win?"Next Level":"Retry Level "+lv)+'</button><button class="mbtn line" id="em">🏠 Main Menu</button>';
+  h+='<button class="mbtn" id="nx">'+(win?"Next Level":"Retry Level "+lv)+'</button><button class="mbtn blue" id="el">🗺️ Levels</button><button class="mbtn line" id="em">🏠 Main Menu</button>';
   $("endbox").innerHTML=h;$("end").style.display="flex";
-  $("nx").onclick=()=>{if(win)lv++;startLevel()};
+  $("nx").onclick=()=>{if(win)lv++;startLevel()};$("el").onclick=()=>showLevels("end");
   $("em").onclick=()=>{$("end").style.display="none";$("ov").style.display="flex";updMenu()};
 }
 
@@ -358,6 +372,8 @@ function art(l,i){
   return s;
 }
 
+function chips(){if(!bonus)return"";const par=90+lv*10,pm=elapsed>par;
+  return '<span class="chip'+(money>=goal?' ok':'')+'">⭐ Reach '+fmt(goal)+'</span><span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span><span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>'}
 function draw(){
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
   $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent="Lv "+lv;
@@ -365,7 +381,7 @@ function draw(){
   $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs==="civic"&&l.st==="ready"?S.civic.rev/3:0),0).toFixed(1)+"/s";
   const pc=Math.min(100,Math.round(money/goal*100));$("gbar").style.width=pc+"%";$("pct").textContent=pc+"%";
   $("bonus").textContent=bonus?(bonus.done?"✔ Bonus complete!":"⭐ Bonus: build "+bonus.n+" "+S[bonus.k].n+(bonus.n>1?"s":"")+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r)):"";
-  $("evt").textContent=ev.k?EV[ev.k]+" ("+Math.ceil(ev.t)+"s)":"";
+  $("bonus").innerHTML=chips();$("evt").textContent=ev.k?EV[ev.k]+" ("+Math.ceil(ev.t)+"s)":"";
   $("hire").textContent="Hire Builder $300";$("hire").disabled=!run||money<300||builders>=5;
   $("tools").textContent="Better Tools $250 ("+speed+"×)";$("tools").disabled=!run||money<250||speed>=2;
   $("sellmode").textContent=sellMode?"Sell Mode: ON":"Sell Empty Lots";$("sellmode").classList.toggle("active",sellMode);
@@ -400,7 +416,19 @@ $("tools").onclick=()=>{if(money>=250){money-=250;speed+=.25;draw()}};
 $("sellmode").onclick=()=>{sellMode=!sellMode;toast(sellMode?"Sell Mode ON: tap a bought, unbuilt lot to sell it.":"Sell Mode OFF.");draw()};
 $("go").onclick=()=>{if($("bc").style.display!=="none"&&!wipe){wipe=true;$("go").textContent="⚠️ Tap again to erase progress";return}store.del(KEY);store.del(PKEY);lv=1;startLevel()};
 document.addEventListener("visibilitychange",()=>{if(document.hidden)autosave()});addEventListener("pagehide",autosave);
-updMenu();requestAnimationFrame(tick);
+function migrate(){try{const o=store.get("lot_flip_save_v2");if(o){const m=JSON.parse(o).mode||"timed";if(!store.get("lot_flip_save_v2_"+m))store.set("lot_flip_save_v2_"+m,o);store.del("lot_flip_save_v2")}
+  const p=store.get("lot_flip_progress_v1");if(p){const m=JSON.parse(p).mode||"timed";if(!store.get("lot_flip_progress_v1_"+m))store.set("lot_flip_progress_v1_"+m,p);store.del("lot_flip_progress_v1")}
+  const b=store.get("lot_flip_best_v1");if(b){if(!store.get("lot_flip_best_v1_timed"))store.set("lot_flip_best_v1_timed",b);store.del("lot_flip_best_v1")}}catch(e){}}
+let lvFrom="menu";
+function showLevels(from){lvFrom=from;const p=getProg(),mx=p?p.lv:1,g=$("lgrid");g.innerHTML="";
+  $("lvsub").textContent=(mode==="timed"?"⏱️ Timed":"🧘 Relaxed")+" · 3 stars = reach the goal, finish the bonus, beat the par time."+(store.get(KEY)?" Starting a level replaces your saved game in progress.":"");
+  for(let n=1;n<=mx+2;n++){const b=document.createElement("button"),ok=n<=mx,st=best[n]||0;b.className="lt"+(ok&&n===mx?" cur":"");b.disabled=!ok;
+    b.innerHTML=ok?"<b>Level "+n+"</b><span>"+"⭐".repeat(st)+"☆".repeat(3-st)+"</span><small>Goal "+fmt(1800+n*400)+"</small>":"<b>🔒 "+n+"</b>";
+    b.onclick=()=>{$("lvs").style.display="none";lv=n;startLevel()};g.appendChild(b)}
+  ["ov","end"].forEach(x=>$(x).style.display="none");$("lvs").style.display="flex"}
+$("lback").onclick=()=>{$("lvs").style.display="none";$(lvFrom==="end"?"end":"ov").style.display="flex"};
+$("bl").onclick=()=>showLevels("menu");
+migrate();setMode(mode);requestAnimationFrame(tick);
 </script>
 </body>
 </html>
