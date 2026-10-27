@@ -163,12 +163,12 @@ civic:{n:"Civic Center",cost:800,val:800,rm:0,dur:6,boost:.15,rev:15,cat:"i",ic:
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
 const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
 const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s"};
-const KEY="lot_flip_save_v2",BKEY="lot_flip_best_v1",N=10;
-const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}};
+const KEY="lot_flip_save_v2",BKEY="lot_flip_best_v1",PKEY="lot_flip_progress_v1",N=10;let asv=5;
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,ev={k:null,t:0,next:30},best={},tt;
 try{best=JSON.parse(store.get(BKEY)||"{}")}catch(e){}
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
-const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0});
+const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false});
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working").length;
 const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
@@ -199,17 +199,21 @@ function startLevel(){
   build();run=true;last=performance.now();
   ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("scene").classList.remove("pz");
   $("tl").textContent=mode==="timed"?"Time":"Elapsed";
-  toast("Level "+lv+": reach "+fmt(goal)+"!");draw();
+  toast("Level "+lv+": reach "+fmt(goal)+"!");setProg(lv);snap();asv=5;draw();
 }
 
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
-function saveGame(){toast(store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus}))?"Game saved!":"Couldn’t save in this browser.")}
+function snap(){return store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus}))}
+function autosave(){if(run&&!paused&&lots.length)snap()}
+function setProg(n){store.set(PKEY,JSON.stringify({lv:n,mode}))}
+function saveGame(){toast(snap()?"Game saved!":"Couldn’t save in this browser.")}
 function loadGame(){
   try{const d=JSON.parse(store.get(KEY));lv=d.lv;money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;bonus=d.bonus;
     ev={k:null,t:0,next:30};setMode(mode);build();run=true;paused=false;last=performance.now();
     ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();return true}catch(e){toast("Couldn’t load save.");return false}
 }
-function updMenu(){const s=!!store.get(KEY);$("bc").style.display=s?"flex":"none";$("go").textContent=s?"🎮 Start New Game":"Start Level 1"}
+let wipe=false;
+function updMenu(){wipe=false;let p=null,k=null;try{p=JSON.parse(store.get(PKEY));k=JSON.parse(store.get(KEY))}catch(e){}const s=!!(k||p);$("bc").textContent="▶ Continue · Level "+(k?k.lv:p?p.lv:1);$("bc").style.display=s?"flex":"none";$("go").textContent=s?"🎮 Start New Game":"Start Level 1"}
 function setMode(m){mode=m;$("mt").classList.toggle("active",m==="timed");$("mr").classList.toggle("active",m==="relaxed")}
 
 function fx(i,t){
@@ -264,14 +268,14 @@ function act(i,a){
   else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");money-=100;reset(l);closeSheet();toast("Property demolished.");draw()}
   else if(a==="accept")resolveOffer(i,true);
   else if(a==="reject")resolveOffer(i,false);
-  else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
+  else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;l.sp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
 }
 function startBuild(i,k){const s=S[k],l=lots[i];if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");money-=s.cost;l.hs=k;l.st="working";l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
 function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return toast("Fully upgraded!");if(busy()>=builders)return toast("All builders are busy!");if(money<R[k].cost)return toast("Need "+fmt(R[k].cost)+" for "+R[k].n+".");money-=R[k].cost;l.st="reno_working";l.pend=k;l.rp=0;l.rd=R[k].dur/speed;closeSheet();toast(R[k].n+" started…");draw()}
 function spawnOffer(i){const l=lots[i],t=7+Math.random()*3,f=ev.k==="boom"?1.25:ev.k==="crash"?.8:1;l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". Tap to respond.");draw()}
 function resolveOffer(i,acc){
   const l=lots[i];if(!l.offer)return;const p=l.offer.price;l.offer=null;
-  if(acc&&run){money+=p;l.st="sold";l.soldT=1.6;fx(i,"sold");pop(i,"+"+fmt(p),1);flash();toast("Sold Lot "+(i+1)+" for "+fmt(p)+"!")}
+  if(acc&&run){money+=p;l.st="sold";l.sp=p;l.soldT=1.6;fx(i,"sold");pop(i,"+"+fmt(p),1);flash();toast("Sold Lot "+(i+1)+" for "+fmt(p)+"!")}
   else{l.wait=2+Math.random()*3;toast("Offer rejected. Waiting for the next buyer…")}
   closeSheet();draw();
 }
@@ -279,15 +283,15 @@ function resolveOffer(i,acc){
 function tick(now){
   const dt=Math.min(.1,(now-last)/1000);last=now;
   if(run&&!paused){
-    elapsed+=dt;if(mode==="timed")timeVal-=dt;
+    elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
     if(ev.k){ev.t-=dt;if(ev.t<=0){ev.k=null;toast("Market is back to normal.")}}
     else{ev.next-=dt;if(ev.next<=0){ev.k=["boom","crash","rent"][Math.floor(Math.random()*3)];ev.t=15;ev.next=35+Math.random()*20;toast(EV[ev.k])}}
     lots.forEach((l,i)=>{
       if(l.hs==="civic"&&l.st==="ready"){l.rt-=dt;if(l.rt<=0){l.rt=3;money+=S.civic.rev;pop(i,"+"+fmt(S.civic.rev))}}
       l.pt-=dt;if(l.pt<=0){l.pt=5+Math.random()*3;l.land=Math.round(Math.min(240,Math.max(90,l.land+(Math.random()-.5)*40)))}
-      if(l.st==="ai_owned"){l.aiW-=dt;if(l.aiW<=0){l.st="ai_for_sale";l.aiP=Math.round(val(i)*(.85+Math.random()*.3));l.aiT=12+Math.random()*8;l.wait=2;toast("🏠 Lot "+(i+1)+" ("+S[l.hs].n+") is for sale: "+fmt(l.aiP))}}
+      if(l.st==="ai_owned"){l.aiW-=dt;if(l.aiW<=0){l.st="ai_for_sale";l.disc=false;if(l.sp){l.disc=Math.random()<.08;l.aiP=Math.round(l.sp*(l.disc?.8+Math.random()*.2:1+Math.random()*.25))}else l.aiP=Math.round(val(i)*(.85+Math.random()*.3));l.aiT=12+Math.random()*8;l.wait=2;toast("🏠 Lot "+(i+1)+" ("+S[l.hs].n+") is for sale: "+fmt(l.aiP))}}
       else if(l.st==="ai_for_sale"){l.aiT-=dt;l.wait-=dt;
-        if(l.wait<=0){l.wait=2+Math.random()*2;l.aiP=Math.round(Math.max(100,l.aiP+(Math.random()-.48)*35));if(sel===i)sheet(i)}
+        if(l.wait<=0){l.wait=2+Math.random()*2;l.aiP=Math.round(Math.max(100,l.sp?l.sp*(l.disc?.8:1):0,l.aiP+(Math.random()-.48)*35));if(sel===i)sheet(i)}
         if(l.aiT<=0){l.st="ai_owned";l.aiW=10+Math.random()*12;if(sel===i)closeSheet()}}
       else if(l.st==="rented"){l.rent=rentOf(i);l.rt-=dt;if(l.rt<=0){l.rt+=3;money+=l.rent;pop(i,"+"+fmt(l.rent))}}
       else if(l.st==="working"){l.p+=dt/l.dur;if(l.p>=1){l.p=0;l.rt=3;if(S[l.hs].cat==="i"){l.st="ready";toast(S[l.hs].n+" finished on Lot "+(i+1)+"!")}else{l.st="rented";l.rent=rentOf(i);toast(S[l.hs].n+" finished! Renting for "+fmt(l.rent)+"/3s.")}fx(i,"done")}}
@@ -295,7 +299,7 @@ function tick(now){
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt;if(l.wait<=0)spawnOffer(i)}
         else{l.offer.ttl-=dt;if(l.offer.ttl<=0){l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired.");if(sel===i)sheet(i)}}}
-      else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0)reset(l)}
+      else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
     if(bonus&&!bonus.done){bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
     if(money>=goal){run=false;endGame(true)}else if(mode==="timed"&&timeVal<=0){run=false;endGame(false)}
@@ -305,7 +309,7 @@ function tick(now){
 }
 
 function endGame(win){
-  closeSheet();let h;
+  closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;
   if(win){const st=1+(bonus&&bonus.done?1:0)+(elapsed<=90+lv*10?1:0);best[lv]=Math.max(best[lv]||0,st);store.set(BKEY,JSON.stringify(best));
     h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p>"}
   else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.</p>';
@@ -375,13 +379,14 @@ function draw(){
 }
 
 $("mt").onclick=()=>setMode("timed");$("mr").onclick=()=>setMode("relaxed");
-$("bp").onclick=togglePause;$("br").onclick=togglePause;$("bs").onclick=saveGame;
+$("bp").onclick=()=>{togglePause();if(paused)snap()};$("br").onclick=togglePause;$("bs").onclick=saveGame;
 $("bm").onclick=()=>{paused=false;run=false;closeSheet();$("pz").style.display="none";$("ov").style.display="flex";updMenu()};
-$("bc").onclick=loadGame;
+$("bc").onclick=()=>{if(store.get(KEY)&&loadGame())return;try{const p=JSON.parse(store.get(PKEY));if(p){lv=p.lv;setMode(p.mode);startLevel()}}catch(e){}};
 $("hire").onclick=()=>{if(money>=300){money-=300;builders++;draw()}};
 $("tools").onclick=()=>{if(money>=250){money-=250;speed+=.25;draw()}};
 $("sellmode").onclick=()=>{sellMode=!sellMode;toast(sellMode?"Sell Mode ON: tap a bought, unbuilt lot to sell it.":"Sell Mode OFF.");draw()};
-$("go").onclick=()=>{lv=1;startLevel()};
+$("go").onclick=()=>{if($("bc").style.display!=="none"&&!wipe){wipe=true;$("go").textContent="⚠️ Tap again to erase progress";return}store.del(KEY);store.del(PKEY);lv=1;startLevel()};
+document.addEventListener("visibilitychange",()=>{if(document.hidden)autosave()});addEventListener("pagehide",autosave);
 updMenu();requestAnimationFrame(tick);
 </script>
 </body>
