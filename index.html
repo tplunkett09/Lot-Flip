@@ -78,6 +78,10 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes sc{50%{opacity:.4}}
 .stamp{animation:st .45s cubic-bezier(.2,1.6,.4,1);transform-box:fill-box;transform-origin:center}
 @keyframes st{from{transform:scale(3);opacity:0}}
+.tk{animation:tk linear both}
+@keyframes tk{0%{transform:translateX(100px)}15%,80%{transform:translateX(50px)}100%{transform:translateX(-45px)}}
+.shk{animation:shk .12s infinite}
+@keyframes shk{25%{transform:translate(-1px,0)}75%{transform:translate(1px,0)}}
 @media(prefers-reduced-motion:reduce){.smk,.flag,.spray,.scaf{animation:none}}
 .shop{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .b{background:var(--card);color:var(--text);border:2px solid var(--line);border-radius:10px;min-height:48px;padding:6px;font:inherit;font-size:13px;font-weight:700}
@@ -147,6 +151,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
   <h2>⏸ Paused</h2><p>Timers and construction are frozen.</p>
   <button class="mbtn" id="br">▶ Resume</button>
   <button class="mbtn blue" id="bs">💾 Save Game</button>
+  <button class="mbtn gold" id="brs">🔄 Restart Level</button>
   <button class="mbtn line" id="bm">🏠 Main Menu</button>
 </div></div>
 
@@ -169,7 +174,7 @@ let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],e
 try{best=JSON.parse(store.get(BKEY)||"{}")}catch(e){}
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
 const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false});
-const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working").length;
+const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo").length;
 const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
 function adj(i){const a=[],c=i<5?i:i-5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);a.push(i<5?i+5:i-5);return a}
@@ -230,7 +235,7 @@ function tapLot(i){
   if(sellMode){if(l.st==="owned"){money+=l.land;pop(i,"+"+fmt(l.land),1);toast("Sold unbuilt lot for "+fmt(l.land));reset(l);flash()}else toast("Sell Mode only works on bought, unbuilt lots.");draw();return}
   if(l.st==="empty"){if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");money-=l.land;l.st="owned";toast("Lot bought! Tap it to build.");draw();return}
   if(l.st==="ai_owned")return toast("A neighbor lives here. Watch for it to go up for sale!");
-  if(l.st==="working"||l.st==="reno_working")return toast("Under construction…");
+  if(l.st==="demo")return toast("Demolition in progress…");if(l.st==="working"||l.st==="reno_working")return toast("Under construction…");
   if(l.st==="sold")return;
   sheet(i);
 }
@@ -265,7 +270,7 @@ function act(i,a){
   else if(a==="unlist"&&l.st==="listed"){l.st="rented";l.offer=null;l.rent=rentOf(i);l.rt=3;closeSheet();toast("Unlisted. Rent resumed.");draw()}
   else if(a==="demo")sheet(i,true);
   else if(a==="demo0")sheet(i);
-  else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");money-=100;reset(l);closeSheet();toast("Property demolished.");draw()}
+  else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");if(busy()>=builders)return toast("All builders are busy!");money-=100;l.offer=null;l.st="demo";l.dp=0;l.dd=8/speed;closeSheet();toast("Demolition crew on the way…");draw()}
   else if(a==="accept")resolveOffer(i,true);
   else if(a==="reject")resolveOffer(i,false);
   else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;l.sp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
@@ -299,6 +304,7 @@ function tick(now){
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt;if(l.wait<=0)spawnOffer(i)}
         else{l.offer.ttl-=dt;if(l.offer.ttl<=0){l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired.");if(sel===i)sheet(i)}}}
+      else if(l.st==="demo"){l.dp+=dt/l.dd;if(l.dp>=1){reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
     if(bonus&&!bonus.done){bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
@@ -336,6 +342,12 @@ function art(l,i){
   else if(k==="civic")s+='<rect x="16" y="22" width="68" height="24" fill="#eceff1" '+T+'/><path d="M24 24v22M38 24v22M60 24v22M74 24v22" stroke="#b0bec5" stroke-width="5"/><polygon points="12,22 50,8 88,22" fill="#78909c" '+T+'/><polygon points="12,22 50,8 50,22" fill="#fff" opacity=".13"/><rect x="40" y="32" width="20" height="14" fill="#4e342e"/><rect x="10" y="44" width="80" height="4" fill="#cfd8dc"/><path d="M50 8V1" stroke="#37474f" stroke-width="1.5"/><polygon class="flag" points="50,1 58,4 50,7" fill="#e53935"/>';
   if(["ranch","colonial","mansion","civic"].includes(k))s+=BUSH;
   const c=l.reno.length;for(let q=0;q<c;q++)s+=STAR(50-(c-1)*7+q*14,7);
+  if(st==="demo"){
+    const p=Math.min(1,l.dp),dd=l.dd||8,q=Math.max(0,Math.min(1,(p-.2)/.55)),ry=q*52,h=Math.min(9,Math.max(0,(p-.25)*14));
+    const deb=p>.2&&p<.85?'<rect x="22" y="52" width="6" height="3" fill="#8d6e63"/><rect x="34" y="53" width="8" height="3" fill="#a1887f"/><rect x="60" y="52" width="6" height="3" fill="#6d4c41"/><rect x="72" y="53" width="7" height="3" fill="#8d6e63"/>':"";
+    const dust=p>.15&&p<.85?'<circle class="smk" cx="30" cy="50" r="5" fill="#cfcfcf"/><circle class="smk s2" cx="55" cy="50" r="6" fill="#cfcfcf"/><circle class="smk" cx="75" cy="50" r="5" fill="#cfcfcf"/>':"";
+    return '<defs><clipPath id="d'+i+'"><rect x="0" y="'+ry+'" width="100" height="'+(65-ry)+'"/></clipPath></defs><g class="'+(p>.15&&p<.8?"shk":"")+'"><g clip-path="url(#d'+i+')">'+s+'</g></g>'+deb+dust+'<g class="tk" style="animation-duration:'+dd+'s;animation-delay:-'+(p*dd).toFixed(2)+'s"><rect x="10" y="38" width="22" height="10" rx="1" fill="#f9a825" stroke="#3e2723"/><polygon points="12,38 16,'+(38-h)+' 24,'+(37-h)+' 30,38" fill="#8d6e63"/><rect x="0" y="41" width="10" height="7" rx="1" fill="#f57f17" stroke="#3e2723"/><rect x="1.5" y="42.5" width="5" height="3" fill="#bde3f5"/><circle cx="6" cy="49" r="3" fill="#263238"/><circle cx="17" cy="49" r="3" fill="#263238"/><circle cx="27" cy="49" r="3" fill="#263238"/></g>';
+  }
   if(st==="working"||st==="reno_working"){
     const pr=Math.max(.05,Math.min(1,st==="working"?l.p:l.rp)),ry=60-pr*56,rh=pr*56;
     return '<defs><clipPath id="c'+i+'"><rect x="0" y="'+ry+'" width="100" height="'+rh+'"/></clipPath></defs><rect x="10" y="46" width="80" height="8" rx="2" fill="#8d6e63" stroke="#5d4037"/><g clip-path="url(#c'+i+')">'+s+'</g><g class="scaf" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none"><rect x="12" y="'+Math.max(10,ry-4)+'" width="76" height="'+Math.min(40,rh+6)+'" rx="2"/><path d="M12 '+ry+'h76M30 10v40M70 10v40"/></g><text class="hm" x="68" y="'+Math.max(24,ry+6)+'" font-size="16">🔨</text>';
@@ -363,11 +375,11 @@ function draw(){
     e.classList.toggle("purchased",l.st!=="empty"&&!ai);e.classList.toggle("ai-owned",ai);
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
     const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
-    const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.p)*15),l.st==="empty"?l.land:0,l.reno.join(),l.paint].join("|");
+    const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),l.st==="empty"?l.land:0,l.reno.join(),l.paint].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
     let lb="",pb=0;const sn=l.hs?S[l.hs].n.split(" ")[0]:"";
     if(l.st==="empty")lb="Buy "+fmt(l.land);else if(l.st==="owned")lb=sellMode?"Sell lot":"Build here";
-    else if(l.st==="working"){lb=sn+"…";pb=l.p}else if(l.st==="reno_working"){lb="Upgrading…";pb=l.rp}
+    else if(l.st==="working"){lb=sn+"…";pb=l.p}else if(l.st==="reno_working"){lb="Upgrading…";pb=l.rp}else if(l.st==="demo"){lb="Demolishing…";pb=l.dp}
     else if(l.st==="ready")lb=sn+" ✔";else if(l.st==="rented")lb=fmt(rentOf(i))+"/3s";
     else if(l.st==="listed")lb=l.offer?"💰 "+fmt(l.offer.price):"On market";else if(l.st==="ai_owned")lb=sn;
     else if(l.st==="ai_for_sale")lb="Buy "+fmt(l.aiP);else lb="Sold ✔";
@@ -379,7 +391,8 @@ function draw(){
 }
 
 $("mt").onclick=()=>setMode("timed");$("mr").onclick=()=>setMode("relaxed");
-$("bp").onclick=()=>{togglePause();if(paused)snap()};$("br").onclick=togglePause;$("bs").onclick=saveGame;
+$("bp").onclick=()=>{rc=false;$("brs").textContent="🔄 Restart Level";togglePause();if(paused)snap()};$("br").onclick=togglePause;$("bs").onclick=saveGame;let rc=false;
+$("brs").onclick=()=>{if(!rc){rc=true;$("brs").textContent="⚠️ Tap again to restart";return}rc=false;$("brs").textContent="🔄 Restart Level";startLevel()};
 $("bm").onclick=()=>{paused=false;run=false;closeSheet();$("pz").style.display="none";$("ov").style.display="flex";updMenu()};
 $("bc").onclick=()=>{if(store.get(KEY)&&loadGame())return;try{const p=JSON.parse(store.get(PKEY));if(p){lv=p.lv;setMode(p.mode);startLevel()}}catch(e){}};
 $("hire").onclick=()=>{if(money>=300){money-=300;builders++;draw()}};
