@@ -233,6 +233,9 @@ hospital:{n:"Hospital",cost:1800,val:1900,rm:0,dur:10,boost:.2,cat:"i",ic:"🏥"
 shopping:{n:"Shopping Center",cost:2500,val:2400,rm:0,dur:12,rev:45,cat:"i",ic:"🛍️",unlock:20,d:"Generates $45 every 3 seconds · traffic can lower nearby home values"},
 fire:{n:"Fire Station",cost:1600,val:1600,rm:0,dur:9,streetBoost:.15,cat:"i",ic:"🚒",unlock:24,d:"+15% home value along its street"},
 bank:{n:"Bank",cost:3000,val:3000,rm:0,dur:14,rev:50,cat:"i",ic:"🏦",unlock:30,d:"Generates $50 every 3 seconds"}};
+const BUILDING_LIMITS={park:3,apartment:3,pool:2,civic:1,school:1,hospital:1,shopping:1,fire:1,bank:1};
+const buildingCount=k=>lots.filter(l=>l&&l.hs===k&&!['sold','ai_owned','ai_for_sale'].includes(l.st)).length;
+const buildingLimit=k=>BUILDING_LIMITS[k]??Infinity;
 const unlocked=k=>lv>=(S[k]?.unlock||1);
 const availableBuildings=()=>Object.keys(S).filter(unlocked);
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
@@ -362,7 +365,7 @@ function closeSheet(){sel=null;$("sheet").innerHTML="";document.body.classList.r
 function sheet(i,conf){
   const l=lots[i];sel=i;document.body.classList.add("so");
   const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl='<button class="opt x" data-a="close">Close</button>';let h="";
-  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy()))+'<div class="opts">'+Object.keys(S).map(k=>{const locked=!unlocked(k);return '<button class="opt'+(locked||money<S[k].cost?" dim":"")+'" data-a="'+k+'"'+(locked?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
+  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy()))+'<div class="opts">'+Object.keys(S).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;return '<button class="opt'+(locked||capped||money<S[k].cost?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":(Number.isFinite(limit)?count+"/"+limit+" built · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
   else if(l.st==="ai_for_sale"){h=hd("Buy "+S[l.hs].n+" · Lot "+(i+1),"Asking "+fmt(l.aiP)+" · Value "+fmt(val(i)))+'<div class="opts"><button class="opt ok" data-a="buyai">🛒 Buy & Auto-Rent</button>'+cl+"</div>"}
   else if(conf){h=hd("⚠️ Demolish Lot "+(i+1)+"?","Costs $100 and clears the property.")+'<div class="opts"><button class="opt no" data-a="demo2">Confirm Demolish</button><button class="opt x" data-a="demo0">Cancel</button></div>'}
   else if(["rented","listed","ready"].includes(l.st)){
@@ -393,7 +396,7 @@ function act(i,a){
   else if(a==="reject")resolveOffer(i,false);
   else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;l.sp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
 }
-function startBuild(i,k){const s=S[k],l=lots[i];if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");money-=s.cost;l.hs=k;l.st="working";sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
+function startBuild(i,k){const s=S[k],l=lots[i];if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");const limit=buildingLimit(k);if(buildingCount(k)>=limit)return toast("Maximum reached: "+limit+" "+s.n+(limit===1?" allowed.":"s allowed."));if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");money-=s.cost;l.hs=k;l.st="working";sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
 function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return toast("Fully upgraded!");if(busy()>=builders)return toast("All builders are busy!");if(money<R[k].cost)return toast("Need "+fmt(R[k].cost)+" for "+R[k].n+".");money-=R[k].cost;l.st="reno_working";sfx.build();l.pend=k;l.rp=0;l.rd=R[k].dur/speed;closeSheet();toast(R[k].n+" started…");draw()}
 function spawnOffer(i){const l=lots[i],t=7+Math.random()*3,f=ev.k==="boom"?1.25:ev.k==="crash"?.8:1;l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};startBuyerArrival(i);sfx.offer();buzz(30);toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". A buyer is pulling in to look at the house.");draw()}
 function resolveOffer(i,acc){
@@ -575,16 +578,19 @@ function trafficGeometry(i){
   const svg=lot.querySelector("svg"),roads=[...sc.querySelectorAll(".road")];if(!svg||!roads.length)return null;
   const scRect=sc.getBoundingClientRect(),lotRect=lot.getBoundingClientRect(),road=(i>=10?(roads[1]||roads[0]):roads[0]),roadRect=road.getBoundingClientRect();
   const ox=scRect.left+sc.clientLeft,oy=scRect.top+sc.clientTop,row=Math.floor(i/5),streetAbove=row>0;
-  const business=!!(lots[i]&&lots[i].hs&&S[lots[i].hs]&&S[lots[i].hs].cat==="i");
-  // Match the CSS parking pad exactly: centered horizontally, with its center measured
-  // from the lot's street-facing edge. Cars therefore finish inside the visible stall.
+  // Match the CSS parking-pad center exactly. Business bays are wider and
+  // visitor cars use opposite halves rather than stopping on the lawn.
   const isBusiness=!!(lots[i]&&hasBusinessParking(lots[i]));
   const side=isBusiness&&traffic[i]&&traffic[i].visitor?(traffic[i].side||-1):0;
-  const driveX=lotRect.left-ox+lotRect.width/2+side*13;
-  const parkY=streetAbove
-    ? lotRect.top-oy+(business?20:20)
-    : lotRect.bottom-oy-(business?37:39);
-  return {x:driveX,parkY,roadY:roadRect.top-oy+roadRect.height/2,road,
+  const padWidth=isBusiness?68:40;
+  // Keep the driveway centerline fixed. Only the final parking position is
+  // offset into one of the business bays, after the car has entered the pad.
+  const driveX=lotRect.left-ox+lotRect.width/2;
+  const parkX=driveX+(isBusiness?side*21:0);
+  const padTop=streetAbove?3:(isBusiness?lotRect.height-20-34:lotRect.height-24-26);
+  const padHeight=isBusiness?34:26;
+  const parkY=lotRect.top-oy+padTop+padHeight/2;
+  return {x:driveX,parkX,parkY,roadY:roadRect.top-oy+roadRect.height/2,road,
     towardLot:streetAbove?1:-1,width:sc.clientWidth,height:sc.clientHeight};
 }
 function trafficColor(i){const colors=["#d84343","#2878bd","#f5b82e","#f3f4ef","#8e5cb7","#279b86"];return colors[(i+2)%colors.length]}
@@ -592,14 +598,16 @@ function trafficColor(i){const colors=["#d84343","#2878bd","#f5b82e","#f3f4ef","
 function roadSpeedFor(g,dir){const roads=[...$("scene").querySelectorAll(".road")],ri=Math.max(0,roads.indexOf(g.road));return 42+ri*4+(dir===1?0:3)}
 function trafficRoute(g,dir,kind){
   const laneY=g.roadY+(dir===1?-8:8),entryY=g.roadY+g.towardLot*28;
+  const parkShift=Math.abs((g.parkX??g.x)-g.x);
   if(kind==="arrive"||kind==="retreat"){
     const startX=dir===1?-28:g.width+28,approachX=g.x-dir*20;
-    const approach=Math.abs(approachX-startX),turn=Math.hypot(g.x-approachX,entryY-laneY),driveway=Math.abs(g.parkY-entryY);
-    return {laneY,entryY,startX,approachX,approach,turn,driveway,total:approach+turn+driveway};
+    const approach=Math.abs(approachX-startX),turn=Math.hypot(g.x-approachX,entryY-laneY);
+    const driveway=Math.abs(g.parkY-entryY);
+    return {laneY,entryY,startX,approachX,approach,turn,driveway,parkShift,total:approach+turn+driveway+parkShift};
   }
   const exitX=g.x+dir*20,endX=dir===1?g.width+28:-28;
   const driveway=Math.abs(entryY-g.parkY),turn=Math.hypot(exitX-g.x,laneY-entryY),road=Math.abs(endX-exitX);
-  return {laneY,entryY,exitX,endX,driveway,turn,road,total:driveway+turn+road};
+  return {laneY,entryY,exitX,endX,driveway,turn,road,parkShift,total:parkShift+driveway+turn+road};
 }
 function trafficDuration(g,dir,kind,fraction=1){return Math.max(.15,trafficRoute(g,dir,kind).total*fraction/roadSpeedFor(g,dir))}
 // Driveway traffic must use the lane beside the lot, independent of horizontal position.
@@ -629,11 +637,13 @@ function startBuyerArrival(i){
   traffic[i]={kind:"arrive",t:0,dur,dir,color:trafficColor(i)};
 }
 function startBusinessVisitorArrival(i){
-  const l=lots[i],g=trafficGeometry(i);
-  if(!g||!visitorBusiness(l)||traffic[i])return;
-  const dir=nearSideLaneDirection(g);
+  const l=lots[i];if(!visitorBusiness(l)||traffic[i])return;
   const side=(l.visitorSide||-1);l.visitorSide=-side;
-  traffic[i]={kind:"arrive",t:0,dur:trafficDuration(g,dir,"arrive"),dir,color:trafficColor(i),visitor:true,side,stay:13+Math.random()*12};
+  // Set the visitor/side before measuring geometry so the route endpoint,
+  // driveway approach, and parked position all use the same parking bay.
+  traffic[i]={kind:"arrive",t:0,dur:1,dir:1,color:trafficColor(i),visitor:true,side,stay:13+Math.random()*12};
+  const g=trafficGeometry(i);if(!g){traffic[i]=null;return;}
+  const dir=nearSideLaneDirection(g);traffic[i].dir=dir;traffic[i].dur=trafficDuration(g,dir,"arrive");
 }
 function startDemoTruck(i){
   const g=trafficGeometry(i);if(!g)return;
@@ -679,24 +689,26 @@ function trafficPose(tr,g,timeOverride){
   const t=timeOverride==null?tr.t:timeOverride;
   const p=tr.kind==="retreat"?tr.reverseStart*(1-Math.min(1,t/tr.dur)):Math.max(0,Math.min(1,t/tr.dur));
   const dir=tr.dir,toward=g.towardLot,metrics=trafficRoute(g,dir,(tr.kind==="arrive"||tr.kind==="retreat")?"arrive":"depart");
-  const laneY=metrics.laneY,entryY=metrics.entryY;
+  const laneY=metrics.laneY,entryY=metrics.entryY,parkX=g.parkX??g.x,shift=metrics.parkShift;
   if(tr.kind==="arrive"||tr.kind==="retreat"){
-    let x,y,a;
     const {approachX,startX,approach,turn,driveway,total}=metrics;
-    const p1=approach/total,p2=(approach+turn)/total;
+    const p1=approach/total,p2=(approach+turn)/total,p3=(approach+turn+driveway)/total;
     const startA=dir===1?0:180,endA=dir===1?toward*90:180-toward*90;
+    let x,y,a;
     if(p<p1){const u=easeTraffic(p/p1);x=startX+(approachX-startX)*u;y=laneY;a=startA}
-    else if(p<p2){const u=easeTraffic((p-p1)/(p2-p1));x=approachX+dir*20*u;y=laneY+(entryY-laneY)*u;a=startA+angleDelta(startA,endA)*u}
-    else{const u=driveway>0?easeTraffic((p-p2)/(1-p2)):1;x=g.x;y=entryY+(g.parkY-entryY)*u;a=endA}
+    else if(p<p2){const u=easeTraffic((p-p1)/(p2-p1));x=approachX+(g.x-approachX)*u;y=laneY+(entryY-laneY)*u;a=startA+angleDelta(startA,endA)*u}
+    else if(p<p3){const u=driveway>0?easeTraffic((p-p2)/(p3-p2)):1;x=g.x;y=entryY+(g.parkY-entryY)*u;a=endA}
+    else{const u=shift>0?easeTraffic((p-p3)/(1-p3)):1;x=g.x+(parkX-g.x)*u;y=g.parkY;a=endA}
     if(tr.kind==="retreat")a+=180;
     return {x,y,a};
   }
   const {driveway,turn,road,exitX,endX,total}=metrics;
-  const p1=driveway/total,p2=(driveway+turn)/total;
+  const p0=shift/total,p1=(shift+driveway)/total,p2=(shift+driveway+turn)/total;
   const exitA=-toward*90,endA=dir===1?0:180;
   let x,y,a;
-  if(p<p1){const u=easeTraffic(p/p1);x=g.x;y=g.parkY+(entryY-g.parkY)*u;a=exitA}
-  else if(p<p2){const u=easeTraffic((p-p1)/(p2-p1));x=g.x+dir*20*u;y=entryY+(laneY-entryY)*u;a=exitA+angleDelta(exitA,endA)*u}
+  if(p<p0){const u=shift>0?easeTraffic(p/p0):1;x=parkX+(g.x-parkX)*u;y=g.parkY;a=exitA}
+  else if(p<p1){const u=driveway>0?easeTraffic((p-p0)/(p1-p0)):1;x=g.x;y=g.parkY+(entryY-g.parkY)*u;a=exitA}
+  else if(p<p2){const u=easeTraffic((p-p1)/(p2-p1));x=g.x+(exitX-g.x)*u;y=entryY+(laneY-entryY)*u;a=exitA+angleDelta(exitA,endA)*u}
   else{const u=road>0?easeTraffic((p-p2)/(1-p2)):1;x=exitX+(endX-exitX)*u;y=laneY;a=endA}
   return {x,y,a};
 }
@@ -998,7 +1010,7 @@ function renderTraffic(){
     if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
     if(tr.kind==="parked"){
       const g=trafficGeometry(i);if(!g)return;const endA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
-      tr.el.style.left=(g.x-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";return;
+      tr.el.style.left=((g.parkX??g.x)-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";return;
     }
     const g=trafficGeometry(i);if(!g)return;
     const pose=trafficPose(tr,g);tr.el.style.left=(pose.x-10)+"px";tr.el.style.top=(pose.y-5.625)+"px";tr.el.style.transform="rotate("+pose.a+"deg)";
