@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Lot Flip</title>
 <style>
 :root{--bg:#1a2417;--card:#263622;--hov:#32462d;--text:#f0f7ec;--mut:#a0b894;--acc:#4caf50;--line:#3a5032;--warn:#e53935;--gold:#ffb300;--blue:#29b6f6;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--text);font:14px/1.3 system-ui,-apple-system,sans-serif;display:flex;justify-content:center;padding:6px;touch-action:manipulation}
+html,body{overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
 body.so{padding-bottom:300px}
 #app{width:100%;max-width:920px;display:flex;flex-direction:column;gap:6px}
 header{display:flex;justify-content:space-between;align-items:center;padding:0 2px}
@@ -89,6 +90,11 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .lt{background:var(--hov);border:2px solid var(--line);border-radius:10px;min-height:78px;color:var(--text);font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .lt b{color:var(--gold)}.lt small{color:var(--mut);font-size:11px}.lt.cur{border-color:var(--gold)}.lt:disabled{opacity:.4}
+.truck{position:absolute;left:0;top:0;width:40px;height:20px;z-index:60;pointer-events:none;will-change:transform}
+
+#tut{background:rgba(255,179,0,.15);border:1px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;text-align:center;animation:tp 1.6s infinite}
+#tut:empty{display:none}
+@keyframes tp{50%{border-color:var(--acc)}}
 @media(prefers-reduced-motion:reduce){.smk,.flag,.spray,.scaf{animation:none}}
 .shop{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .b{background:var(--card);color:var(--text);border:2px solid var(--line);border-radius:10px;min-height:48px;padding:6px;font:inherit;font-size:13px;font-weight:700}
@@ -122,7 +128,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 </head>
 <body>
 <div id="app">
-  <header><h1>🏡 Lot Flip</h1><span id="lvl">Lv 1</span></header>
+  <header><h1>🏡 Lot Flip</h1><span style="display:flex;gap:6px;align-items:center"><button class="pbtn" id="snd" style="min-height:32px;padding:0 10px">🔊</button><span id="lvl">Lv 1</span></span></header>
   <div class="ribbon">
     <div class="ri"><span>Money</span><b id="money">$0</b></div>
     <div class="ri"><span>Goal</span><b id="goal">$0</b></div>
@@ -132,7 +138,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
     <button class="pbtn" id="bp">⏸ Pause</button>
   </div>
   <div class="prog"><div class="pl"><span>Goal Progress</span><span id="pct">0%</span></div><div class="bar"><i id="gbar"></i></div></div>
-  <div id="bonus"></div><div id="evt"></div>
+  <div id="bonus"></div><div id="evt"></div><div id="tut"></div>
   <div id="scene"></div>
   <div class="shop">
     <button class="b" id="hire"></button>
@@ -145,10 +151,10 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 
 <div class="ov" id="ov"><div class="box">
   <h2>🏡 Lot Flip</h2>
-  <p>Buy plots, build homes that <b>auto-rent</b>, add Parks and Civic Centers, buy neighbors’ houses and flip them. Hit each level’s goal, finish the bonus task, and earn up to ⭐⭐⭐!</p>
+  <p>Buy plots, build homes that <b>auto-rent</b>, add Parks, Public Pools, Schools & Community Hubs, buy neighbors’ houses and flip them. Hit each level’s goal, fulfill community targets, and earn ⭐⭐⭐!</p>
   <div class="modes">
     <button class="mb active" id="mt"><b>⏱️ Timed</b><small>Beat the clock</small></button>
-    <button class="mb" id="mr"><b>🧘 Relaxed</b><small>No timer</small></button>
+    <button class="mb" id="mr"><b>🧘 Relaxed</b><small>No timer + community goals</small></button>
   </div>
   <button class="mbtn blue" id="bl" style="display:none">🗺️ Levels & Stars</button>
   <button class="mbtn gold" id="bc" style="display:none">💾 Continue Saved Game</button>
@@ -177,12 +183,19 @@ ranch:{n:"Ranch",cost:250,val:450,rm:1,dur:3,boost:0,cat:"h",ic:"🏡",d:"Value 
 colonial:{n:"Colonial",cost:450,val:800,rm:1.3,dur:5,boost:.15,cat:"h",ic:"🏛️",d:"Value $800 · +15% nearby"},
 mansion:{n:"Mansion",cost:800,val:1500,rm:1.8,dur:8,boost:.3,cat:"h",ic:"🏰",d:"Value $1500 · +30% nearby"},
 park:{n:"Park",cost:400,val:400,rm:0,dur:4,boost:.25,rb:.2,cat:"i",ic:"🌳",d:"+25% value, +20% rent nearby"},
-civic:{n:"Civic Center",cost:800,val:800,rm:0,dur:6,boost:.15,rev:15,cat:"i",ic:"🏛️",d:"+15% all lots · +$15/3s"}};
+civic:{n:"Civic Center",cost:800,val:800,rm:0,dur:6,boost:.15,rev:15,cat:"i",ic:"🏛️",d:"+15% all lots · +$15/3s"},
+pool:{n:"Public Pool",cost:550,val:550,rm:0,dur:5,boost:.2,rb:.15,cat:"i",ic:"🏊",d:"+20% value, +15% rent nearby"},
+hospital:{n:"Hospital",cost:1100,val:1200,rm:0,dur:7,boost:.2,rev:25,cat:"i",ic:"🏥",d:"+20% all lots · +$25/3s"},
+library:{n:"Library",cost:600,val:600,rm:0,dur:5,boost:.18,rev:12,cat:"i",ic:"📚",d:"+18% value · +$12/3s"},
+museum:{n:"Museum",cost:850,val:900,rm:0,dur:6,boost:.2,rev:18,cat:"i",ic:"🖼️",d:"+20% value · +$18/3s"},
+theatre:{n:"Theatre",cost:750,val:800,rm:0,dur:5,boost:.15,rev:20,cat:"i",ic:"🎭",d:"+15% value · +$20/3s"},
+grocery:{n:"Grocery Store",cost:500,val:600,rm:0,dur:4,boost:.1,rev:22,cat:"i",ic:"🛒",d:"Local shop · +$22/3s"},
+gasstation:{n:"Gas Station",cost:450,val:500,rm:0,dur:4,boost:-.15,penalty:true,cat:"i",ic:"⛽",d:"⚠️ Decreases nearby mansion/colonial value!"}};
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
 const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
 const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s"};
-let KEY,BKEY,PKEY;const N=10;let asv=5;
-const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+let KEY,BKEY,PKEY,N=10;let asv=5;
+const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
 let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,ev={k:null,t:0,next:30},best={},tt;
 
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
@@ -190,34 +203,51 @@ const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,lan
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo").length;
 const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
-function adj(i){const a=[],c=i<5?i:i-5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);a.push(i<5?i+5:i-5);return a}
-const civicB=()=>lots.filter(l=>l.hs==="civic"&&done(l)).length*S.civic.boost;
-function nBoost(i){let b=civicB();adj(i).forEach(n=>{const l=lots[n];if(l&&done(l)&&S[l.hs].boost>0&&l.hs!=="civic")b+=S[l.hs].boost});return b}
-function parkRB(i){let b=0;adj(i).forEach(n=>{const l=lots[n];if(l&&l.hs==="park"&&done(l))b+=S.park.rb});return b}
+function adj(i){const a=[],c=i%5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);if(i>=5)a.push(i-5);if(i+5<lots.length)a.push(i+5);return a}
+const civicB=()=>lots.filter(l=>(l.hs==="civic"||l.hs==="hospital")&&done(l)).length*0.15;
+function nBoost(i){
+  let b=civicB();
+  adj(i).forEach(n=>{
+    const l=lots[n];
+    if(l&&done(l)&&S[l.hs]){
+      if(S[l.hs].boost) b+=S[l.hs].boost;
+      if(S[l.hs].penalty && (lots[i].hs==="mansion"||lots[i].hs==="colonial")) b-=0.2; // penalty for gas station near mansion/colonial
+    }
+  });
+  return Math.max(-0.4, b);
+}
+function parkRB(i){let b=0;adj(i).forEach(n=>{const l=lots[n];if(l&&(l.hs==="park"||l.hs==="pool")&&done(l))b+=0.15});return b}
 function val(i){const l=lots[i];return Math.round((l.land+(l.hs?S[l.hs].val:0)+l.reno.reduce((a,k)=>a+R[k].vb,0))*(1+nBoost(i)))}
 function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working")return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1))}
 
 function build(){
-  const sc=$("scene");sc.innerHTML="";
+  const sc=$("scene");sc.innerHTML="";trk={};
   const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div");d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 65"></svg><div class="act"></div><div class="pb"><i></i></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
   const rd=document.createElement("div");rd.className="road";
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div><span class="ct">🚗</span><span class="cb">🚙</span>';
-  sc.append(row(0),rd,row(5));els=[...sc.querySelectorAll(".lot")];
+  sc.append(row(0),rd,row(5));if(lots.length>10){const r2=rd.cloneNode(true);sc.append(r2,row(10))}els=[...sc.querySelectorAll(".lot")];
 }
 
 function startLevel(){
-  lots=Array.from({length:N},mkLot);closeSheet();
-  money=600+lv*50;goal=1800+lv*400;total=mode==="timed"?Math.max(90,180-lv*8):0;timeVal=total;elapsed=0;
+  N=lv>=4?15:10;tutOn=lv===1&&!store.get("lot_flip_tut");lots=Array.from({length:N},mkLot);closeSheet();
+  money=600+lv*50;goal=Math.round((1800+lv*400)*(lv>=4?1.25:1));total=mode==="timed"?Math.max(90,180-lv*8):0;timeVal=total;elapsed=0;
   const n=Math.min(4,2+Math.floor(lv/3)),ix=[],ht=["ranch","colonial","mansion"];
   while(ix.length<n){const r=Math.floor(Math.random()*N);if(!ix.includes(r))ix.push(r)}
   ix.forEach(k=>{const l=lots[k];l.st="ai_owned";l.hs=ht[Math.floor(Math.random()*3)];l.aiW=3+Math.random()*6});
-  const ks=Object.keys(S),k=ks[Math.floor(Math.random()*ks.length)];
-  bonus={k,n:S[k].cat==="h"?Math.min(3,1+Math.floor(lv/3)):1,r:200+lv*50,c:0,done:false};
+  
+  // Choose bonus goal: relaxed mode or higher levels can require community buildings
+  const ks=Object.keys(S);
+  let k=ks[Math.floor(Math.random()*ks.length)];
+  if(lv>=3 && Math.random()<0.5) {
+    const civicKeys = ["park","civic","pool","hospital","library","museum","theatre","grocery"];
+    k = civicKeys[Math.floor(Math.random()*civicKeys.length)];
+  }
+  bonus={k,n:S[k].cat==="h"?Math.min(3,1+Math.floor(lv/3)):(lv>=3?2:1),r:200+lv*50,c:0,done:false};
   builders=2;speed=1;sellMode=false;paused=false;ev={k:null,t:0,next:30};
   build();run=true;last=performance.now();
   ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("scene").classList.remove("pz");
   $("tl").textContent=mode==="timed"?"Time":"Elapsed";
-  toast("Level "+lv+": reach "+fmt(goal)+"!");setProg(lv);snap();asv=5;draw();
+  toast("Level "+lv+": reach "+fmt(goal)+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();
 }
 
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
@@ -227,7 +257,7 @@ function getProg(){try{return JSON.parse(store.get(PKEY))}catch(e){return null}}
 function setProg(n){const p=getProg();if(!p||n>p.lv)store.set(PKEY,JSON.stringify({lv:n,mode}))}
 function saveGame(){toast(snap()?"Game saved!":"Couldn’t save in this browser.")}
 function loadGame(){
-  try{const d=JSON.parse(store.get(KEY));lv=d.lv;money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;bonus=d.bonus;
+  try{const d=JSON.parse(store.get(KEY));lv=d.lv;money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;bonus=d.bonus;
     ev={k:null,t:0,next:30};setMode(mode);build();run=true;paused=false;last=performance.now();
     ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();return true}catch(e){toast("Couldn’t load save.");return false}
 }
@@ -235,17 +265,33 @@ let wipe=false;
 function updMenu(){wipe=false;let p=null,k=null;try{p=JSON.parse(store.get(PKEY));k=JSON.parse(store.get(KEY))}catch(e){}const s=!!(k||p);$("bc").textContent="▶ Continue · "+(mode==="timed"?"Timed":"Relaxed")+" Lv "+(k?k.lv:p?p.lv:1);$("bc").style.display=s?"flex":"none";$("bl").style.display=s?"flex":"none";$("go").textContent=s?"🎮 Start New Game":"Start Level 1"}
 function setMode(m){mode=m;KEY="lot_flip_save_v2_"+m;PKEY="lot_flip_progress_v1_"+m;BKEY="lot_flip_best_v1_"+m;best={};try{best=JSON.parse(store.get(BKEY)||"{}")}catch(e){}$("mt").classList.toggle("active",m==="timed");$("mr").classList.toggle("active",m==="relaxed");updMenu()}
 
+let snd=store.get("lot_flip_snd")!=="0",AC=null;
+function ctx(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC}
+function tone(f,d,ty,v,dl,f2){if(!snd)return;try{const c=ctx(),t=c.currentTime+(dl||0),o=c.createOscillator(),g=c.createGain();o.type=ty||"sine";o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v||.08,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d)}catch(e){}}
+function noise(d,v){if(!snd)return;try{const c=ctx(),n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource(),g=c.createGain();g.gain.value=v||.1;s.buffer=b;s.connect(g);g.connect(c.destination);s.start()}catch(e){}}
+function buzz(ms){if(!snd)return;const H=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Haptics;if(H){try{H.impact({style:ms>=50?"HEAVY":ms>=25?"MEDIUM":"LIGHT"})}catch(e){}return}if(navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}}
+const sfx={
+ tap(){tone(520,.06,"triangle",.05)},
+ coin(){tone(880,.09,"square",.04);tone(1320,.12,"square",.04,.07)},
+ build(){tone(220,.08,"square",.05,0,160);tone(240,.08,"square",.05,.12,170)},
+ done(){tone(523,.12,"triangle",.08);tone(659,.12,"triangle",.08,.1);tone(784,.2,"triangle",.08,.2)},
+ sell(){[523,659,784,1047].forEach((f,k)=>tone(f,.15,"triangle",.09,k*.08))},
+ offer(){tone(740,.1,"sine",.08);tone(988,.16,"sine",.08,.1)},
+ crash(){noise(.5,.18);tone(90,.4,"sawtooth",.08,0,40)},
+ win(){[523,659,784,1047,1319].forEach((f,k)=>tone(f,.2,"triangle",.1,k*.1))},
+ lose(){[440,370,311,262].forEach((f,k)=>tone(f,.25,"sawtooth",.06,k*.15))}
+};
 function fx(i,t){
   const e=els[i];if(!e)return;
-  if(t==="done"){const s=e.querySelector("svg");s.classList.remove("pi");void s.getBoundingClientRect();s.classList.add("pi");
+  if(t==="done"){sfx.done();buzz(20);const s=e.querySelector("svg");s.classList.remove("pi");void s.getBoundingClientRect();s.classList.add("pi");
     for(let k=0;k<7;k++){const d=document.createElement("span");d.className="dust";d.style.setProperty("--x",((k-3)*9)+"px");e.appendChild(d);setTimeout(()=>d.remove(),700)}}
-  if(t==="sold")for(let k=0;k<18;k++){const c=document.createElement("span");c.className="cf";c.style.cssText="--x:"+((Math.random()-.5)*130)+"px;--y:"+(-30-Math.random()*50)+"px;left:50%;top:55%;background:hsl("+Math.random()*360+",85%,60%)";e.appendChild(c);setTimeout(()=>c.remove(),900)}
+  if(t==="sold"){sfx.sell();buzz(60)}if(t==="sold")for(let k=0;k<18;k++){const c=document.createElement("span");c.className="cf";c.style.cssText="--x:"+((Math.random()-.5)*130)+"px;--y:"+(-30-Math.random()*50)+"px;left:50%;top:55%;background:hsl("+Math.random()*360+",85%,60%)";e.appendChild(c);setTimeout(()=>c.remove(),900)}
 }
 function pop(i,t,big){const e=els[i];if(!e)return;const s=document.createElement("span");s.className="pop"+(big?" big":"");s.textContent=t;e.appendChild(s);setTimeout(()=>s.remove(),1100)}
 function flash(){const m=$("money");m.classList.remove("flash");void m.offsetWidth;m.classList.add("flash")}
 
 function tapLot(i){
-  if(!run||paused)return;const l=lots[i],e=els[i];e.classList.add("tap");setTimeout(()=>e.classList.remove("tap"),180);
+  if(!run||paused)return;const l=lots[i],e=els[i];e.classList.add("tap");setTimeout(()=>e.classList.remove("tap"),180);sfx.tap();
   if(sellMode){if(l.st==="owned"){money+=l.land;pop(i,"+"+fmt(l.land),1);toast("Sold unbuilt lot for "+fmt(l.land));reset(l);flash()}else toast("Sell Mode only works on bought, unbuilt lots.");draw();return}
   if(l.st==="empty"){if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");money-=l.land;l.st="owned";toast("Lot bought! Tap it to build.");draw();return}
   if(l.st==="ai_owned")return toast("A neighbor lives here. Watch for it to go up for sale!");
@@ -284,17 +330,17 @@ function act(i,a){
   else if(a==="unlist"&&l.st==="listed"){l.st="rented";l.offer=null;l.rent=rentOf(i);l.rt=3;closeSheet();toast("Unlisted. Rent resumed.");draw()}
   else if(a==="demo")sheet(i,true);
   else if(a==="demo0")sheet(i);
-  else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");if(busy()>=builders)return toast("All builders are busy!");money-=100;l.offer=null;l.st="demo";l.dp=0;l.dd=8/speed;closeSheet();toast("Demolition crew on the way…");draw()}
+  else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");if(busy()>=builders)return toast("All builders are busy!");money-=100;l.offer=null;l.st="demo";l.dp=0;l.dd=8/speed;sfx.crash();closeSheet();toast("Demolition crew on the way…");draw()}
   else if(a==="accept")resolveOffer(i,true);
   else if(a==="reject")resolveOffer(i,false);
   else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;l.sp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
 }
-function startBuild(i,k){const s=S[k],l=lots[i];if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");money-=s.cost;l.hs=k;l.st="working";l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
-function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return toast("Fully upgraded!");if(busy()>=builders)return toast("All builders are busy!");if(money<R[k].cost)return toast("Need "+fmt(R[k].cost)+" for "+R[k].n+".");money-=R[k].cost;l.st="reno_working";l.pend=k;l.rp=0;l.rd=R[k].dur/speed;closeSheet();toast(R[k].n+" started…");draw()}
-function spawnOffer(i){const l=lots[i],t=7+Math.random()*3,f=ev.k==="boom"?1.25:ev.k==="crash"?.8:1;l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". Tap to respond.");draw()}
+function startBuild(i,k){const s=S[k],l=lots[i];if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");money-=s.cost;l.hs=k;l.st="working";sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
+function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return toast("Fully upgraded!");if(busy()>=builders)return toast("All builders are busy!");if(money<R[k].cost)return toast("Need "+fmt(R[k].cost)+" for "+R[k].n+".");money-=R[k].cost;l.st="reno_working";sfx.build();l.pend=k;l.rp=0;l.rd=R[k].dur/speed;closeSheet();toast(R[k].n+" started…");draw()}
+function spawnOffer(i){const l=lots[i],t=7+Math.random()*3,f=ev.k==="boom"?1.25:ev.k==="crash"?.8:1;l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};sfx.offer();buzz(30);toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". Tap to respond.");draw()}
 function resolveOffer(i,acc){
   const l=lots[i];if(!l.offer)return;const p=l.offer.price;l.offer=null;
-  if(acc&&run){money+=p;l.st="sold";l.sp=p;l.soldT=1.6;fx(i,"sold");pop(i,"+"+fmt(p),1);flash();toast("Sold Lot "+(i+1)+" for "+fmt(p)+"!")}
+  if(acc&&run){money+=p;l.st="sold";l.sp=p;l.soldT=1.6;fx(i,"sold");pop(i,"+"+fmt(p),1);flash();if(tutOn){tutOn=false;store.set("lot_flip_tut","1");setTimeout(()=>toast("🎓 Tutorial done! Chase the ⭐ tags for 3 stars."),2500)}toast("Sold Lot "+(i+1)+" for "+fmt(p)+"!")}
   else{l.wait=2+Math.random()*3;toast("Offer rejected. Waiting for the next buyer…")}
   closeSheet();draw();
 }
@@ -306,7 +352,9 @@ function tick(now){
     if(ev.k){ev.t-=dt;if(ev.t<=0){ev.k=null;toast("Market is back to normal.")}}
     else{ev.next-=dt;if(ev.next<=0){ev.k=["boom","crash","rent"][Math.floor(Math.random()*3)];ev.t=15;ev.next=35+Math.random()*20;toast(EV[ev.k])}}
     lots.forEach((l,i)=>{
-      if(l.hs==="civic"&&l.st==="ready"){l.rt-=dt;if(l.rt<=0){l.rt=3;money+=S.civic.rev;pop(i,"+"+fmt(S.civic.rev))}}
+      if((l.hs==="civic"||l.hs==="hospital"||l.hs==="library"||l.hs==="museum"||l.hs==="theatre"||l.hs==="grocery")&&l.st==="ready"){
+        l.rt-=dt;if(l.rt<=0){l.rt=3;const rev=S[l.hs].rev||15;money+=rev;pop(i,"+"+fmt(rev))}
+      }
       l.pt-=dt;if(l.pt<=0){l.pt=5+Math.random()*3;l.land=Math.round(Math.min(240,Math.max(90,l.land+(Math.random()-.5)*40)))}
       if(l.st==="ai_owned"){l.aiW-=dt;if(l.aiW<=0){l.st="ai_for_sale";l.disc=false;if(l.sp){l.disc=Math.random()<.08;l.aiP=Math.round(l.sp*(l.disc?.8+Math.random()*.2:1+Math.random()*.25))}else l.aiP=Math.round(val(i)*(.85+Math.random()*.3));l.aiT=12+Math.random()*8;l.wait=2;toast("🏠 Lot "+(i+1)+" ("+S[l.hs].n+") is for sale: "+fmt(l.aiP))}}
       else if(l.st==="ai_for_sale"){l.aiT-=dt;l.wait-=dt;
@@ -321,7 +369,12 @@ function tick(now){
       else if(l.st==="demo"){l.dp+=dt/l.dd;if(l.dp>=1){reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
-    if(bonus&&!bonus.done){bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
+    if(bonus&&!bonus.done){
+      if(S[bonus.k].cat==="h" || S[bonus.k].cat==="i"){
+        bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;
+      }
+      if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}
+    }
     if(money>=goal){run=false;endGame(true)}else if(mode==="timed"&&timeVal<=0){run=false;endGame(false)}
     draw();
   }
@@ -329,9 +382,15 @@ function tick(now){
 }
 
 function endGame(win){
-  closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;
-  if(win){const st=1+(bonus&&bonus.done?1:0)+(elapsed<=90+lv*10?1:0);best[lv]=Math.max(best[lv]||0,st);store.set(BKEY,JSON.stringify(best));
-    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p>"}
+  closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;win?sfx.win():sfx.lose();
+  if(win){
+    // High levels require community buildings for 3rd star
+    const hasCommunityBuilding = lots.some(l => l.hs && S[l.hs].cat === 'i' && done(l));
+    const communityReqMet = lv < 3 || hasCommunityBuilding;
+    const st=1+(bonus&&bonus.done?1:0)+((elapsed<=90+lv*10 || mode==="relaxed")&&communityReqMet?1:0);
+    best[lv]=Math.max(best[lv]||0,st);store.set(BKEY,JSON.stringify(best));
+    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ Goal · ⭐ Bonus · ⭐ '+(lv>=3?'Community building integrated':'Speed par')+'<br>Best: '+best[lv]+"/3</p>";
+  }
   else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.</p>';
   h+='<button class="mbtn" id="nx">'+(win?"Next Level":"Retry Level "+lv)+'</button><button class="mbtn blue" id="el">🗺️ Levels</button><button class="mbtn line" id="em">🏠 Main Menu</button>';
   $("endbox").innerHTML=h;$("end").style.display="flex";
@@ -354,7 +413,15 @@ function art(l,i){
   else if(k==="mansion")s+='<rect x="12" y="20" width="22" height="26" fill="'+b+'" stroke="#3e2723"/><polygon points="10,20 23,10 36,20" fill="'+r+'" stroke="#3e2723"/><rect x="66" y="20" width="22" height="26" fill="'+b+'" stroke="#3e2723"/><polygon points="64,20 77,10 90,20" fill="'+r+'" stroke="#3e2723"/><rect x="28" y="16" width="44" height="30" fill="'+b+'" '+T+'/><rect x="12" y="40" width="76" height="6" fill="#000" opacity=".08"/><polygon points="25,17 50,5 75,17" fill="'+r+'" '+T+'/><polygon points="25,17 50,5 50,17" fill="#fff" opacity=".13"/><rect x="40" y="30" width="20" height="16" fill="#fff" stroke="#3e2723"/><rect x="44" y="32" width="6" height="14" fill="#4e342e"/><rect x="50" y="32" width="6" height="14" fill="#4e342e"/><path d="M38 30h24" stroke="#3e2723" stroke-width="1.5"/>'+WN(16,24,14,10)+WN(70,24,14,10)+WN(34,20,12,9)+WN(54,20,12,9);
   else if(k==="park")s='<rect x="6" y="10" width="88" height="48" rx="8" fill="#5cb85c" stroke="#2e7d32" stroke-width="1.5"/><path d="M6 52Q50 36 94 52" stroke="#e0cfa8" stroke-width="5" fill="none"/>'+TREE(18,22)+TREE(82,22)+TREE(70,14)+'<ellipse cx="46" cy="34" rx="12" ry="5" fill="#b0bec5" stroke="#546e7a"/><ellipse cx="46" cy="33" rx="9" ry="3.5" fill="#4fc3f7"/><path class="spray" d="M46 33v-9M46 27q-4 0-5 5M46 27q4 0 5 5" stroke="#e1f5fe" stroke-width="1.2" fill="none"/><rect x="68" y="40" width="16" height="3" fill="#795548"/><rect x="69" y="43" width="2" height="4" fill="#5d4037"/><rect x="81" y="43" width="2" height="4" fill="#5d4037"/>';
   else if(k==="civic")s+='<rect x="16" y="22" width="68" height="24" fill="#eceff1" '+T+'/><path d="M24 24v22M38 24v22M60 24v22M74 24v22" stroke="#b0bec5" stroke-width="5"/><polygon points="12,22 50,8 88,22" fill="#78909c" '+T+'/><polygon points="12,22 50,8 50,22" fill="#fff" opacity=".13"/><rect x="40" y="32" width="20" height="14" fill="#4e342e"/><rect x="10" y="44" width="80" height="4" fill="#cfd8dc"/><path d="M50 8V1" stroke="#37474f" stroke-width="1.5"/><polygon class="flag" points="50,1 58,4 50,7" fill="#e53935"/>';
-  if(["ranch","colonial","mansion","civic"].includes(k))s+=BUSH;
+  else if(k==="pool")s+='<rect x="12" y="18" width="76" height="30" rx="6" fill="#81d4fa" stroke="#0288d1" stroke-width="2"/><ellipse cx="50" cy="33" rx="26" ry="10" fill="#03a9f4"/><rect x="36" y="22" width="28" height="6" fill="#fff" rx="2"/><path d="M42 22v-4M58 22v-4" stroke="#fff" stroke-width="2"/>';
+  else if(k==="hospital")s+='<rect x="16" y="16" width="68" height="30" fill="#fafafa" '+T+'/><rect x="42" y="22" width="16" height="24" fill="#e53935"/><rect x="32" y="28" width="36" height="12" fill="#e53935"/>';
+  else if(k==="library")s+='<rect x="16" y="20" width="68" height="26" fill="#d7ccc8" '+T+'/><path d="M24 20v26M36 20v26M64 20v26M76 20v26" stroke="#8d6e63" stroke-width="3"/><polygon points="12,20 50,8 88,20" fill="#5d4037" '+T+'/>';
+  else if(k==="museum")s+='<rect x="16" y="20" width="68" height="26" fill="#cfd8dc" '+T+'/><path d="M22 20v26M34 20v26M46 20v26M58 20v26M70 20v26" stroke="#90a4ae" stroke-width="3"/><polygon points="12,20 50,10 88,20" fill="#455a64" '+T+'/>';
+  else if(k==="theatre")s+='<rect x="16" y="20" width="68" height="26" fill="#ab47bc" '+T+'/><polygon points="12,20 50,10 88,20" fill="#7b1fa2" '+T+'/><circle cx="50" cy="32" r="8" fill="#ffeb3b"/><text x="50" y="35" font-size="10" text-anchor="middle">🎭</text>';
+  else if(k==="grocery")s+='<rect x="16" y="20" width="68" height="26" fill="#81c784" '+T+'/><rect x="22" y="26" width="56" height="14" fill="#fff" stroke="#3e2723"/><text x="50" y="36" font-size="8" font-weight="900" text-anchor="middle" fill="#d32f2f">MARKET</text>';
+  else if(k==="gasstation")s+='<rect x="16" y="20" width="68" height="26" fill="#ffb74d" '+T+'/><rect x="24" y="26" width="22" height="14" fill="#e53935"/><text x="35" y="36" font-size="7" font-weight="900" text-anchor="middle" fill="#fff">GAS</text><circle cx="72" cy="33" r="8" fill="#d32f2f"/><text x="72" y="36" font-size="8" text-anchor="middle" fill="#fff">⛽</text>';
+
+  if(["ranch","colonial","mansion","civic","hospital","library","museum","theatre","grocery","gasstation"].includes(k))s+=BUSH;
   const c=l.reno.length;for(let q=0;q<c;q++)s+=STAR(50-(c-1)*7+q*14,7);
   if(st==="demo"){
     const p=Math.min(1,l.dp),dd=l.dd||8,q=Math.max(0,Math.min(1,(p-.2)/.55)),ry=q*52,h=Math.min(9,Math.max(0,(p-.25)*14));
@@ -372,16 +439,46 @@ function art(l,i){
   return s;
 }
 
-function chips(){if(!bonus)return"";const par=90+lv*10,pm=elapsed>par;
-  return '<span class="chip'+(money>=goal?' ok':'')+'">⭐ Reach '+fmt(goal)+'</span><span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span><span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>'}
+let tutOn=false;
+function tutText(){if(!tutOn)return"";const has=s=>lots.some(l=>s.includes(l.st));
+  if(lots.some(l=>l.offer))return"👆 A buyer made an offer! Tap that lot, then Accept.";
+  if(has(["listed"]))return"⏳ Listed! Wait for an offer to appear on the lot.";
+  if(has(["rented"]))return"💵 It earns rent on its own. To flip it, tap the house and choose List for Sale.";
+  if(has(["working"]))return"🔨 Building… your builders need a few seconds.";
+  if(has(["owned"]))return"🏗️ Tap your lot, then pick a house to build.";
+  return"👆 Tap a lot marked FOR SALE to buy it."}
+let trk={};
+function truck(i,l){
+  const sc=$("scene");let t=trk[i];
+  if(!t||!t.el.isConnected){const el=document.createElement("div");el.className="truck";el.innerHTML='<svg viewBox="0 0 40 20" width="40" height="20" style="overflow:visible"><rect x="14" y="3" width="24" height="11" rx="1" fill="#f9a825" stroke="#3e2723"/><polygon class="pile" points="16,3 20,3 30,2 36,3" fill="#8d6e63"/><rect x="1" y="6" width="13" height="8" rx="1.5" fill="#f57f17" stroke="#3e2723"/><rect x="2.5" y="7.5" width="5" height="3.5" fill="#bde3f5"/><circle cx="7" cy="16" r="3.2" fill="#263238"/><circle cx="21" cy="16" r="3.2" fill="#263238"/><circle cx="32" cy="16" r="3.2" fill="#263238"/></svg>';sc.appendChild(el);t=trk[i]={el,pile:el.querySelector(".pile")}}
+  const S=sc.getBoundingClientRect(),L=els[i].getBoundingClientRect(),rd=sc.querySelector(".road").getBoundingClientRect();
+  const ox=S.left+sc.clientLeft,oy=S.top+sc.clientTop,W=sc.clientWidth,top=i<5,sg=top?1:-1;
+  const ly=rd.top-oy+rd.height*.7,lx=L.left-ox+L.width/2,py=top?L.bottom-oy-22:L.top-oy+22,p=Math.min(1,l.dp);
+  let x,y,r;
+  if(p<.22){x=W+30+(lx-W-30)*(p/.22);y=ly;r=0}
+  else if(p<.32){const u=(p-.22)/.1;x=lx;y=ly+(py-ly)*u;r=sg*14*Math.sin(Math.PI*u)}
+  else if(p<.7){x=lx+Math.sin(p*90)*.8;y=py+Math.cos(p*70)*.6;r=0}
+  else if(p<.8){const u=(p-.7)/.1;x=lx;y=py+(ly-py)*u;r=sg*14*Math.sin(Math.PI*u)}
+  else{x=lx-(lx+40)*((p-.8)/.2);y=ly;r=0}
+  t.el.style.transform="translate("+(x-20)+"px,"+(y-10)+"px) rotate("+r+"deg)";
+  const h=Math.min(8,Math.max(0,(p-.34)*24));t.pile.setAttribute("points","16,3 20,"+(3-h)+" 30,"+(2-h)+" 36,3");
+}
+function chips(){
+  if(!bonus)return"";
+  const par=90+lv*10,pm=elapsed>par;
+  const hasComm = lots.some(l => l.hs && S[l.hs].cat === 'i' && done(l));
+  return '<span class="chip'+(money>=goal?' ok':'')+'">⭐ Reach '+fmt(goal)+'</span>'+
+         '<span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span>'+
+         (lv>=3?'<span class="chip'+(hasComm?' ok':' bad')+'">'+(hasComm?'✔ Community building active':'⭐ Build a Community Facility')+'</span>':'<span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>');
+}
 function draw(){
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
   $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent="Lv "+lv;
   $("bld").textContent=(builders-busy())+"/"+builders;
-  $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs==="civic"&&l.st==="ready"?S.civic.rev/3:0),0).toFixed(1)+"/s";
+  $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs&&S[l.hs].rev&&l.st==="ready"?S[l.hs].rev/3:0),0).toFixed(1)+"/s";
   const pc=Math.min(100,Math.round(money/goal*100));$("gbar").style.width=pc+"%";$("pct").textContent=pc+"%";
   $("bonus").textContent=bonus?(bonus.done?"✔ Bonus complete!":"⭐ Bonus: build "+bonus.n+" "+S[bonus.k].n+(bonus.n>1?"s":"")+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r)):"";
-  $("bonus").innerHTML=chips();$("evt").textContent=ev.k?EV[ev.k]+" ("+Math.ceil(ev.t)+"s)":"";
+  $("tut").textContent=tutText();$("bonus").innerHTML=chips();$("evt").textContent=ev.k?EV[ev.k]+" ("+Math.ceil(ev.t)+"s)":"";
   $("hire").textContent="Hire Builder $300";$("hire").disabled=!run||money<300||builders>=5;
   $("tools").textContent="Better Tools $250 ("+speed+"×)";$("tools").disabled=!run||money<250||speed>=2;
   $("sellmode").textContent=sellMode?"Sell Mode: ON":"Sell Empty Lots";$("sellmode").classList.toggle("active",sellMode);
@@ -389,7 +486,7 @@ function draw(){
     const e=els[i];if(!e)return;
     const ai=l.st==="ai_owned"||l.st==="ai_for_sale";
     e.classList.toggle("purchased",l.st!=="empty"&&!ai);e.classList.toggle("ai-owned",ai);
-    const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
+    const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp!==0?"block":"none";bb.textContent=(bp>0?"+":"")+bp+"%";bb.style.background=bp>0?"rgba(171,71,188,.95)":"rgba(229,57,53,.95)";
     const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
     const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),l.st==="empty"?l.land:0,l.reno.join(),l.paint].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
@@ -415,20 +512,22 @@ $("hire").onclick=()=>{if(money>=300){money-=300;builders++;draw()}};
 $("tools").onclick=()=>{if(money>=250){money-=250;speed+=.25;draw()}};
 $("sellmode").onclick=()=>{sellMode=!sellMode;toast(sellMode?"Sell Mode ON: tap a bought, unbuilt lot to sell it.":"Sell Mode OFF.");draw()};
 $("go").onclick=()=>{if($("bc").style.display!=="none"&&!wipe){wipe=true;$("go").textContent="⚠️ Tap again to erase progress";return}store.del(KEY);store.del(PKEY);lv=1;startLevel()};
-document.addEventListener("visibilitychange",()=>{if(document.hidden)autosave()});addEventListener("pagehide",autosave);
+document.addEventListener("visibilitychange",()=>{if(document.hidden){autosave();if(run&&!paused)togglePause()}});addEventListener("contextmenu",e=>e.preventDefault());addEventListener("pagehide",autosave);
 function migrate(){try{const o=store.get("lot_flip_save_v2");if(o){const m=JSON.parse(o).mode||"timed";if(!store.get("lot_flip_save_v2_"+m))store.set("lot_flip_save_v2_"+m,o);store.del("lot_flip_save_v2")}
   const p=store.get("lot_flip_progress_v1");if(p){const m=JSON.parse(p).mode||"timed";if(!store.get("lot_flip_progress_v1_"+m))store.set("lot_flip_progress_v1_"+m,p);store.del("lot_flip_progress_v1")}
   const b=store.get("lot_flip_best_v1");if(b){if(!store.get("lot_flip_best_v1_timed"))store.set("lot_flip_best_v1_timed",b);store.del("lot_flip_best_v1")}}catch(e){}}
 let lvFrom="menu";
 function showLevels(from){lvFrom=from;const p=getProg(),mx=p?p.lv:1,g=$("lgrid");g.innerHTML="";
-  $("lvsub").textContent=(mode==="timed"?"⏱️ Timed":"🧘 Relaxed")+" · 3 stars = reach the goal, finish the bonus, beat the par time."+(store.get(KEY)?" Starting a level replaces your saved game in progress.":"");
+  $("lvsub").textContent=(mode==="timed"?"⏱️ Timed":"🧘 Relaxed")+" · 3 stars = reach goal, bonus completed, & community building requirements met."+(store.get(KEY)?" Starting a level replaces your saved game in progress.":"");
   for(let n=1;n<=mx+2;n++){const b=document.createElement("button"),ok=n<=mx,st=best[n]||0;b.className="lt"+(ok&&n===mx?" cur":"");b.disabled=!ok;
-    b.innerHTML=ok?"<b>Level "+n+"</b><span>"+"⭐".repeat(st)+"☆".repeat(3-st)+"</span><small>Goal "+fmt(1800+n*400)+"</small>":"<b>🔒 "+n+"</b>";
+    b.innerHTML=ok?"<b>Level "+n+"</b><span>"+"⭐".repeat(st)+"☆".repeat(3-st)+"</span><small>Goal "+fmt(Math.round((1800+n*400)*(n>=4?1.25:1)))+"</small>":"<b>🔒 "+n+"</b>";
     b.onclick=()=>{$("lvs").style.display="none";lv=n;startLevel()};g.appendChild(b)}
   ["ov","end"].forEach(x=>$(x).style.display="none");$("lvs").style.display="flex"}
 $("lback").onclick=()=>{$("lvs").style.display="none";$(lvFrom==="end"?"end":"ov").style.display="flex"};
 $("bl").onclick=()=>showLevels("menu");
-migrate();setMode(mode);requestAnimationFrame(tick);
+$("snd").textContent=snd?"🔊":"🔇";$("snd").onclick=()=>{snd=!snd;store.set("lot_flip_snd",snd?"1":"0");$("snd").textContent=snd?"🔊":"🔇";if(snd)sfx.tap()};
+function boot(){snd=store.get("lot_flip_snd")!=="0";$("snd").textContent=snd?"🔊":"🔇";migrate();setMode(mode);requestAnimationFrame(tick)}
+if(CP){CP.keys().then(r=>Promise.all((r.keys||[]).filter(k=>k.indexOf("lot_flip")===0&&store.get(k)===null).map(k=>CP.get({key:k}).then(v=>{if(v&&v.value!=null)try{localStorage.setItem(k,v.value)}catch(e){}})))).catch(()=>{}).then(boot)}else boot();
 </script>
 </body>
 </html>
