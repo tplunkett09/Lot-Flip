@@ -57,7 +57,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot.has-parking.to-bottom::after{bottom:-12px;height:36px}
 .lot.has-parking.to-top::before{top:5px}
 .lot.has-parking.to-top::after{top:-12px;height:17px}
-.lot.has-parking.business-parking::before{left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:68px;height:34px;box-sizing:border-box;background:linear-gradient(90deg,transparent calc(50% - .6px),#f8f8ef calc(50% - .6px),#f8f8ef calc(50% + .6px),transparent calc(50% + .6px)),#aeb2a9;}
+.lot.has-parking.business-parking::before{left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:68px;height:34px;box-sizing:border-box;border:1px solid #f8f8ef;border-radius:2px;background:linear-gradient(90deg,transparent calc(50% - .7px),#f8f8ef calc(50% - .7px),#f8f8ef calc(50% + .7px),transparent calc(50% + .7px)),linear-gradient(0deg,transparent 2px,#f8f8ef 2px,#f8f8ef 3px,transparent 3px,transparent calc(100% - 3px),#f8f8ef calc(100% - 3px),#f8f8ef calc(100% - 2px),transparent calc(100% - 2px)),#aeb2a9;}
 .lot.has-parking.business-parking.to-bottom::before{bottom:20px}
 .lot.has-parking.business-parking.to-top::before{top:3px}
 .lot.has-parking.business-parking::after{left:calc(50% - 12px);width:24px}
@@ -74,6 +74,9 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .pb i{display:block;height:100%;background:var(--gold);width:0}
 .bb,.ab{position:absolute;top:3px;font-size:10px;font-weight:800;padding:1px 4px;border-radius:4px;color:#fff;z-index:5;pointer-events:none;display:none}
 .bb{left:3px;background:rgba(171,71,188,.95)}
+.lot.business-parking .bb{z-index:70}
+.lot.business-parking.to-bottom .bb{top:3px;bottom:auto}
+.lot.business-parking.to-top .bb{top:auto;bottom:3px}
 .ab{right:3px;background:#d84315;font-size:9px}
 .pop{position:absolute;top:6px;right:6px;font-weight:800;color:#fff;background:var(--acc);border-radius:10px;padding:1px 6px;font-size:11px;animation:popa 1.1s ease-out forwards;pointer-events:none;z-index:40}
 .pop.big{font-size:14px;background:var(--gold);color:#000}
@@ -597,7 +600,7 @@ function trafficGeometry(i){
   // Keep the driveway centerline fixed. Only the final parking position is
   // offset into one of the business bays, after the car has entered the pad.
   const driveX=lotRect.left-ox+lotRect.width/2;
-  const parkX=driveX+(isBusiness?side*17:0);
+  const parkX=driveX+(isBusiness?side*12:0);
   const padTop=streetAbove?3:(isBusiness?lotRect.height-20-34:lotRect.height-24-26);
   const padHeight=isBusiness?34:26;
   const parkY=lotRect.top-oy+padTop+padHeight/2;
@@ -1044,7 +1047,7 @@ function renderTraffic(){
       const progress=clamp01((tr.secondArriveT||0)/(tr.secondArriveDur||1));
       const entryY=g.roadY+g.towardLot*28;
       const lateral=easeTraffic(clamp01((progress-.72)/.28));
-      const x=g.x+(g.x+(tr.secondSide||1)*21-g.x)*lateral;
+      const x=g.x+(g.x+(tr.secondSide||1)*12-g.x)*lateral;
       const y=entryY+(g.parkY-entryY)*easeTraffic(progress);
       const approachA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
       const parkedA=tr.dir===1?0:180;
