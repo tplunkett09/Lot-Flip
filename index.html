@@ -49,10 +49,6 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes op{50%{box-shadow:0 0 12px var(--blue)}}
 @media(hover:hover){.lot:hover{border-color:#fff}}
 .lot svg{width:100%;height:84px;display:block;flex-shrink:0;pointer-events:none;transform-origin:50% 100%;position:relative;z-index:2}
-.driveway-spur{position:absolute;left:74%;width:18%;min-width:12px;max-width:26px;pointer-events:none;z-index:0;background:linear-gradient(90deg,#858980 0 12%,#d0d1c8 12% 88%,#858980 88% 100%);filter:drop-shadow(0 0 1px rgba(40,45,39,.55))}
-/* The apron flares only at the curb, like a real curb cut, instead of making a bar across the road. */
-.driveway-spur.to-bottom{top:76px;bottom:-10px;clip-path:polygon(18% 0,82% 0,82% 76%,100% 100%,0 100%,18% 76%)}
-.driveway-spur.to-top{top:-10px;height:14px;clip-path:polygon(0 0,100% 0,82% 24%,82% 100%,18% 100%,18% 24%)}
 .drive-art{pointer-events:none}
 .lot .act,.lot .pb{position:relative;z-index:3}
 .pi{animation:pi .5s}
@@ -267,7 +263,7 @@ function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_wor
 
 function build(){
   const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];
-  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<div class="driveway-spur '+side+'" aria-hidden="true"></div><b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
+  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
   const rd=document.createElement("div");rd.className="road";
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div>';
   sc.append(row(0),rd,row(5));if(lots.length>10){const r2=rd.cloneNode(true);sc.append(r2,row(10))}els=[...sc.querySelectorAll(".lot")];initRoadTraffic();
@@ -472,23 +468,36 @@ function houseArt(l,i){
   return s;
 }
 
-function drivewayArt(i,parked){
+function drivewayArt(i,parked,l){
+  // The road-facing edge is the bottom of the upper row and the top of lower rows.
+  // Keep all pavement in the same SVG coordinate system as the building so it cannot drift.
   const streetAbove=Math.floor(i/5)>0;
   const roadEdge=streetAbove?"M80 0 V15":"M80 90 V75";
   const lotY=streetAbove?15:50;
   const colors=["#d84343","#2878bd","#f5b82e","#f3f4ef","#8e5cb7","#279b86"];
   const c1=colors[i%colors.length],c2=colors[(i+3)%colors.length];
-  const car=(x,y,c)=>'<g transform="translate('+x+' '+y+')"><rect x="-5.5" y="-7" width="11" height="14" rx="2.4" fill="'+c+'" stroke="#263238" stroke-width=".9"/><rect x="-3.4" y="-3.8" width="6.8" height="6.5" rx="1" fill="#bde3f5" stroke="#38505a" stroke-width=".5"/><rect x="-4.5" y="-8" width="2.5" height="2" rx=".5" fill="#263238"/><rect x="2" y="-8" width="2.5" height="2" rx=".5" fill="#263238"/><rect x="-4.5" y="6" width="2.5" height="2" rx=".5" fill="#263238"/><rect x="2" y="6" width="2.5" height="2" rx=".5" fill="#263238"/></g>';
+  const car=(x,y,c,angle=0)=>'<g transform="translate('+x+' '+y+') rotate('+angle+')"><rect x="-5.5" y="-7" width="11" height="14" rx="2.4" fill="'+c+'" stroke="#263238" stroke-width=".9"/><rect x="-3.4" y="-3.8" width="6.8" height="6.5" rx="1" fill="#bde3f5" stroke="#38505a" stroke-width=".5"/><rect x="-4.5" y="-8" width="2.5" height="2" rx=".5" fill="#263238"/><rect x="2" y="-8" width="2.5" height="2" rx=".5" fill="#263238"/><rect x="-4.5" y="6" width="2.5" height="2" rx=".5" fill="#263238"/><rect x="2" y="6" width="2.5" height="2" rx=".5" fill="#263238"/></g>';
+  const isBusiness=!!(l&&l.hs&&S[l.hs]&&S[l.hs].cat==="i");
+  if(isBusiness){
+    // Businesses get a broad, marked customer car park at the street frontage.
+    const y=streetAbove?15:47, h=28;
+    let marks='';
+    for(let x=44;x<=92;x+=12)marks+='<path d="M'+x+' '+(y+3)+'v'+(h-6)+'" stroke="#f8f8ef" stroke-width="1.3"/>';
+    const cars=parked?car(50,y+14,c1)+car(74,y+14,c2)+car(89,y+14,colors[(i+1)%colors.length]):'';
+    return '<g class="drive-art"><path d="'+roadEdge+'" fill="none" stroke="#777b75" stroke-width="18" stroke-linecap="round"/><path d="'+roadEdge+'" fill="none" stroke="#c7c8bf" stroke-width="13" stroke-linecap="round"/><rect x="40" y="'+y+'" width="56" height="'+h+'" rx="2.5" fill="#777b75" stroke="#545954" stroke-width="1.2"/><rect x="42" y="'+(y+2)+'" width="52" height="'+(h-4)+'" rx="1.5" fill="#aeb2a9"/>'+marks+cars+'</g>';
+  }
+  // Homes get a narrow, centered driveway and a two-car pad rather than a business-style lot.
   const parkedCars=parked?car(73,lotY+8,c1)+car(87,lotY+8,c2):'';
-  const stallY=streetAbove?lotY+2:lotY+2;
-  return '<g class="drive-art"><path d="'+roadEdge+'" fill="none" stroke="#777b75" stroke-width="18" stroke-linecap="round"/><path d="'+roadEdge+'" fill="none" stroke="#c7c8bf" stroke-width="13" stroke-linecap="round"/><rect x="64" y="'+lotY+'" width="32" height="27" rx="2.5" fill="#777b75" stroke="#545954" stroke-width="1.2"/><rect x="66" y="'+(lotY+2)+'" width="28" height="23" rx="1.5" fill="#c7c8bf"/><path d="M80 '+(lotY+2)+'v23" stroke="#f7f7ef" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M66 '+(lotY+2)+'h28M66 '+(lotY+25)+'h28" stroke="#ecece5" stroke-width=".8"/>'+parkedCars+'</g>';
+  return '<g class="drive-art"><path d="'+roadEdge+'" fill="none" stroke="#777b75" stroke-width="12" stroke-linecap="round"/><path d="'+roadEdge+'" fill="none" stroke="#c7c8bf" stroke-width="8" stroke-linecap="round"/><rect x="64" y="'+lotY+'" width="32" height="27" rx="2.5" fill="#777b75" stroke="#545954" stroke-width="1.2"/><rect x="66" y="'+(lotY+2)+'" width="28" height="23" rx="1.5" fill="#c7c8bf"/><path d="M80 '+(lotY+2)+'v23" stroke="#f7f7ef" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M66 '+(lotY+2)+'h28M66 '+(lotY+25)+'h28" stroke="#ecece5" stroke-width=".8"/>'+parkedCars+'</g>';
 }
 function art(l,i){
   const main=houseArt(l,i);
-  const parked=!!l.hs&&!['working','reno_working','demo','sold','listed','ai_for_sale'].includes(l.st)&&!traffic[i];
-  // Draw the driveway first, then the lot artwork so FOR SALE signs and buildings stay in front.
-  // The building art remains on top wherever the two layers overlap.
-  return drivewayArt(i,parked)+'<g transform="translate(0 14) scale(.8 1)">'+main+'</g>';
+  // Vacant lots stay clear. Add pavement only when a building exists or construction is underway.
+  const hasBuilding=!!l.hs&&l.st!=="sold";
+  const parked=hasBuilding&&!['working','reno_working','demo','sold','listed','ai_for_sale'].includes(l.st)&&!traffic[i];
+  const parking=hasBuilding?drivewayArt(i,parked,l):'';
+  // Pavement is in the same SVG coordinate system as the building; no separate HTML spur can drift.
+  return parking+'<g transform="translate(0 14) scale(.8 1)">'+main+'</g>';
 }
 
 let tutOn=false;
