@@ -51,8 +51,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot svg{width:100%;height:84px;display:block;flex-shrink:0;pointer-events:none;transform-origin:50% 100%;position:relative;z-index:2}
 .drive-art{pointer-events:none}
 /* Parking is anchored to the lot edge. Driveway connectors stop at the gray sidewalk before the road. */
-.lot.has-parking::before{content:"";position:absolute;left:calc(50% - 27px);width:54px;height:30px;background:#777b75;border:1px solid #545954;border-radius:3px;box-sizing:border-box;z-index:1;pointer-events:none}
-.lot.has-parking::after{content:"";position:absolute;left:calc(50% - 10px);width:20px;height:24px;background:#777b75;border-left:1px solid #545954;border-right:1px solid #545954;box-sizing:border-box;z-index:1;pointer-events:none}
+.lot.has-parking::before{content:"";position:absolute;left:calc(50% - 20px);width:40px;height:26px;background:#777b75;border:1px solid #545954;border-radius:3px;box-sizing:border-box;z-index:1;pointer-events:none}
+.lot.has-parking::after{content:"";position:absolute;left:calc(50% - 7px);width:14px;height:24px;background:#777b75;border-left:1px solid #545954;border-right:1px solid #545954;box-sizing:border-box;z-index:1;pointer-events:none}
 .lot.has-parking.to-bottom::before{bottom:24px}
 .lot.has-parking.to-bottom::after{bottom:-12px;height:36px}
 .lot.has-parking.to-top::before{top:5px}
@@ -246,7 +246,8 @@ const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].include
 const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false});
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo").length;
 // Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
-const visitorBusiness=l=>!!(l&&l.st==="ready"&&["civic","pool","school","hospital","shopping","bank"].includes(l.hs));
+const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank"].includes(l.hs));
+const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&(S[l.hs].cat==="i"||l.hs==="apartment"));
 const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
 function adj(i){const a=[],c=i%5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);if(i>=5)a.push(i-5);if(i+5<lots.length)a.push(i+5);return a}
@@ -460,7 +461,7 @@ const GROUND='<ellipse cx="50" cy="56" rx="46" ry="7" fill="#000" opacity=".22"/
 const BUSH='<circle cx="9" cy="47" r="4" fill="#388e3c"/><circle cx="91" cy="47" r="4" fill="#388e3c"/>';
 function houseArt(l,i){
   const st=l.st,k=l.hs;
-  if(st==="empty"){const rd=l.land<125;return '<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".15"/><g transform="translate(10,2) scale(1.65)"><path d="M16 10v28M16 12h16" stroke="#4e342e" stroke-width="3" stroke-linecap="round"/><rect x="16" y="14" width="36" height="22" rx="3" fill="#fff" stroke="#1b5e20" stroke-width="2"/><rect x="16" y="14" width="36" height="8" fill="#2e7d32"/><text x="34" y="20" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">FOR SALE</text><text x="34" y="30" font-size="8" font-weight="900" text-anchor="middle">'+fmt(l.land)+'</text></g>'+(rd?'<g transform="translate(70,14) rotate(-12)"><rect x="-16" y="-6" width="32" height="12" rx="2.5" fill="#d32f2f" stroke="#fff" stroke-width="1.2"/><text y="2.5" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">REDUCED</text></g>':"")}
+  if(st==="empty"){const rd=l.land<125;return '<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".15"/><g transform="translate(10,-8) scale(1.65)"><path d="M16 10v28M16 12h16" stroke="#4e342e" stroke-width="3" stroke-linecap="round"/><rect x="16" y="14" width="36" height="22" rx="3" fill="#fff" stroke="#1b5e20" stroke-width="2"/><rect x="16" y="14" width="36" height="8" fill="#2e7d32"/><text x="34" y="20" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">FOR SALE</text><text x="34" y="30" font-size="8" font-weight="900" text-anchor="middle">'+fmt(l.land)+'</text></g>'+(rd?'<g transform="translate(70,14) rotate(-12)"><rect x="-16" y="-6" width="32" height="12" rx="2.5" fill="#d32f2f" stroke="#fff" stroke-width="1.2"/><text y="2.5" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">REDUCED</text></g>':"")}
   if(st==="owned")return '<ellipse cx="50" cy="56" rx="40" ry="6" fill="#000" opacity=".2"/><circle cx="50" cy="30" r="15" fill="#ffb300"/><text x="50" y="38" font-size="22" font-weight="900" text-anchor="middle" fill="#fff">+</text>';
   const b=l.paint,r=l.reno.includes("roof")?"#ff7043":"#a8483a";let s=GROUND,T='stroke="#3e2723" stroke-width="1.5"';
   if(k==="ranch")s+='<rect x="68" y="16" width="8" height="12" fill="#8d6e63" stroke="#3e2723"/><circle class="smk" cx="72" cy="13" r="3" fill="#fff"/><circle class="smk s2" cx="74" cy="13" r="2.5" fill="#fff"/><rect x="16" y="24" width="68" height="22" fill="'+b+'" '+T+'/><rect x="16" y="40" width="68" height="6" fill="#000" opacity=".08"/><polygon points="10,25 50,10 90,25" fill="'+r+'" '+T+'/><polygon points="10,25 50,10 50,25" fill="#fff" opacity=".13"/><rect x="52" y="28" width="28" height="18" fill="#cfd8dc" stroke="#3e2723"/><path d="M52 33h28M52 38h28M52 43h28" stroke="#90a4ae"/><rect x="38" y="32" width="10" height="14" fill="#5c3826"/><circle cx="45" cy="39" r="1" fill="#ffb300"/><rect x="17" y="28" width="3" height="12" fill="#37474f"/><rect x="34" y="28" width="3" height="12" fill="#37474f"/>'+WN(20,28,14,12);
@@ -524,7 +525,7 @@ function art(l,i){
   // This is important because the lot SVG occupies only the upper portion of each tall lot;
   // drawing the driveway inside its 0..90 viewBox leaves a visible gap before the road.
   const streetAbove=Math.floor(i/5)>0;
-  return '<g transform="translate(10 '+(streetAbove?'40':'14')+') scale(.8 1)">'+main+'</g>';
+  return '<g transform="translate(0 '+(streetAbove?'40':'14')+')">'+main+'</g>';
 }
 
 let tutOn=false;
@@ -1006,7 +1007,7 @@ function draw(){
     const streetAbove=Math.floor(i/5)>0;
     e.classList.toggle("to-bottom",!streetAbove);e.classList.toggle("to-top",streetAbove);
     e.classList.toggle("has-parking",hasBuilding);
-    e.classList.toggle("business-parking",hasBuilding&&S[l.hs]&&S[l.hs].cat==="i");
+    e.classList.toggle("business-parking",hasBuilding&&hasBusinessParking(l));
     e.classList.toggle("purchased",l.st!=="empty"&&!ai);e.classList.toggle("ai-owned",ai);
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
     const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
