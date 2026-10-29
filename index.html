@@ -84,7 +84,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes sc{50%{opacity:.4}}
 .stamp{animation:st .45s cubic-bezier(.2,1.6,.4,1);transform-box:fill-box;transform-origin:center}
 @keyframes st{from{transform:scale(3);opacity:0}}
-.tk{animation:tk linear both}
+.tk{display:none}
 @keyframes tk{0%{transform:translateX(100px)}15%,80%{transform:translateX(50px)}100%{transform:translateX(-45px)}}
 .shk{animation:shk .12s infinite}
 @keyframes shk{25%{transform:translate(-1px,0)}75%{transform:translate(1px,0)}}
@@ -348,7 +348,7 @@ function tick(now){
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt;if(l.wait<=0)spawnOffer(i)}
         else{l.offer.ttl-=dt;if(l.offer.ttl<=0){sendBuyerAway(i);l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired. The buyer is heading back to the street.");if(sel===i)sheet(i)}}}
-      else if(l.st==="demo"){l.dp+=dt/l.dd;if(l.dp>=1){reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}
+      else if(l.st==="demo"){const tr=traffic[i];if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
     if(bonus&&!bonus.done){bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
@@ -495,6 +495,12 @@ function startBuyerArrival(i){
   const dur=trafficDuration(g,dir,"arrive");
   traffic[i]={kind:"arrive",t:0,dur,dir,color:trafficColor(i)};
 }
+function startDemoTruck(i){
+  const g=trafficGeometry(i);if(!g)return;
+  const cur=traffic[i];if(cur&&cur.el)cur.el.remove();
+  const dir=nearSideLaneDirection(g);
+  traffic[i]={kind:"arrive",t:0,dur:trafficDuration(g,dir,"arrive"),dir,color:"#f9a825",truck:true,speedFactor:1,actualSpeed:0};
+}
 function beginTrafficDeparture(i,tr,g){
   if(!tr||!g)return;
   // Always leave by turning out of the driveway into its assigned lane. Never reverse a car
@@ -556,8 +562,11 @@ function trafficPose(tr,g,timeOverride){
 function vehicleMarkup(color){
   return '<svg viewBox="0 0 32 18" aria-hidden="true"><rect x="2" y="3" width="28" height="12" rx="4" fill="'+color+'" stroke="#263238" stroke-width="1.1"/><rect x="8" y="4.1" width="10" height="9.8" rx="2" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="19" y="4.6" width="5.8" height="8.8" rx="1.4" fill="#a7d5e7" stroke="#38505a" stroke-width=".6"/><path d="M19 5v8" stroke="#38505a" stroke-width=".7"/><rect x="0" y="4" width="4" height="3" rx="1" fill="#1f2933"/><rect x="0" y="11" width="4" height="3" rx="1" fill="#1f2933"/><rect x="28" y="4" width="4" height="3" rx="1" fill="#1f2933"/><rect x="28" y="11" width="4" height="3" rx="1" fill="#1f2933"/><rect x="28.5" y="5" width="1.3" height="2" fill="#fff7b0"/><rect x="28.5" y="11" width="1.3" height="2" fill="#fff7b0"/><rect x="2" y="5" width="1.4" height="2" fill="#ff5252"/><rect x="2" y="11" width="1.4" height="2" fill="#ff5252"/></svg>';
 }
-function makeVehicle(color,cls){
-  const el=document.createElement("div");el.className=cls;el.setAttribute("aria-hidden","true");el.innerHTML=vehicleMarkup(color);return el;
+function truckMarkup(){
+  return '<svg viewBox="0 0 32 18" aria-hidden="true"><rect x="1" y="2.5" width="19" height="13" rx="1.5" fill="#f9a825" stroke="#263238" stroke-width="1.1"/><g class="ld"><rect x="3.5" y="5" width="6" height="4.5" fill="#8d6e63"/><rect x="10" y="8.5" width="7" height="5" fill="#6d4c41"/><rect x="11" y="4.5" width="5" height="3" fill="#a1887f"/></g><rect x="21" y="3.5" width="10" height="11" rx="2.5" fill="#f57f17" stroke="#263238" stroke-width="1.1"/><rect x="25.5" y="4.7" width="4" height="8.6" rx="1" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="3" y="0" width="5" height="3" rx="1" fill="#1f2933"/><rect x="3" y="15" width="5" height="3" rx="1" fill="#1f2933"/><rect x="23" y="1" width="5" height="3" rx="1" fill="#1f2933"/><rect x="23" y="14" width="5" height="3" rx="1" fill="#1f2933"/><rect x="30" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="30" y="11.5" width="1.3" height="2" fill="#fff7b0"/></svg>';
+}
+function makeVehicle(color,cls,truck){
+  const el=document.createElement("div");el.className=cls;el.setAttribute("aria-hidden","true");el.innerHTML=truck?truckMarkup():vehicleMarkup(color);return el;
 }
 function initRoadTraffic(){
   const sc=$("scene"),roads=[...sc.querySelectorAll(".road")],colors=["#d84343","#2878bd","#f5b82e","#f3f4ef","#8e5cb7","#279b86"];
@@ -844,7 +853,8 @@ function renderTraffic(){
   const sc=$("scene");if(!sc)return;
   Object.keys(traffic).forEach(key=>{
     const i=+key,tr=traffic[i];if(!tr)return;
-    if(!tr.el||!tr.el.isConnected){tr.el=makeVehicle(tr.color,"traffic-car");sc.appendChild(tr.el)}
+    if(!tr.el||!tr.el.isConnected){tr.el=makeVehicle(tr.color,"traffic-car",tr.truck);sc.appendChild(tr.el)}
+    if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
     if(tr.kind==="parked"){
       const g=trafficGeometry(i);if(!g)return;const endA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
       tr.el.style.left=(g.x-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";return;
