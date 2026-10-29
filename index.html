@@ -597,7 +597,7 @@ function trafficGeometry(i){
   // Keep the driveway centerline fixed. Only the final parking position is
   // offset into one of the business bays, after the car has entered the pad.
   const driveX=lotRect.left-ox+lotRect.width/2;
-  const parkX=driveX+(isBusiness?side*21:0);
+  const parkX=driveX+(isBusiness?side*17:0);
   const padTop=streetAbove?3:(isBusiness?lotRect.height-20-34:lotRect.height-24-26);
   const padHeight=isBusiness?34:26;
   const parkY=lotRect.top-oy+padTop+padHeight/2;
@@ -716,19 +716,21 @@ function trafficPose(tr,g,timeOverride){
     const {approachX,startX,approach,turn,driveway,total}=metrics;
     const p1=approach/total,p2=(approach+turn)/total,p3=(approach+turn+driveway)/total;
     const startA=dir===1?0:180,endA=dir===1?toward*90:180-toward*90;
+    const parkA=dir===1?0:180;
     let x,y,a;
     if(p<p1){const u=easeTraffic(p/p1);x=startX+(approachX-startX)*u;y=laneY;a=startA}
     else if(p<p2){const u=easeTraffic((p-p1)/(p2-p1));x=approachX+(g.x-approachX)*u;y=laneY+(entryY-laneY)*u;a=startA+angleDelta(startA,endA)*u}
     else if(p<p3){const u=driveway>0?easeTraffic((p-p2)/(p3-p2)):1;x=g.x;y=entryY+(g.parkY-entryY)*u;a=endA}
-    else{const u=shift>0?easeTraffic((p-p3)/(1-p3)):1;x=g.x+(parkX-g.x)*u;y=g.parkY;a=endA}
+    else{const u=shift>0?easeTraffic((p-p3)/(1-p3)):1;x=g.x+(parkX-g.x)*u;y=g.parkY;a=endA+angleDelta(endA,parkA)*u}
     if(tr.kind==="retreat")a+=180;
     return {x,y,a};
   }
   const {driveway,turn,road,exitX,endX,total}=metrics;
   const p0=shift/total,p1=(shift+driveway)/total,p2=(shift+driveway+turn)/total;
   const exitA=-toward*90,endA=dir===1?0:180;
+  const parkA=dir===1?0:180;
   let x,y,a;
-  if(p<p0){const u=shift>0?easeTraffic(p/p0):1;x=parkX+(g.x-parkX)*u;y=g.parkY;a=exitA}
+  if(p<p0){const u=shift>0?easeTraffic(p/p0):1;x=parkX+(g.x-parkX)*u;y=g.parkY;a=parkA+angleDelta(parkA,exitA)*u}
   else if(p<p1){const u=driveway>0?easeTraffic((p-p0)/(p1-p0)):1;x=g.x;y=g.parkY+(entryY-g.parkY)*u;a=exitA}
   else if(p<p2){const u=easeTraffic((p-p1)/(p2-p1));x=g.x+(exitX-g.x)*u;y=entryY+(laneY-entryY)*u;a=exitA+angleDelta(exitA,endA)*u}
   else{const u=road>0?easeTraffic((p-p2)/(1-p2)):1;x=exitX+(endX-exitX)*u;y=laneY;a=endA}
@@ -1032,7 +1034,7 @@ function renderTraffic(){
     if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
     const g=trafficGeometry(i);if(!g)return;
     if(tr.kind==="parked"){
-      const endA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
+      const endA=tr.dir===1?0:180;
       tr.el.style.left=((g.parkX??g.x)-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";
     }else{
       const pose=trafficPose(tr,g);tr.el.style.left=(pose.x-10)+"px";tr.el.style.top=(pose.y-5.625)+"px";tr.el.style.transform="rotate("+pose.a+"deg)";
@@ -1044,8 +1046,10 @@ function renderTraffic(){
       const lateral=easeTraffic(clamp01((progress-.72)/.28));
       const x=g.x+(g.x+(tr.secondSide||1)*21-g.x)*lateral;
       const y=entryY+(g.parkY-entryY)*easeTraffic(progress);
-      const endA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
-      tr.secondEl.style.left=(x-10)+"px";tr.secondEl.style.top=(y-5.625)+"px";tr.secondEl.style.transform="rotate("+endA+"deg)";
+      const approachA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
+      const parkedA=tr.dir===1?0:180;
+      const angle=approachA+angleDelta(approachA,parkedA)*lateral;
+      tr.secondEl.style.left=(x-10)+"px";tr.secondEl.style.top=(y-5.625)+"px";tr.secondEl.style.transform="rotate("+angle+"deg)";
     }else if(tr.secondEl){tr.secondEl.remove();tr.secondEl=null}
   });
   renderRoadTraffic();
