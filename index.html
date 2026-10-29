@@ -50,6 +50,17 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @media(hover:hover){.lot:hover{border-color:#fff}}
 .lot svg{width:100%;height:84px;display:block;flex-shrink:0;pointer-events:none;transform-origin:50% 100%;position:relative;z-index:2}
 .drive-art{pointer-events:none}
+/* Parking is anchored to the actual street-facing edge of each lot, not to the small house SVG. */
+.lot.has-parking::before{content:"";position:absolute;left:calc(50% - 27px);width:54px;height:30px;background:#777b75;border:1px solid #545954;border-radius:3px;box-sizing:border-box;z-index:1;pointer-events:none}
+.lot.has-parking::after{content:"";position:absolute;left:calc(50% - 10px);width:20px;height:24px;background:#777b75;border-left:1px solid #545954;border-right:1px solid #545954;box-sizing:border-box;z-index:1;pointer-events:none}
+.lot.has-parking.to-bottom::before{bottom:24px}
+.lot.has-parking.to-bottom::after{bottom:-18px;height:44px}
+.lot.has-parking.to-top::before{top:5px}
+.lot.has-parking.to-top::after{top:-18px;height:44px}
+.lot.has-parking.business-parking::before{left:calc(50% - 34px);width:68px;height:34px;background:repeating-linear-gradient(90deg,#aeb2a9 0 12px,#f8f8ef 12px 13px,#aeb2a9 13px 23px);}
+.lot.has-parking.business-parking.to-bottom::before{bottom:20px}
+.lot.has-parking.business-parking.to-top::before{top:3px}
+.lot.has-parking.business-parking::after{left:calc(50% - 12px);width:24px}
 .lot .act,.lot .pb{position:relative;z-index:3}
 .pi{animation:pi .5s}
 @keyframes pi{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
@@ -495,9 +506,11 @@ function art(l,i){
   // Vacant lots stay clear. Add pavement only when a building exists or construction is underway.
   const hasBuilding=!!l.hs&&l.st!=="sold";
   const parked=hasBuilding&&!['working','reno_working','demo','sold','listed','ai_for_sale'].includes(l.st)&&!traffic[i];
-  const parking=hasBuilding?drivewayArt(i,parked,l):'';
-  // Pavement is in the same SVG coordinate system as the building; no separate HTML spur can drift.
-  return parking+'<g transform="translate(0 14) scale(.8 1)">'+main+'</g>';
+  // The street-side parking pad and connector are CSS-anchored to the actual lot edge.
+  // This is important because the lot SVG occupies only the upper portion of each tall lot;
+  // drawing the driveway inside its 0..90 viewBox leaves a visible gap before the road.
+  const streetAbove=Math.floor(i/5)>0;
+  return '<g transform="translate(10 '+(streetAbove?'40':'14')+') scale(.8 1)">'+main+'</g>';
 }
 
 let tutOn=false;
@@ -963,6 +976,11 @@ function draw(){
     const e=els[i];if(!e)return;
     
     const ai=l.st==="ai_owned"||l.st==="ai_for_sale";
+    const hasBuilding=!!l.hs&&l.st!=="sold";
+    const streetAbove=Math.floor(i/5)>0;
+    e.classList.toggle("to-bottom",!streetAbove);e.classList.toggle("to-top",streetAbove);
+    e.classList.toggle("has-parking",hasBuilding);
+    e.classList.toggle("business-parking",hasBuilding&&S[l.hs]&&S[l.hs].cat==="i");
     e.classList.toggle("purchased",l.st!=="empty"&&!ai);e.classList.toggle("ai-owned",ai);
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
     const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
