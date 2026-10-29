@@ -417,7 +417,7 @@ function art(l,i){
   const parked=!!l.hs&&!['working','reno_working','demo','sold','listed','ai_for_sale'].includes(l.st)&&!traffic[i];
   // Draw the driveway first, then the lot artwork so FOR SALE signs and buildings stay in front.
   // The building art remains on top wherever the two layers overlap.
-  return drivewayArt(i,parked)+'<g transform="scale(.8 1)">'+main+'</g>';
+  return drivewayArt(i,parked)+'<g transform="translate(0 14) scale(.8 1)">'+main+'</g>';
 }
 
 let tutOn=false;
