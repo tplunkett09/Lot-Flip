@@ -135,9 +135,9 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 /* compact pinned HUD */
 .hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);display:flex;flex-direction:column;gap:3px;padding:2px 0 4px}
 .hrow{display:flex;align-items:center;gap:8px;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:4px 8px}
-.hm{display:flex;align-items:baseline;gap:4px;flex:1;min-width:0;white-space:nowrap}
-.hm b{font-size:17px;color:var(--gold)}
-.hm small{font-size:12px;color:var(--mut);font-weight:700}
+.money-group{display:flex;align-items:baseline;gap:4px;flex:1;min-width:0;white-space:nowrap}
+.money-group b{font-size:17px;color:var(--gold)}
+.money-group small{font-size:12px;color:var(--mut);font-weight:700}
 .ht{display:flex;flex-direction:column;align-items:center;line-height:1.1}
 .ht span{font-size:9px;color:var(--mut);text-transform:uppercase;font-weight:700}
 .ht b{font-size:14px}
@@ -162,7 +162,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 <div id="app">
   <div class="hud" id="hud">
     <div class="hrow">
-      <div class="hm"><b id="money">$0</b><small>/ <span id="goal">$0</span></small></div>
+      <div class="money-group"><b id="money">$0</b><small>/ <span id="goal">$0</span></small></div>
       <div class="ht"><span id="tl">Time</span><b id="time">0s</b></div>
       <span id="lvl">Lv 1</span>
       <button class="pbtn" id="snd" style="min-height:32px;padding:0 8px">🔊</button>
