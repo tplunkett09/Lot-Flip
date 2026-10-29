@@ -29,9 +29,9 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
 #bonus,#evt{font-size:12px;font-weight:700;text-align:center;color:var(--gold);min-height:0}
 #evt{color:var(--blue)}
-#scene{isolation:isolate;background:#62aa48;border:3px solid #4d8837;border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:6px;box-shadow:inset 0 2px 12px rgba(0,0,0,.3);position:relative;overflow:hidden}
+#scene{isolation:isolate;background:#62aa48;border:3px solid #4d8837;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 2px 12px rgba(0,0,0,.3);position:relative;overflow:hidden}
 #scene.pz *{animation-play-state:paused!important}
-.row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;position:relative;z-index:2}
+.row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;position:relative;z-index:2}
 .road{height:38px;background:#33383b;border-radius:6px;position:relative;z-index:1;overflow:hidden;border:2px solid #222;border-top:4px solid #a7aaa1;border-bottom:4px solid #a7aaa1;box-shadow:inset 0 4px rgba(255,255,255,.035),inset 0 -4px rgba(0,0,0,.12)}
 .road::before{content:"";position:absolute;left:0;right:0;top:15px;border-top:2px dashed #f5d061}
 .cw{position:absolute;top:0;bottom:0;width:16px;background:repeating-linear-gradient(0deg,#fff,#fff 4px,transparent 4px,transparent 8px);opacity:.7}
@@ -39,7 +39,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .traffic-car{z-index:65}
 .road-traffic-car{z-index:60}
 .traffic-car svg,.road-traffic-car svg{display:block;width:20px;height:11.25px;overflow:visible}
-.lot{background:#73b853;border:2px dashed #488433;border-radius:10px;padding:3px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;height:132px;overflow:visible;user-select:none;-webkit-user-select:none;transition:transform .15s}
+.lot{background:#73b853;border:2px dashed #488433;border-radius:10px;padding:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;height:142px;overflow:visible;user-select:none;-webkit-user-select:none;transition:transform .15s}
 .lot.purchased{background:var(--card);border:2px solid var(--line)}
 .lot.ai-owned{background:#33261a;border:2px solid #8d6e63}
 .lot.tap{transform:scale(.93)}
@@ -184,7 +184,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 
 <div class="ov" id="ov"><div class="box">
   <h2>🏡 Lot Flip</h2>
-  <p>Buy plots, build homes that <b>auto-rent</b>, and flip houses. Every lot now has a street-connected driveway, a curved curb entry, and a parking pad. Unlock new neighborhood buildings as you level up, add parking lots, hit each level’s goal, finish the bonus task, and earn up to ⭐⭐⭐!</p>
+  <p>Buy plots, build homes that <b>auto-rent</b>, and flip houses. Every lot has a street-connected parking lot. Unlock 10 building types from Levels 1–30. Amenities can raise nearby values, apartments and shopping traffic can lower nearby home values, and fire stations boost homes on their street. Complete money and building goals in either mode!</p>
   <div class="modes">
     <button class="mb active" id="mt"><b>⏱️ Timed</b><small>Beat the clock</small></button>
     <button class="mb" id="mr"><b>🧘 Relaxed</b><small>No timer</small></button>
@@ -216,14 +216,14 @@ ranch:{n:"Ranch",cost:250,val:450,rm:1,dur:3,boost:0,cat:"h",ic:"🏡",unlock:1,
 colonial:{n:"Colonial",cost:450,val:800,rm:1.3,dur:5,boost:.15,cat:"h",ic:"🏛️",unlock:1,d:"Value $800 · +15% nearby"},
 mansion:{n:"Mansion",cost:800,val:1500,rm:1.8,dur:8,boost:.3,cat:"h",ic:"🏰",unlock:1,d:"Value $1500 · +30% nearby"},
 park:{n:"Park",cost:400,val:400,rm:0,dur:4,boost:.25,rb:.2,cat:"i",ic:"🌳",unlock:2,d:"+25% value, +20% rent nearby"},
-civic:{n:"Civic Center",cost:800,val:800,rm:0,dur:6,globalBoost:.15,rev:15,cat:"i",ic:"🏛️",unlock:3,d:"+15% all lots · +$15/3s"},
-apartment:{n:"Apartment Building",cost:2000,val:2600,rm:2.2,dur:10,boost:.1,cat:"h",ic:"🏢",unlock:4,d:"High rental income · +10% nearby"},
-pool:{n:"Swimming Pool",cost:900,val:700,rm:0,dur:6,boost:.1,rb:.25,cat:"i",ic:"🏊",unlock:5,d:"+10% value, +25% rent nearby"},
-school:{n:"School",cost:1400,val:1300,rm:0,dur:8,boost:.15,cat:"i",ic:"🏫",unlock:6,d:"+15% nearby property value"},
-hospital:{n:"Hospital",cost:1800,val:1900,rm:0,dur:10,boost:.2,cat:"i",ic:"🏥",unlock:7,d:"+20% nearby property value"},
-shopping:{n:"Shopping Center",cost:2500,val:2400,rm:0,dur:12,rev:30,cat:"i",ic:"🛍️",unlock:8,d:"Generates $30 every 3 seconds"},
-fire:{n:"Fire Station",cost:1600,val:1600,rm:0,dur:9,globalBoost:.08,cat:"i",ic:"🚒",unlock:9,d:"+8% value across the neighborhood"},
-bank:{n:"Bank",cost:3000,val:3000,rm:0,dur:14,rev:50,cat:"i",ic:"🏦",unlock:10,d:"Generates $50 every 3 seconds"}};
+civic:{n:"Civic Center",cost:800,val:800,rm:0,dur:6,globalBoost:.15,rev:25,cat:"i",ic:"🏛️",unlock:3,d:"+15% all lots · +$25/3s"},
+apartment:{n:"Apartment Building",cost:2000,val:2600,rm:2.2,dur:10,boost:.1,cat:"h",ic:"🏢",unlock:5,d:"High rental income · can lower nearby mansion values"},
+pool:{n:"Swimming Pool",cost:900,val:700,rm:0,dur:6,boost:.1,rb:.25,cat:"i",ic:"🏊",unlock:8,d:"+10% value, +25% rent nearby"},
+school:{n:"School",cost:1400,val:1300,rm:0,dur:8,boost:.15,cat:"i",ic:"🏫",unlock:12,d:"+15% nearby property value"},
+hospital:{n:"Hospital",cost:1800,val:1900,rm:0,dur:10,boost:.2,cat:"i",ic:"🏥",unlock:15,d:"+20% nearby property value"},
+shopping:{n:"Shopping Center",cost:2500,val:2400,rm:0,dur:12,rev:45,cat:"i",ic:"🛍️",unlock:20,d:"Generates $45 every 3 seconds · traffic can lower nearby home values"},
+fire:{n:"Fire Station",cost:1600,val:1600,rm:0,dur:9,streetBoost:.15,cat:"i",ic:"🚒",unlock:24,d:"+15% home value along its street"},
+bank:{n:"Bank",cost:3000,val:3000,rm:0,dur:14,rev:50,cat:"i",ic:"🏦",unlock:30,d:"Generates $50 every 3 seconds"}};
 const unlocked=k=>lv>=(S[k]?.unlock||1);
 const availableBuildings=()=>Object.keys(S).filter(unlocked);
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
@@ -231,7 +231,7 @@ const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d
 const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s"};
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
-let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,ev={k:null,t:0,next:30},best={},tt;
+let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
 
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
 const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false});
@@ -240,9 +240,29 @@ const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
 function adj(i){const a=[],c=i%5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);if(i>=5)a.push(i-5);if(i+5<lots.length)a.push(i+5);return a}
 const civicB=()=>lots.reduce((b,l)=>b+(l.hs&&done(l)?(S[l.hs].globalBoost||0):0),0);
-function nBoost(i){let b=civicB();adj(i).forEach(n=>{const l=lots[n];if(l&&done(l)&&S[l.hs].boost>0)b+=S[l.hs].boost});return b}
+function nBoost(i){
+  const l=lots[i];let b=civicB();
+  // Nearby amenities lift home values; apartment blocks and retail traffic can
+  // reduce premium residential values when directly adjacent.
+  adj(i).forEach(n=>{const x=lots[n];if(!x||!done(x))return;const k=x.hs;
+    if(S[k].boost)b+=S[k].boost;
+    if(l.hs&&S[l.hs].cat==="h"){
+      if(k==="apartment")b-=l.hs==="mansion"?.18:-.08;
+      if(k==="shopping")b-=l.hs==="mansion"?.22:-.10;
+    }
+  });
+  // A fire station improves perceived safety and emergency coverage for homes
+  // on the same street row, rather than boosting every property globally.
+  if(l.hs&&S[l.hs].cat==="h"){
+    const rowStart=Math.floor(i/10)*10;
+    for(let n=rowStart;n<Math.min(rowStart+10,lots.length);n++){
+      if(n!==i&&lots[n].hs==="fire"&&done(lots[n]))b+=S.fire.streetBoost;
+    }
+  }
+  return Math.max(-.55,b);
+}
 function parkRB(i){let b=0;adj(i).forEach(n=>{const l=lots[n];if(l&&l.hs==="park"&&done(l))b+=S.park.rb});return b}
-function val(i){const l=lots[i];return Math.round((l.land+(l.hs?S[l.hs].val:0)+l.reno.reduce((a,k)=>a+R[k].vb,0))*(1+nBoost(i)))}
+function val(i){const l=lots[i];return Math.max(1,Math.round((l.land+(l.hs?S[l.hs].val:0)+l.reno.reduce((a,k)=>a+R[k].vb,0))*(1+nBoost(i))))}
 function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working")return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1))}
 
 function build(){
@@ -255,27 +275,34 @@ function build(){
 
 function startLevel(){
   N=lv>=4?15:10;tutOn=lv===1&&!store.get("lot_flip_tut");lots=Array.from({length:N},mkLot);closeSheet();
-  money=600+lv*50;goal=Math.round((1800+lv*400)*(lv>=4?1.25:1));total=mode==="timed"?Math.max(90,180-lv*8):0;timeVal=total;elapsed=0;
+  const goalOrder=[{lv:1,k:"ranch"},{lv:2,k:"park"},{lv:3,k:"civic"},{lv:5,k:"apartment"},{lv:8,k:"pool"},{lv:12,k:"school"},{lv:15,k:"hospital"},{lv:20,k:"shopping"},{lv:24,k:"fire"},{lv:30,k:"bank"}];
+  const requiredBuilding=goalOrder.filter(x=>lv>=x.lv).at(-1).k;
+  // The objective building is always affordable at the start, with a small
+  // operating reserve. This avoids mathematically impossible timed starts.
+  money=Math.max(800+lv*75,S[requiredBuilding].cost+500);
+  goal=1600+lv*300;
+  total=mode==="timed"?240+lv*20:0;timeVal=total;elapsed=0;
   const n=Math.min(4,2+Math.floor(lv/3)),ix=[],ht=["ranch","colonial","mansion"];
   while(ix.length<n){const r=Math.floor(Math.random()*N);if(!ix.includes(r))ix.push(r)}
   ix.forEach(k=>{const l=lots[k];l.st="ai_owned";l.hs=ht[Math.floor(Math.random()*3)];l.aiW=3+Math.random()*6});
   const ks=availableBuildings(),k=ks[Math.floor(Math.random()*ks.length)];
   bonus={k,n:S[k].cat==="h"?Math.min(3,1+Math.floor(lv/3)):1,r:200+lv*50,c:0,done:false};
+  objective={k:requiredBuilding,done:false};
   builders=2;speed=1;sellMode=false;paused=false;ev={k:null,t:0,next:30};
   build();run=true;last=performance.now();
   ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("scene").classList.remove("pz");
   $("tl").textContent=mode==="timed"?"Time":"Elapsed";
-  toast("Level "+lv+": reach "+fmt(goal)+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();
+  toast("Level "+lv+": reach "+fmt(goal)+" and build a "+S[objective.k].n+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();
 }
 
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
-function snap(){return store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus}))}
+function snap(){return store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus,objective}))}
 function autosave(){if(run&&!paused&&lots.length)snap()}
 function getProg(){try{return JSON.parse(store.get(PKEY))}catch(e){return null}}
 function setProg(n){const p=getProg();if(!p||n>p.lv)store.set(PKEY,JSON.stringify({lv:n,mode}))}
 function saveGame(){toast(snap()?"Game saved!":"Couldn’t save in this browser.")}
 function loadGame(){
-  try{const d=JSON.parse(store.get(KEY));lv=d.lv;money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;bonus=d.bonus;
+  try{const d=JSON.parse(store.get(KEY));lv=d.lv;money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;bonus=d.bonus;const milestones=[{lv:1,k:"ranch"},{lv:2,k:"park"},{lv:3,k:"civic"},{lv:5,k:"apartment"},{lv:8,k:"pool"},{lv:12,k:"school"},{lv:15,k:"hospital"},{lv:20,k:"shopping"},{lv:24,k:"fire"},{lv:30,k:"bank"}];const expected=(milestones.filter(x=>lv>=x.lv).at(-1)||{k:"ranch"}).k;objective=d.objective||{k:expected,done:false};if(objective.k&&typeof objective.k==="object")objective.k=objective.k.k;if(objective.k!==expected)objective={k:expected,done:lots.some(l=>l.hs===expected&&["rented","listed","ready"].includes(l.st))};
     ev={k:null,t:0,next:30};setMode(mode);build();lots.forEach((l,i)=>{if(l.st==="listed"&&l.offer)startBuyerArrival(i)});run=true;paused=false;last=performance.now();
     ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();return true}catch(e){toast("Couldn’t load save.");return false}
 }
@@ -387,7 +414,8 @@ function tick(now){
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
     if(bonus&&!bonus.done){bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
-    if(money>=goal){run=false;endGame(true)}else if(mode==="timed"&&timeVal<=0){run=false;endGame(false)}
+    if(objective){objective.done=lots.some(l=>l.hs===objective.k&&["rented","listed","ready"].includes(l.st));}
+    if(money>=goal&&objective&&objective.done){run=false;endGame(true)}else if(mode==="timed"&&timeVal<=0){run=false;endGame(false)}
     draw();
   }
   requestAnimationFrame(tick);
@@ -397,7 +425,7 @@ function endGame(win){
   closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;win?sfx.win():sfx.lose();
   if(win){const st=1+(bonus&&bonus.done?1:0)+(elapsed<=90+lv*10?1:0);best[lv]=Math.max(best[lv]||0,st);store.set(BKEY,JSON.stringify(best));
     h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p>"}
-  else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.</p>';
+  else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.<br>Building goal: '+(objective&&objective.done?'complete':'build '+S[objective?objective.k:"ranch"].n)+'.</p>';
   h+='<button class="mbtn" id="nx">'+(win?"Next Level":"Retry Level "+lv)+'</button><button class="mbtn blue" id="el">🗺️ Levels</button><button class="mbtn line" id="em">🏠 Main Menu</button>';
   $("endbox").innerHTML=h;$("end").style.display="flex";
   $("nx").onclick=()=>{if(win)lv++;startLevel()};$("el").onclick=()=>showLevels("end");
@@ -909,7 +937,8 @@ function renderTraffic(){
 }
 
 function chips(){if(!bonus)return"";const par=90+lv*10,pm=elapsed>par;
-  return '<span class="chip'+(money>=goal?' ok':'')+'">⭐ Reach '+fmt(goal)+'</span><span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span><span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>'}
+  const objectiveName=S[objective?objective.k:"ranch"].n;
+  return '<span class="chip'+(money>=goal?' ok':'')+'">💰 Reach '+fmt(goal)+'</span><span class="chip'+(objective&&objective.done?' ok':'')+'">'+(objective&&objective.done?'✔ Building goal':'🏗️ Build '+objectiveName)+'</span><span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span><span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>'}
 function draw(){
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
   $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent="Lv "+lv;
@@ -961,7 +990,7 @@ let lvFrom="menu";
 function showLevels(from){lvFrom=from;const p=getProg(),mx=p?p.lv:1,g=$("lgrid");g.innerHTML="";
   $("lvsub").textContent=(mode==="timed"?"⏱️ Timed":"🧘 Relaxed")+" · 3 stars = reach the goal, finish the bonus, beat the par time."+(store.get(KEY)?" Starting a level replaces your saved game in progress.":"");
   for(let n=1;n<=mx+2;n++){const b=document.createElement("button"),ok=n<=mx,st=best[n]||0;b.className="lt"+(ok&&n===mx?" cur":"");b.disabled=!ok;
-    b.innerHTML=ok?"<b>Level "+n+"</b><span>"+"⭐".repeat(st)+"☆".repeat(3-st)+"</span><small>Goal "+fmt(Math.round((1800+n*400)*(n>=4?1.25:1)))+"</small>":"<b>🔒 "+n+"</b>";
+    b.innerHTML=ok?"<b>Level "+n+"</b><span>"+"⭐".repeat(st)+"☆".repeat(3-st)+"</span><small>Goal "+fmt(1600+n*300)+"</small>":"<b>🔒 "+n+"</b>";
     b.onclick=()=>{$("lvs").style.display="none";lv=n;startLevel()};g.appendChild(b)}
   ["ov","end"].forEach(x=>$(x).style.display="none");$("lvs").style.display="flex"}
 $("lback").onclick=()=>{$("lvs").style.display="none";$(lvFrom==="end"?"end":"ov").style.display="flex"};
