@@ -57,7 +57,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot.has-parking.to-bottom::after{bottom:-12px;height:36px}
 .lot.has-parking.to-top::before{top:5px}
 .lot.has-parking.to-top::after{top:-12px;height:17px}
-.lot.has-parking.business-parking::before{left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:68px;height:34px;box-sizing:border-box;background:repeating-linear-gradient(90deg,#aeb2a9 0 12px,#f8f8ef 12px 13px,#aeb2a9 13px 23px);}
+.lot.has-parking.business-parking::before{left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:68px;height:34px;box-sizing:border-box;background:linear-gradient(90deg,transparent calc(50% - .6px),#f8f8ef calc(50% - .6px),#f8f8ef calc(50% + .6px),transparent calc(50% + .6px)),#aeb2a9;}
 .lot.has-parking.business-parking.to-bottom::before{bottom:20px}
 .lot.has-parking.business-parking.to-top::before{top:3px}
 .lot.has-parking.business-parking::after{left:calc(50% - 12px);width:24px}
@@ -420,9 +420,20 @@ function tick(now){
         const visitor=traffic[i];
         if(visitor&&visitor.visitor&&visitor.kind==="parked"){
           visitor.parkUntil=(visitor.parkUntil==null?10+Math.random()*12:visitor.parkUntil)-dt;
-          if(visitor.parkUntil<=5&&!visitor.secondParked){visitor.secondParked=true;visitor.secondSide=-(visitor.side||1);visitor.secondLeaveIn=5;}
-          if(visitor.secondParked){visitor.secondLeaveIn-=dt;if(visitor.secondLeaveIn<=0)beginTrafficDeparture(i,visitor,trafficGeometry(i));}
-          else if(visitor.parkUntil<=0)beginTrafficDeparture(i,visitor,trafficGeometry(i));
+          if(visitor.parkUntil<=5&&!visitor.secondParked){
+            visitor.secondParked=true;
+            visitor.secondSide=-(visitor.side||1);
+            visitor.secondArriveT=0;
+            visitor.secondArriveDur=2.4;
+          }
+          if(visitor.secondParked&&visitor.secondArriveT<visitor.secondArriveDur){
+            visitor.secondArriveT=Math.min(visitor.secondArriveDur,visitor.secondArriveT+dt);
+          }
+          if(visitor.parkUntil<=0&&visitor.secondParked&&visitor.secondArriveT>=visitor.secondArriveDur){
+            beginTrafficDeparture(i,visitor,trafficGeometry(i));
+          }else if(visitor.parkUntil<=0&&!visitor.secondParked){
+            beginTrafficDeparture(i,visitor,trafficGeometry(i));
+          }
         }else if(!visitor){
           l.visitorWait=(l.visitorWait==null?2+Math.random()*5:l.visitorWait)-dt;
           if(l.visitorWait<=0)startBusinessVisitorArrival(i);
@@ -546,9 +557,7 @@ function art(l,i){
   // This is important because the lot SVG occupies only the upper portion of each tall lot;
   // drawing the driveway inside its 0..90 viewBox leaves a visible gap before the road.
   const streetAbove=Math.floor(i/5)>0;
-  const buddy=traffic[i]&&traffic[i].visitor&&traffic[i].kind==='parked'&&traffic[i].secondParked;
-  const buddyCar=buddy?'<g transform="translate('+(traffic[i].secondSide<0?67:88)+' '+(streetAbove?22:58)+')"><rect x="-5" y="-8" width="10" height="16" rx="2.5" fill="#2878bd" stroke="#263238" stroke-width=".8"/><rect x="-3" y="-4" width="6" height="7" rx="1" fill="#bde3f5"/></g>':'';
-  return '<g transform="translate(0 '+(streetAbove?'40':'14')+')">'+main+'</g>'+buddyCar;
+  return '<g transform="translate(0 '+(streetAbove?'40':'14')+')">'+main+'</g>';
 }
 
 let tutOn=false;
@@ -679,7 +688,18 @@ function sendBuyerAway(i){
   traffic[i]={kind:"depart",t:0,dur:trafficDuration(g,dir,"depart"),dir,color:trafficColor(i),speedFactor:1,actualSpeed:0,exitCommitted:false};
 }
 function finishTraffic(i,tr){
+  // If a second visitor has pulled into the opposite bay, keep that same-size
+  // vehicle parked and promote it to the active visitor instead of deleting it.
+  if(tr.visitor&&tr.secondParked&&tr.secondEl&&tr.secondArriveT>=tr.secondArriveDur){
+    if(tr.el)tr.el.remove();
+    const next={kind:"parked",t:0,dur:0,dir:tr.dir,color:tr.secondColor||"#2878bd",el:tr.secondEl,
+      visitor:true,side:tr.secondSide,stay:10+Math.random()*12,parkUntil:10+Math.random()*12};
+    tr.secondEl=null;
+    traffic[i]=next;
+    return;
+  }
   if(tr.el)tr.el.remove();
+  if(tr.secondEl)tr.secondEl.remove();
   const queue=tr.queuedBuyer&&lots[i]&&lots[i].offer;
   if(tr.visitor&&lots[i])lots[i].visitorWait=4+Math.random()*10;
   delete traffic[i];
@@ -1010,12 +1030,23 @@ function renderTraffic(){
     const i=+key,tr=traffic[i];if(!tr)return;
     if(!tr.el||!tr.el.isConnected){tr.el=makeVehicle(tr.color,"traffic-car",tr.truck);sc.appendChild(tr.el)}
     if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
-    if(tr.kind==="parked"){
-      const g=trafficGeometry(i);if(!g)return;const endA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
-      tr.el.style.left=((g.parkX??g.x)-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";return;
-    }
     const g=trafficGeometry(i);if(!g)return;
-    const pose=trafficPose(tr,g);tr.el.style.left=(pose.x-10)+"px";tr.el.style.top=(pose.y-5.625)+"px";tr.el.style.transform="rotate("+pose.a+"deg)";
+    if(tr.kind==="parked"){
+      const endA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
+      tr.el.style.left=((g.parkX??g.x)-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";
+    }else{
+      const pose=trafficPose(tr,g);tr.el.style.left=(pose.x-10)+"px";tr.el.style.top=(pose.y-5.625)+"px";tr.el.style.transform="rotate("+pose.a+"deg)";
+    }
+    if(tr.visitor&&tr.secondParked){
+      if(!tr.secondEl||!tr.secondEl.isConnected){tr.secondColor="#2878bd";tr.secondEl=makeVehicle(tr.secondColor,"traffic-car");sc.appendChild(tr.secondEl)}
+      const progress=clamp01((tr.secondArriveT||0)/(tr.secondArriveDur||1));
+      const entryY=g.roadY+g.towardLot*28;
+      const lateral=easeTraffic(clamp01((progress-.72)/.28));
+      const x=g.x+(g.x+(tr.secondSide||1)*21-g.x)*lateral;
+      const y=entryY+(g.parkY-entryY)*easeTraffic(progress);
+      const endA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
+      tr.secondEl.style.left=(x-10)+"px";tr.secondEl.style.top=(y-5.625)+"px";tr.secondEl.style.transform="rotate("+endA+"deg)";
+    }else if(tr.secondEl){tr.secondEl.remove();tr.secondEl=null}
   });
   renderRoadTraffic();
 }
