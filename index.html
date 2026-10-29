@@ -50,17 +50,19 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @media(hover:hover){.lot:hover{border-color:#fff}}
 .lot svg{width:100%;height:84px;display:block;flex-shrink:0;pointer-events:none;transform-origin:50% 100%;position:relative;z-index:2}
 .drive-art{pointer-events:none}
-/* Parking is anchored to the actual street-facing edge of each lot, not to the small house SVG. */
+/* Parking is anchored to the lot edge. Driveway connectors stop at the gray sidewalk before the road. */
 .lot.has-parking::before{content:"";position:absolute;left:calc(50% - 27px);width:54px;height:30px;background:#777b75;border:1px solid #545954;border-radius:3px;box-sizing:border-box;z-index:1;pointer-events:none}
 .lot.has-parking::after{content:"";position:absolute;left:calc(50% - 10px);width:20px;height:24px;background:#777b75;border-left:1px solid #545954;border-right:1px solid #545954;box-sizing:border-box;z-index:1;pointer-events:none}
 .lot.has-parking.to-bottom::before{bottom:24px}
-.lot.has-parking.to-bottom::after{bottom:-18px;height:44px}
+.lot.has-parking.to-bottom::after{bottom:-12px;height:36px}
 .lot.has-parking.to-top::before{top:5px}
-.lot.has-parking.to-top::after{top:-18px;height:44px}
+.lot.has-parking.to-top::after{top:-12px;height:17px}
 .lot.has-parking.business-parking::before{left:calc(50% - 34px);width:68px;height:34px;background:repeating-linear-gradient(90deg,#aeb2a9 0 12px,#f8f8ef 12px 13px,#aeb2a9 13px 23px);}
 .lot.has-parking.business-parking.to-bottom::before{bottom:20px}
 .lot.has-parking.business-parking.to-top::before{top:3px}
 .lot.has-parking.business-parking::after{left:calc(50% - 12px);width:24px}
+.lot.has-parking.business-parking.to-bottom::after{bottom:-12px;height:32px}
+.lot.has-parking.business-parking.to-top::after{top:-12px;height:15px}
 .lot .act,.lot .pb{position:relative;z-index:3}
 .pi{animation:pi .5s}
 @keyframes pi{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
@@ -191,7 +193,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 
 <div class="ov" id="ov"><div class="box">
   <h2>🏡 Lot Flip</h2>
-  <p>Buy plots, build homes that <b>auto-rent</b>, and flip houses. Every lot has a street-connected parking lot. Unlock 10 building types from Levels 1–30. Amenities can raise nearby values, apartments and shopping traffic can lower nearby home values, and fire stations boost homes on their street. Complete money and building goals in either mode!</p>
+  <p>Buy plots, build homes that <b>auto-rent</b>, and flip houses. Houses and businesses have street-connected parking. Public destinations attract visitors who park and leave over time. Unlock 10 building types from Levels 1–30. Amenities can raise nearby values, apartments and shopping traffic can lower nearby home values, and fire stations boost homes on their street. Complete money and building goals in either mode!</p>
   <div class="modes">
     <button class="mb active" id="mt"><b>⏱️ Timed</b><small>Beat the clock</small></button>
     <button class="mb" id="mr"><b>🧘 Relaxed</b><small>No timer</small></button>
@@ -243,6 +245,8 @@ let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],e
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
 const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false});
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo").length;
+// Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
+const visitorBusiness=l=>!!(l&&l.st==="ready"&&["civic","pool","school","hospital","shopping","bank"].includes(l.hs));
 const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
 function adj(i){const a=[],c=i%5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);if(i>=5)a.push(i-5);if(i+5<lots.length)a.push(i+5);return a}
@@ -405,6 +409,16 @@ function tick(now){
     else{ev.next-=dt;if(ev.next<=0){ev.k=["boom","crash","rent"][Math.floor(Math.random()*3)];ev.t=15;ev.next=35+Math.random()*20;toast(EV[ev.k])}}
     updateTraffic(dt);
     lots.forEach((l,i)=>{
+      if(visitorBusiness(l)){
+        const visitor=traffic[i];
+        if(visitor&&visitor.visitor&&visitor.kind==="parked"){
+          visitor.parkUntil=(visitor.parkUntil==null?10+Math.random()*12:visitor.parkUntil)-dt;
+          if(visitor.parkUntil<=0)beginTrafficDeparture(i,visitor,trafficGeometry(i));
+        }else if(!visitor){
+          l.visitorWait=(l.visitorWait==null?2+Math.random()*5:l.visitorWait)-dt;
+          if(l.visitorWait<=0)startBusinessVisitorArrival(i);
+        }
+      }else if(l.visitorWait!=null)l.visitorWait=null;
       if(l.hs&&S[l.hs].rev&&l.st==="ready"){l.rt-=dt;if(l.rt<=0){l.rt=3;money+=S[l.hs].rev;pop(i,"+"+fmt(S[l.hs].rev))}}
       l.pt-=dt;if(l.pt<=0){l.pt=5+Math.random()*3;l.land=Math.round(Math.min(240,Math.max(90,l.land+(Math.random()-.5)*40)))}
       if(l.st==="ai_owned"){l.aiW-=dt;if(l.aiW<=0){l.st="ai_for_sale";startTraffic(i,"leave");l.disc=false;if(l.sp){l.disc=Math.random()<.08;l.aiP=Math.round(l.sp*(l.disc?.8+Math.random()*.2:1+Math.random()*.25))}else l.aiP=Math.round(val(i)*(.85+Math.random()*.3));l.aiT=12+Math.random()*8;l.wait=2;toast("🏠 Lot "+(i+1)+" ("+S[l.hs].n+") is for sale: "+fmt(l.aiP))}}
@@ -412,7 +426,7 @@ function tick(now){
         if(l.wait<=0){l.wait=2+Math.random()*2;l.aiP=Math.round(Math.max(100,l.sp?l.sp*(l.disc?.8:1):0,l.aiP+(Math.random()-.48)*35));if(sel===i)sheet(i)}
         if(l.aiT<=0){l.st="ai_owned";l.aiW=10+Math.random()*12;if(sel===i)closeSheet()}}
       else if(l.st==="rented"){l.rent=rentOf(i);l.rt-=dt;if(l.rt<=0){l.rt+=3;money+=l.rent;pop(i,"+"+fmt(l.rent))}}
-      else if(l.st==="working"){l.p+=dt/l.dur;if(l.p>=1){l.p=0;l.rt=3;if(S[l.hs].cat==="i"){l.st="ready";toast(S[l.hs].n+" finished on Lot "+(i+1)+"!")}else{l.st="rented";l.rent=rentOf(i);toast(S[l.hs].n+" finished! Renting for "+fmt(l.rent)+"/3s.")}fx(i,"done")}}
+      else if(l.st==="working"){l.p+=dt/l.dur;if(l.p>=1){l.p=0;l.rt=3;if(S[l.hs].cat==="i"){l.st="ready";if(visitorBusiness(l))l.visitorWait=2+Math.random()*5;toast(S[l.hs].n+" finished on Lot "+(i+1)+"!")}else{l.st="rented";l.rent=rentOf(i);toast(S[l.hs].n+" finished! Renting for "+fmt(l.rent)+"/3s.")}fx(i,"done")}}
       else if(l.st==="reno_working"){l.rp+=dt/l.rd;if(l.rp>=1){l.reno.push(l.pend);if(l.pend==="paint")l.paint=PAINT[Math.floor(Math.random()*PAINT.length)];toast(R[l.pend].n+" done on Lot "+(i+1)+"!");l.pend=null;l.rp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;fx(i,"done")}}
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt;if(l.wait<=0)spawnOffer(i)}
@@ -540,11 +554,16 @@ function truck(i,l){
 function trafficGeometry(i){
   const sc=$("scene"),lot=els[i];if(!sc||!lot)return null;
   const svg=lot.querySelector("svg"),roads=[...sc.querySelectorAll(".road")];if(!svg||!roads.length)return null;
-  const scRect=sc.getBoundingClientRect(),svgRect=svg.getBoundingClientRect(),road=(i>=10?(roads[1]||roads[0]):roads[0]),roadRect=road.getBoundingClientRect();
+  const scRect=sc.getBoundingClientRect(),lotRect=lot.getBoundingClientRect(),road=(i>=10?(roads[1]||roads[0]):roads[0]),roadRect=road.getBoundingClientRect();
   const ox=scRect.left+sc.clientLeft,oy=scRect.top+sc.clientTop,row=Math.floor(i/5),streetAbove=row>0;
-  const driveX=svgRect.left-ox+svgRect.width*.82;
-  const carY=streetAbove?39:57;
-  return {x:driveX,parkY:svgRect.top-oy+carY*(svgRect.height/90),roadY:roadRect.top-oy+roadRect.height/2,road,
+  const business=!!(lots[i]&&lots[i].hs&&S[lots[i].hs]&&S[lots[i].hs].cat==="i");
+  // Match the CSS parking pad exactly: centered horizontally, with its center measured
+  // from the lot's street-facing edge. Cars therefore finish inside the visible stall.
+  const driveX=lotRect.left-ox+lotRect.width/2;
+  const parkY=streetAbove
+    ? lotRect.top-oy+(business?20:20)
+    : lotRect.bottom-oy-(business?37:39);
+  return {x:driveX,parkY,roadY:roadRect.top-oy+roadRect.height/2,road,
     towardLot:streetAbove?1:-1,width:sc.clientWidth,height:sc.clientHeight};
 }
 function trafficColor(i){const colors=["#d84343","#2878bd","#f5b82e","#f3f4ef","#8e5cb7","#279b86"];return colors[(i+2)%colors.length]}
@@ -588,6 +607,12 @@ function startBuyerArrival(i){
   const dur=trafficDuration(g,dir,"arrive");
   traffic[i]={kind:"arrive",t:0,dur,dir,color:trafficColor(i)};
 }
+function startBusinessVisitorArrival(i){
+  const l=lots[i],g=trafficGeometry(i);
+  if(!g||!visitorBusiness(l)||traffic[i])return;
+  const dir=nearSideLaneDirection(g);
+  traffic[i]={kind:"arrive",t:0,dur:trafficDuration(g,dir,"arrive"),dir,color:trafficColor(i),visitor:true,stay:8+Math.random()*18};
+}
 function startDemoTruck(i){
   const g=trafficGeometry(i);if(!g)return;
   const cur=traffic[i];if(cur&&cur.el)cur.el.remove();
@@ -622,6 +647,7 @@ function sendBuyerAway(i){
 function finishTraffic(i,tr){
   if(tr.el)tr.el.remove();
   const queue=tr.queuedBuyer&&lots[i]&&lots[i].offer;
+  if(tr.visitor&&lots[i])lots[i].visitorWait=4+Math.random()*10;
   delete traffic[i];
   if(queue)startBuyerArrival(i);
 }
@@ -912,7 +938,7 @@ function updateTraffic(dt){
 
     if(tr.kind==="arrive"&&tr.t>=tr.dur){
       if(tr.leaveAfterArrival)beginTrafficDeparture(i,tr,g);
-      else{tr.kind="parked";tr.t=tr.dur;tr.actualSpeed=0}
+      else{tr.kind="parked";tr.t=tr.dur;tr.actualSpeed=0;if(tr.visitor)tr.parkUntil=tr.stay|| (8+Math.random()*18)}
     }
     else if(tr.kind!=="arrive"&&tr.t>=tr.dur)finishTraffic(i,tr);
   });
