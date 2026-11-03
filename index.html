@@ -39,7 +39,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .traffic-car{z-index:65}
 .road-traffic-car{z-index:60}
 .traffic-car svg,.road-traffic-car svg{display:block;width:20px;height:11.25px;overflow:visible}
-.lot{background:#73b853;border:2px dashed #488433;border-radius:10px;padding:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;height:142px;overflow:visible;user-select:none;-webkit-user-select:none;transition:transform .15s}
+.lot{background:var(--lot,#73b853);border:2px dashed var(--lotbd,#488433);border-radius:10px;padding:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;height:142px;overflow:visible;user-select:none;-webkit-user-select:none;transition:transform .15s}
 .lot.purchased{background:linear-gradient(135deg,rgba(255,193,7,.18) 0 16px,var(--card) 16px);border:3px solid #d6a400;outline:2px solid #d6a400;outline-offset:-3px;box-shadow:inset 0 0 0 2px rgba(255,193,7,.16),0 0 0 1px rgba(0,0,0,.12)}
 .lot.ai-owned{background:#33261a;border:2px solid #8d6e63}
 .lot.tap{transform:scale(.93)}
@@ -116,7 +116,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 #tut{background:rgba(255,179,0,.15);border:1px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;text-align:center;animation:tp 1.6s infinite}
 #tut:empty{display:none}
 @keyframes tp{50%{border-color:var(--acc)}}
-@media(prefers-reduced-motion:reduce){.smk,.flag,.spray,.scaf{animation:none}}
+@media(prefers-reduced-motion:reduce){.smk,.flag,.spray,.scaf,#lfs i,#stm .rain{animation:none}}
 .shop{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .b{background:var(--card);color:var(--text);border:2px solid var(--line);border-radius:10px;min-height:48px;padding:6px;font:inherit;font-size:13px;font-weight:700}
 .b:disabled{opacity:.4}
@@ -145,6 +145,22 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .mbtn.blue{background:#0288d1}.mbtn.gold{background:#f57c00}.mbtn.line{background:var(--line)}
 .stars{font-size:34px;letter-spacing:4px}
 .box{max-height:94vh;overflow-y:auto}
+.lot.dmg{border-color:#e53935!important;outline-color:#e53935!important;animation:dmg 1s infinite}
+@keyframes dmg{50%{box-shadow:0 0 14px 4px rgba(229,57,53,.95)}}
+.act.dmgl{background:#e53935;font-size:10px}
+#lfs{position:absolute;inset:0;z-index:70;pointer-events:none;overflow:hidden;border-radius:11px}
+#lfs i{position:absolute;top:0;width:var(--s);height:calc(var(--s)*.65);background:var(--c);border-radius:60% 0 60% 0;opacity:.85;animation:leaf var(--t) linear var(--d) infinite;will-change:transform}
+@keyframes leaf{0%{transform:translate3d(0,-14px,0) rotate(0)}25%{transform:translate3d(16px,calc(var(--h)*.25),0) rotate(110deg)}50%{transform:translate3d(-8px,calc(var(--h)*.5),0) rotate(230deg)}75%{transform:translate3d(14px,calc(var(--h)*.75),0) rotate(320deg)}100%{transform:translate3d(0,var(--h),0) rotate(420deg)}}
+#stm{position:absolute;inset:0;z-index:80;pointer-events:none;opacity:0;transition:opacity .9s;background:rgba(18,26,44,.45);border-radius:11px;overflow:hidden}
+#stm.on{opacity:1}
+#stm .rain{position:absolute;left:-30%;right:-30%;top:-90px;bottom:-90px;opacity:.75;background:repeating-linear-gradient(90deg,transparent 0 11px,rgba(200,222,255,.85) 11px 12px);-webkit-mask-image:repeating-linear-gradient(180deg,#000 0 16px,transparent 16px 44px);mask-image:repeating-linear-gradient(180deg,#000 0 16px,transparent 16px 44px);animation:rain .4s linear infinite}
+#stm .r2{opacity:.45;background:repeating-linear-gradient(90deg,transparent 0 16px,rgba(200,222,255,.8) 16px 17px);-webkit-mask-image:repeating-linear-gradient(180deg,#000 0 10px,transparent 10px 36px);mask-image:repeating-linear-gradient(180deg,#000 0 10px,transparent 10px 36px);animation-duration:.3s}
+@keyframes rain{from{transform:rotate(14deg) translateY(0)}to{transform:rotate(14deg) translateY(44px)}}
+#stm .r2{animation-name:rain2}
+@keyframes rain2{from{transform:rotate(14deg) translateY(0)}to{transform:rotate(14deg) translateY(36px)}}
+#stm .flash{position:absolute;inset:0;background:#fff;opacity:0}
+#stm.bolt .flash{animation:bolt .8s}
+@keyframes bolt{0%{opacity:0}8%{opacity:.9}16%{opacity:.1}26%{opacity:.75}100%{opacity:0}}
 @media(max-width:768px){.lot{height:124px}.lot svg{height:76px}}
 
 /* compact pinned HUD */
@@ -247,13 +263,13 @@ const unlocked=k=>lv>=(S[k]?.unlock||1);
 const availableBuildings=()=>Object.keys(S).filter(unlocked);
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
 const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
-const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s"};
+const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses"};
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
 let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
 
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
-const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,marketWait:18+Math.random()*32,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false});
+const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,marketWait:18+Math.random()*32,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false,dmg:false});
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo").length;
 // Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
 const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank"].includes(l.hs));
@@ -285,14 +301,14 @@ function nBoost(i){
 }
 function parkRB(i){let b=0;adj(i).forEach(n=>{const l=lots[n];if(l&&l.hs==="park"&&done(l))b+=S.park.rb});return b}
 function val(i){const l=lots[i];return Math.max(1,Math.round((l.land+(l.hs?S[l.hs].val:0)+l.reno.reduce((a,k)=>a+R[k].vb,0))*(1+nBoost(i))))}
-function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working")return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1)*(twist&&twist.k==="recession"?.6:1))}
+function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working"||l.dmg)return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1)*(twist&&twist.k==="recession"?.6:1))}
 
 function build(){
   const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];
   const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
   const rd=document.createElement("div");rd.className="road";
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div>';
-  sc.append(row(0),rd,row(5));if(lots.length>10){const r2=rd.cloneNode(true);sc.append(r2,row(10))}els=[...sc.querySelectorAll(".lot")];initRoadTraffic();
+  sc.append(row(0),rd,row(5));if(lots.length>10){const r2=rd.cloneNode(true);sc.append(r2,row(10))}els=[...sc.querySelectorAll(".lot")];initRoadTraffic();fxLayers();
 }
 
 function startLevel(){
@@ -346,6 +362,7 @@ const sfx={
  offer(){tone(740,.1,"sine",.08);tone(988,.16,"sine",.08,.1)},
  crash(){noise(.5,.18);tone(90,.4,"sawtooth",.08,0,40)},
  win(){[523,659,784,1047,1319].forEach((f,k)=>tone(f,.2,"triangle",.1,k*.1))},
+ rumble(){noise(.9,.12);tone(60,.9,"sawtooth",.05,0,35)},
  lose(){[440,370,311,262].forEach((f,k)=>tone(f,.25,"sawtooth",.06,k*.15))}
 };
 function fx(i,t){
@@ -380,7 +397,8 @@ function sheet(i,conf){
     h=hd("Lot "+(i+1)+" · "+S[l.hs].n,"Value "+fmt(val(i))+(inf?"":" · Rent "+fmt(rentOf(i))+"/3s")+(l.reno.length?" · "+"⭐".repeat(l.reno.length):""));
     if(l.offer)h+='<div class="ob">💰 Buyer offers <b>'+fmt(l.offer.price)+'</b> (value '+fmt(val(i))+')</div><div class="opts"><button class="opt ok" data-a="accept">✓ Accept</button><button class="opt no" data-a="reject">✕ Reject</button></div>';
     h+='<div class="opts">';
-    if(l.st==="rented"&&!inf&&nx)h+='<button class="opt'+(money<R[nx].cost?" dim":"")+'" data-a="upgrade"><b>👷 '+R[nx].n+" "+fmt(R[nx].cost)+"</b><small>+"+fmt(R[nx].vb)+" value</small></button>";
+    if(l.dmg)h+='<button class="opt'+(money<repairCost(i)?" dim":"")+'" data-a="repair"><b>🔧 Repair '+fmt(repairCost(i))+"</b><small>Storm damage · restores rent</small></button>";
+    if(l.st==="rented"&&!inf&&nx&&!l.dmg)h+='<button class="opt'+(money<R[nx].cost?" dim":"")+'" data-a="upgrade"><b>👷 '+R[nx].n+" "+fmt(R[nx].cost)+"</b><small>+"+fmt(R[nx].vb)+" value</small></button>";
     if(l.st==="rented"&&!inf)h+='<button class="opt" data-a="list"><b>🏷️ List for Sale</b><small>Pauses rent</small></button>';
     if(l.st==="listed")h+='<button class="opt" data-a="unlist"><b>🛑 Unlist</b><small>Resume rent</small></button>';
     h+='<button class="opt" data-a="demo"><b>🏗️ Demolish $100</b><small>Back to empty land</small></button>'+cl+"</div>";
@@ -394,8 +412,10 @@ function act(i,a){
   if(S[a]){if(l.st==="owned")startBuild(i,a);return}
   if(a==="close")closeSheet();
   else if(a==="upgrade")reno(i);
+  else if(a==="list"&&l.st==="rented"&&l.dmg)toast("Repair the storm damage before listing.");
   else if(a==="list"&&l.st==="rented"){l.st="listed";l.wait=1.5+Math.random()*2;startTraffic(i,"leave");closeSheet();toast("Listed! The owner is pulling out, and rent is paused until it sells.");draw()}
   else if(a==="unlist"&&l.st==="listed"){if(l.offer)sendBuyerAway(i);l.st="rented";l.offer=null;l.rent=rentOf(i);l.rt=3;closeSheet();toast("Unlisted. Rent resumed.");draw()}
+  else if(a==="repair"&&l.dmg){const c=repairCost(i);if(money<c)return toast("Need "+fmt(c)+" to repair.");money-=c;l.dmg=false;l.rt=3;closeSheet();fx(i,"done");toast("Repaired Lot "+(i+1)+"!");draw()}
   else if(a==="demo")sheet(i,true);
   else if(a==="demo0")sheet(i);
   else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");if(busy()>=builders)return toast("All builders are busy!");money-=100;l.offer=null;l.st="demo";l.dp=0;l.dd=8/speed;sfx.crash();closeSheet();toast("Demolition crew on the way…");draw()}
@@ -417,8 +437,8 @@ function tick(now){
   const dt=Math.min(.1,(now-last)/1000);last=now;
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
-    if(ev.k){ev.t-=dt;if(ev.t<=0){ev.k=null;toast("Market is back to normal.")}}
-    else{ev.next-=dt;if(ev.next<=0){ev.k=["boom","crash","rent"][Math.floor(Math.random()*3)];ev.t=15;ev.next=35+Math.random()*20;toast(EV[ev.k])}}
+    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.t<=0){toast(ev.k==="storm"?"☀️ The storm has passed.":"Market is back to normal.");ev.k=null}}
+    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(EV[ev.k]);if(ev.k==="storm")sfx.rumble()}}
     updateTraffic(dt);
     lots.forEach((l,i)=>{
       if(visitorBusiness(l)){
@@ -462,7 +482,7 @@ function tick(now){
       else if(l.st==="ai_for_sale"){l.aiT-=dt;l.wait-=dt;
         if(l.wait<=0){l.wait=2+Math.random()*2;l.aiP=Math.round(Math.max(100,l.sp?l.sp*(l.disc?.8:1):0,l.aiP+(Math.random()-.48)*35));if(sel===i)sheet(i)}
         if(l.aiT<=0){l.st="ai_owned";l.aiW=10+Math.random()*12;if(sel===i)closeSheet()}}
-      else if(l.st==="rented"){l.rent=rentOf(i);l.rt-=dt;if(l.rt<=0){l.rt+=3;money+=l.rent;pop(i,"+"+fmt(l.rent))}}
+      else if(l.st==="rented"){l.rent=rentOf(i);l.rt-=dt;if(l.rt<=0){l.rt+=3;if(l.rent>0){money+=l.rent;pop(i,"+"+fmt(l.rent))}}}
       else if(l.st==="working"){l.p+=dt/l.dur;if(l.p>=1){l.p=0;l.rt=3;if(S[l.hs].cat==="i"){l.st="ready";if(visitorBusiness(l))l.visitorWait=2+Math.random()*5;toast(S[l.hs].n+" finished on Lot "+(i+1)+"!")}else{l.st="rented";l.rent=rentOf(i);toast(S[l.hs].n+" finished! Renting for "+fmt(l.rent)+"/3s.")}fx(i,"done")}}
       else if(l.st==="reno_working"){l.rp+=dt/l.rd;if(l.rp>=1){l.reno.push(l.pend);if(l.pend==="paint")l.paint=PAINT[Math.floor(Math.random()*PAINT.length)];toast(R[l.pend].n+" done on Lot "+(i+1)+"!");l.pend=null;l.rp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;fx(i,"done")}}
       else if(l.st==="listed"){
@@ -526,6 +546,7 @@ function houseArt(l,i){
     return '<defs><clipPath id="c'+i+'"><rect x="0" y="'+ry+'" width="100" height="'+rh+'"/></clipPath></defs><rect x="10" y="46" width="80" height="8" rx="2" fill="#8d6e63" stroke="#5d4037"/><g clip-path="url(#c'+i+')">'+s+'</g><g class="scaf" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none"><rect x="12" y="'+Math.max(10,ry-4)+'" width="76" height="'+Math.min(40,rh+6)+'" rx="2"/><path d="M12 '+ry+'h76M30 10v40M70 10v40"/></g><text class="hm" x="68" y="'+Math.max(24,ry+6)+'" font-size="16">🔨</text>';
   }
   if(st==="listed"||st==="ai_for_sale")s+='<g transform="translate(18,5) scale(1.25)"><path d="M18 18v26M18 20h14" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/><rect x="18" y="22" width="28" height="18" rx="2" fill="#fff" stroke="#1565c0" stroke-width="1.5"/><rect x="18" y="22" width="28" height="6" fill="#1565c0"/><text x="32" y="26.5" font-size="4" font-weight="900" text-anchor="middle" fill="#fff">REALTY</text><text x="32" y="34" font-size="5" font-weight="900" text-anchor="middle" fill="#d32f2f">FOR SALE</text></g>';
+  if(l.dmg&&st==="rented")s+='<polygon points="30,16 54,9 66,19 42,27" fill="#1e88e5" stroke="#0d47a1" opacity=".9"/><path d="M34 18l8 5M46 13l9 6" stroke="#fff" opacity=".5"/><circle class="smk" cx="58" cy="16" r="3" fill="#555"/><circle class="smk s2" cx="48" cy="18" r="3" fill="#555"/><g class="scaf"><circle cx="50" cy="12" r="10" fill="#e53935" stroke="#fff" stroke-width="1.5"/><text x="50" y="18" font-size="15" font-weight="900" text-anchor="middle" fill="#fff">!</text></g>';
   if(st==="rented")s+='<rect x="2" y="32" width="24" height="10" rx="2" fill="#4caf50"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">RENT</text>';
   if(st==="sold")s+='<g class="stamp"><g transform="rotate(-12 50 32)"><rect x="12" y="23" width="76" height="18" rx="3" fill="#e53935" stroke="#fff" stroke-width="1.5"/><text x="50" y="37" font-size="13" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="2">SOLD</text></g></g>';
   return s;
@@ -554,7 +575,7 @@ function drivewayArt(i,parked,l){
   return '<g class="drive-art"><path d="'+roadEdge+'" fill="none" stroke="#777b75" stroke-width="12" stroke-linecap="round"/><path d="'+roadEdge+'" fill="none" stroke="#c7c8bf" stroke-width="8" stroke-linecap="round"/><rect x="64" y="'+lotY+'" width="32" height="27" rx="2.5" fill="#777b75" stroke="#545954" stroke-width="1.2"/><rect x="66" y="'+(lotY+2)+'" width="28" height="23" rx="1.5" fill="#c7c8bf"/><path d="M80 '+(lotY+2)+'v23" stroke="#f7f7ef" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M66 '+(lotY+2)+'h28M66 '+(lotY+25)+'h28" stroke="#ecece5" stroke-width=".8"/>'+parkedCars+'</g>';
 }
 function art(l,i){
-  const main=houseArt(l,i);
+  const main=houseArt(l,i).replace(/#5aa23e/g,COS.theme[meta.eq.theme].g);
   // Vacant lots stay clear. Add pavement only when a building exists or construction is underway.
   const hasBuilding=!!l.hs&&l.st!=="sold";
   const parked=hasBuilding&&!['working','reno_working','demo','sold','listed','ai_for_sale'].includes(l.st)&&!traffic[i];
@@ -1060,10 +1081,10 @@ function renderTraffic(){
   renderRoadTraffic();
 }
 
-function chips(){if(!bonus)return"";const par=90+lv*10,pm=elapsed>par;
+function chips(){if(!bonus)return"";const dm=lots.filter(l=>l.dmg&&l.st==="rented").length;const par=90+lv*10,pm=elapsed>par;
   const objectiveName=S[objective?objective.k:"ranch"].n;
-  return (twist?'<span class="chip ok">'+twist.ic+' '+twist.n+': '+twist.d+'</span>':'')+'<span class="chip'+(money>=goal?' ok':'')+'">💰 Reach '+fmt(goal)+'</span><span class="chip'+(objective&&objective.done?' ok':'')+'">'+(objective&&objective.done?'✔ Building goal':'🏗️ Build '+objectiveName)+'</span><span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span><span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>'}
-function draw(){
+  return (dm?'<span class="chip" style="border-color:#e53935;color:#ff8a80">🔧 '+dm+' damaged · tap to repair</span>':'')+(twist?'<span class="chip ok">'+twist.ic+' '+twist.n+': '+twist.d+'</span>':'')+'<span class="chip'+(money>=goal?' ok':'')+'">💰 Reach '+fmt(goal)+'</span><span class="chip'+(objective&&objective.done?' ok':'')+'">'+(objective&&objective.done?'✔ Building goal':'🏗️ Build '+objectiveName)+'</span><span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span><span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>'}
+function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&&run);
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
   $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent="Lv "+lv;
   $("bld").textContent=(builders-busy())+"/"+builders;
@@ -1087,16 +1108,16 @@ function draw(){
     e.classList.toggle("purchased",mine);e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
     const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
-    const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):""].join("|");
+    const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):""].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
     let lb="",pb=0;const sn=l.hs?S[l.hs].n.split(" ")[0]:"";
     if(l.st==="empty")lb="Buy "+fmt(l.land);else if(l.st==="off_market")lb="Off market";else if(l.st==="owned")lb=sellMode?"Sell lot":"Build here";
     else if(l.st==="working"){lb=sn+"…";pb=l.p}else if(l.st==="reno_working"){lb="Upgrading…";pb=l.rp}else if(l.st==="demo"){lb="Demolishing…";pb=l.dp}
-    else if(l.st==="ready")lb=sn+" ✔";else if(l.st==="rented")lb=fmt(rentOf(i))+"/3s";
+    else if(l.st==="ready")lb=sn+" ✔";else if(l.st==="rented")lb=l.dmg?"⚡ REPAIR "+fmt(repairCost(i)):fmt(rentOf(i))+"/3s";
     else if(l.st==="listed")lb=l.offer?"💰 "+fmt(l.offer.price):"On market";else if(l.st==="ai_owned")lb=sn;
     else if(l.st==="ai_for_sale")lb="Buy "+fmt(l.aiP);else lb="Sold ✔";
     if(l.offer)pb=l.offer.ttl/l.offer.max;
-    const a=e.querySelector(".act");a.textContent=lb;a.style.display=l.st==="empty"?"none":"";a.classList.toggle("ai",l.st==="ai_for_sale");
+    const a=e.querySelector(".act");a.textContent=lb;a.style.display=l.st==="empty"?"none":"";a.classList.toggle("ai",l.st==="ai_for_sale");a.classList.toggle("dmgl",!!l.dmg);e.classList.toggle("dmg",!!l.dmg);
     const bi=e.querySelector(".pb i");bi.style.width=pb*100+"%";bi.style.background=l.offer?"var(--blue)":"var(--gold)";
     e.classList.toggle("offer",!!l.offer);e.classList.toggle("hot",false);
   });
@@ -1128,16 +1149,28 @@ $("bl").onclick=()=>showLevels("menu");
 $("snd").textContent=snd?"🔊":"🔇";$("snd").onclick=()=>{snd=!snd;store.set("lot_flip_snd",snd?"1":"0");$("snd").textContent=snd?"🔊":"🔇";if(snd)sfx.tap()};
 
 /* ===== Rewards: permanent stars, upgrades, achievements, chests, daily streak, hard mode ===== */
-const TW={recession:{k:"recession",n:"Recession",ic:"📉",d:"Rents −40%"},rush:{k:"rush",n:"Rush Job",ic:"⚡",d:"Builds 1.5× faster, goal +30%"},squeeze:{k:"squeeze",n:"Tight Budget",ic:"💸",d:"Minimum starting cash"}};
-const twistFor=l=>l>=6&&l%3===0?TW[["recession","rush","squeeze"][(l/3-2)%3]]:null;
-const COS={theme:{meadow:{n:"Meadow",v:"#62aa48",bd:"#4d8837",c:0},autumn:{n:"Autumn",v:"#c9923a",bd:"#a3722a",c:4},snow:{n:"Snowfield",v:"#dfe9ee",bd:"#aebfc7",c:5},desert:{n:"Desert",v:"#d9b77a",bd:"#b8935a",c:5}},
+const TW={recession:{k:"recession",n:"Recession",ic:"📉",d:"Rents −40%"},rush:{k:"rush",n:"Rush Job",ic:"⚡",d:"Builds 1.5× faster, goal +30%"},squeeze:{k:"squeeze",n:"Tight Budget",ic:"💸",d:"Minimum starting cash"},storm:{k:"storm",n:"Storm Season",ic:"⛈️",d:"Frequent storms damage houses"}};
+const twistFor=l=>l>=6&&l%3===0?TW[["recession","rush","squeeze","storm"][(l/3-2)%4]]:null;
+const COS={theme:{meadow:{n:"Meadow",v:"#62aa48",bd:"#4d8837",l:"#73b853",lb:"#488433",g:"#5aa23e",c:0},autumn:{n:"Autumn",v:"#b9843a",bd:"#8f6428",l:"#e0c796",lb:"#a8854f",g:"#c49a58",c:4},snow:{n:"Snowfield",v:"#cfdde4",bd:"#9fb4be",l:"#f1f6f8",lb:"#a9bdc7",g:"#e6eff2",c:5},desert:{n:"Desert",v:"#d9b77a",bd:"#b8935a",l:"#efd9a8",lb:"#b8935a",g:"#d6b176",c:5}},
 roof:{brick:{n:"Brick Red",v:"#a8483a",c:0},slate:{n:"Slate Blue",v:"#4f6d8f",c:3},moss:{n:"Moss Green",v:"#5b8a4a",c:3}},
 car:{std:{n:"Classic Colors",c:0},taxi:{n:"All Taxis",v:"#f5c400",c:4},night:{n:"Midnight",v:"#2b2f3a",c:4}}};
 const COSL={theme:"🎨 Scene",roof:"🏠 Roofs",car:"🚗 Cars"};
 const carSkin=c=>meta&&COS.car[meta.eq.car].v||c;
-function applyTheme(){if(!meta)return;const t=COS.theme[meta.eq.theme],sc=$("scene");sc.style.background=t.v;sc.style.borderColor=t.bd}
+function applyTheme(){if(!meta)return;const t=COS.theme[meta.eq.theme],sc=$("scene");sc.style.background=t.v;sc.style.borderColor=t.bd;sc.style.setProperty("--lot",t.l);sc.style.setProperty("--lotbd",t.lb);fxLayers()}
+function fxLayers(){const sc=$("scene");if(!sc||!meta)return;
+ let o=$("stm");if(!o||!o.isConnected){o=document.createElement("div");o.id="stm";o.innerHTML='<i class="rain"></i><i class="rain r2"></i><i class="flash"></i>';sc.appendChild(o)}
+ let f=$("lfs");const want=meta.eq.theme==="autumn";
+ if(f&&(!want||!f.isConnected)){f.remove();f=null}
+ if(want&&!f){f=document.createElement("div");f.id="lfs";const cols=["#e65100","#bf360c","#f9a825","#c62828","#ef6c00","#8d6e63"];for(let k=0;k<16;k++){const i=document.createElement("i");i.style.cssText="left:"+(Math.random()*96).toFixed(1)+"%;--d:"+(-Math.random()*10).toFixed(1)+"s;--t:"+(7+Math.random()*6).toFixed(1)+"s;--c:"+cols[k%6]+";--s:"+(5+Math.random()*3).toFixed(1)+"px";f.appendChild(i)}sc.appendChild(f)}
+ if(f)f.style.setProperty("--h",sc.clientHeight+"px")}
+function repairCost(i){return Math.round(Math.max(80,val(i)*.1)*(1-.2*upT("shield")))}
+function strike(){const o=$("stm");if(o){o.classList.remove("bolt");void o.offsetWidth;o.classList.add("bolt")}sfx.rumble();buzz(60);
+ const c=lots.map((l,i)=>i).filter(i=>{const l=lots[i];return l.st==="rented"&&l.hs&&S[l.hs].cat==="h"&&!l.dmg});
+ let n=twist&&twist.k==="storm"?2:1,hit=0;
+ while(n--&&c.length){const i=c.splice(Math.floor(Math.random()*c.length),1)[0];lots[i].dmg=true;hit++;pop(i,"⚡",1);const e=els[i];e.classList.add("shk");setTimeout(()=>e.classList.remove("shk"),700)}
+ toast(hit?"⚡ Lightning! "+hit+" house"+(hit>1?"s":"")+" damaged. Tap to repair.":"⚡ The storm missed your houses.")}
 function cosClick(id){const[cat,k]=id.split(":"),it=COS[cat][k];if(it.c>0&&!meta.own[id]){if(meta.stars<it.c)return toast("Need "+it.c+" ⭐.");meta.stars-=it.c;meta.own[id]=1;sfx.coin()}meta.eq[cat]=k;applyTheme();checkAch();for(const x of lots)x._k=null;showRw(rwFrom)}
-const UP={cash:{n:"Seed Money",ic:"💵",d:"+$100 starting cash per tier",c:[3,5,8,12]},crew:{n:"Union Crew",ic:"👷",d:"+10% build speed per tier",c:[3,5,8,12]},buyer:{n:"Patient Buyers",ic:"🤝",d:"+1s offer time per tier",c:[2,4,6,9]}};
+const UP={shield:{n:"Storm Shutters",ic:"🛡️",d:"−20% storm repair cost per tier",c:[2,4,6,9]},cash:{n:"Seed Money",ic:"💵",d:"+$100 starting cash per tier",c:[3,5,8,12]},crew:{n:"Union Crew",ic:"👷",d:"+10% build speed per tier",c:[3,5,8,12]},buyer:{n:"Patient Buyers",ic:"🤝",d:"+1s offer time per tier",c:[2,4,6,9]}};
 const ACH=[
 {id:"f1",n:"First Flip",d:"Sell a house",r:1,t:m=>m.st.flips>=1},
 {id:"f10",n:"Flipper",d:"Sell 10 houses",r:3,t:m=>m.st.flips>=10},
