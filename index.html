@@ -116,7 +116,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 #tut{background:rgba(255,179,0,.15);border:1px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;text-align:center;animation:tp 1.6s infinite}
 #tut:empty{display:none}
 @keyframes tp{50%{border-color:var(--acc)}}
-@media(prefers-reduced-motion:reduce){.smk,.flag,.spray,.scaf,#lfs i,#stm .rain{animation:none}}
+@media(prefers-reduced-motion:reduce){.smk,.flag,.spray,.scaf,#lfs i,#snw i,.tw,.tw i,#stm .rain{animation:none}}
 .shop{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .b{background:var(--card);color:var(--text);border:2px solid var(--line);border-radius:10px;min-height:48px;padding:6px;font:inherit;font-size:13px;font-weight:700}
 .b:disabled{opacity:.4}
@@ -148,6 +148,17 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot.dmg{border-color:#e53935!important;outline-color:#e53935!important;animation:dmg 1s infinite}
 @keyframes dmg{50%{box-shadow:0 0 14px 4px rgba(229,57,53,.95)}}
 .act.dmgl{background:#e53935;font-size:10px}
+#snw{position:absolute;inset:0;z-index:70;pointer-events:none;overflow:hidden;border-radius:11px}
+#snw i{position:absolute;top:0;width:var(--s);height:var(--s);background:#fff;border-radius:50%;box-shadow:0 0 2px 1px rgba(90,120,150,.75);animation:snow var(--t) linear var(--d) infinite;will-change:transform}
+@keyframes snow{0%{transform:translate3d(0,-8px,0)}33%{transform:translate3d(8px,calc(var(--h)*.33),0)}66%{transform:translate3d(-6px,calc(var(--h)*.66),0)}100%{transform:translate3d(2px,var(--h),0)}}
+.tw{position:absolute;left:0;top:0;width:8px;height:8px;z-index:55;pointer-events:none;animation:twr var(--t) linear forwards}
+.tw i{display:block;width:100%;height:100%;border-radius:50%;border:1.5px dashed #7a5a2c;background:radial-gradient(circle,#b68c4a 0 28%,transparent 30%),repeating-conic-gradient(#a37b3c 0 20deg,transparent 20deg 45deg);animation:twb .45s ease-in-out infinite alternate}
+@keyframes twr{from{transform:translate(var(--x0),var(--y)) rotate(0)}to{transform:translate(var(--x1),var(--y)) rotate(var(--r))}}
+@keyframes twb{to{transform:translateY(-3px)}}
+.emg{animation:emg .5s infinite alternate}
+@keyframes emg{from{filter:drop-shadow(0 0 3px #ff3d3d)}to{filter:drop-shadow(0 0 3px #3d7bff)}}
+.blk{animation:blk .35s steps(1) infinite}.b2{animation-delay:-.175s}
+@keyframes blk{50%{opacity:.15}}
 #lfs{position:absolute;inset:0;z-index:70;pointer-events:none;overflow:hidden;border-radius:11px}
 #lfs i{position:absolute;top:0;width:var(--s);height:calc(var(--s)*.65);background:var(--c);border-radius:60% 0 60% 0;opacity:.85;animation:leaf var(--t) linear var(--d) infinite;will-change:transform}
 @keyframes leaf{0%{transform:translate3d(0,-14px,0) rotate(0)}25%{transform:translate3d(16px,calc(var(--h)*.25),0) rotate(110deg)}50%{transform:translate3d(-8px,calc(var(--h)*.5),0) rotate(230deg)}75%{transform:translate3d(14px,calc(var(--h)*.75),0) rotate(320deg)}100%{transform:translate3d(0,var(--h),0) rotate(420deg)}}
@@ -439,7 +450,7 @@ function tick(now){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
     if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.t<=0){toast(ev.k==="storm"?"☀️ The storm has passed.":"Market is back to normal.");ev.k=null}}
     else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(EV[ev.k]);if(ev.k==="storm")sfx.rumble()}}
-    updateTraffic(dt);
+    updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
       if(visitorBusiness(l)){
         const visitor=traffic[i];
@@ -528,12 +539,12 @@ function houseArt(l,i){
   else if(k==="civic")s+='<rect x="16" y="22" width="68" height="24" fill="#eceff1" '+T+'/><path d="M24 24v22M38 24v22M60 24v22M74 24v22" stroke="#b0bec5" stroke-width="5"/><polygon points="12,22 50,8 88,22" fill="#78909c" '+T+'/><polygon points="12,22 50,8 50,22" fill="#fff" opacity=".13"/><rect x="40" y="32" width="20" height="14" fill="#4e342e"/><rect x="10" y="44" width="80" height="4" fill="#cfd8dc"/><path d="M50 8V1" stroke="#37474f" stroke-width="1.5"/><polygon class="flag" points="50,1 58,4 50,7" fill="#e53935"/>';
   else if(k==="apartment")s+='<rect x="22" y="9" width="56" height="39" fill="#b0bec5" '+T+'/><rect x="27" y="14" width="46" height="34" fill="#78909c"/><path d="M27 25h46M27 36h46M39 14v34M55 14v34" stroke="#eceff1" stroke-width="2"/><rect x="44" y="37" width="12" height="11" fill="#5d4037"/><path d="M18 49h64" stroke="#546e7a" stroke-width="2"/>'
   else if(k==="pool")s+='<rect x="12" y="15" width="76" height="38" rx="5" fill="#e0f2f1" stroke="#546e7a" stroke-width="2"/><rect x="17" y="20" width="66" height="28" rx="3" fill="#29b6f6" stroke="#0277bd" stroke-width="1.5"/><path d="M20 29q7 -5 14 0t14 0t14 0t14 0M20 39q7 -5 14 0t14 0t14 0t14 0" fill="none" stroke="#e1f5fe" stroke-width="2"/><circle cx="22" cy="12" r="4" fill="#43a047"/><circle cx="78" cy="56" r="4" fill="#43a047"/>'
-  else if(k==="school")s+='<rect x="14" y="21" width="72" height="27" fill="#ffcc80" '+T+'/><polygon points="10,22 50,7 90,22" fill="#d84315" '+T+'/><rect x="43" y="32" width="14" height="16" fill="#5d4037"/><rect x="21" y="27" width="12" height="9" fill="#b3e5fc" stroke="#3e2723"/><rect x="39" y="27" width="12" height="9" fill="#b3e5fc" stroke="#3e2723"/><rect x="57" y="27" width="12" height="9" fill="#b3e5fc" stroke="#3e2723"/><rect x="75" y="27" width="7" height="9" fill="#b3e5fc" stroke="#3e2723"/><path d="M50 7v-5" stroke="#37474f"/><path d="M50 2l10 3-10 3" fill="#e53935"/>'
+  else if(k==="school")s+='<rect x="8" y="22" width="84" height="5" fill="#7a3322" '+T+'/><rect x="10" y="27" width="80" height="21" fill="#c0583f" '+T+'/><rect x="10" y="43" width="80" height="5" fill="#000" opacity=".08"/>'+WN(13,31,9,9)+WN(25,31,9,9)+WN(66,31,9,9)+WN(78,31,9,9)+'<path d="M12 41h22M66 41h22" stroke="#e0d6cc" stroke-width="1.5"/><rect x="37" y="11" width="26" height="37" fill="#cf6a4d" '+T+'/><polygon points="34,11 50,2 66,11" fill="#5d4037" '+T+'/><polygon points="34,11 50,2 50,11" fill="#fff" opacity=".13"/><circle cx="50" cy="17" r="5.5" fill="#fff" stroke="#3e2723" stroke-width="1.2"/><path d="M50 17v-3.5M50 17l2.6 1.6" stroke="#3e2723" stroke-width="1" stroke-linecap="round"/><text x="50" y="31" font-size="5" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing=".3">SCHOOL</text><rect x="43" y="35" width="14" height="13" fill="#5d4037" stroke="#3e2723"/><path d="M50 35v13" stroke="#3e2723"/><circle cx="48.3" cy="42" r=".8" fill="#ffb300"/><circle cx="51.7" cy="42" r=".8" fill="#ffb300"/><rect x="40" y="48" width="20" height="3" fill="#cfd8dc" stroke="#78909c" stroke-width=".6"/><path d="M82 22V6" stroke="#37474f" stroke-width="1.5"/><polygon class="flag" points="82,6 92,9 82,12" fill="#e53935"/>';
   else if(k==="hospital")s+='<rect x="19" y="15" width="62" height="33" fill="#eceff1" '+T+'/><rect x="27" y="23" width="46" height="25" fill="#fff" stroke="#90a4ae"/><rect x="43" y="8" width="14" height="17" fill="#fff" stroke="#90a4ae"/><path d="M50 11v11M44.5 16.5h11" stroke="#e53935" stroke-width="4"/><rect x="43" y="36" width="14" height="12" fill="#b0bec5"/>'
   else if(k==="shopping")s+='<rect x="12" y="22" width="76" height="27" fill="#ffcc80" '+T+'/><path d="M12 22l8-12h60l8 12" fill="#e57373" '+T+'/><rect x="18" y="28" width="18" height="14" fill="#b3e5fc" stroke="#3e2723"/><rect x="41" y="28" width="18" height="14" fill="#b3e5fc" stroke="#3e2723"/><rect x="64" y="28" width="18" height="14" fill="#b3e5fc" stroke="#3e2723"/><rect x="43" y="13" width="14" height="8" fill="#fff"/><text x="50" y="19" font-size="5" font-weight="900" text-anchor="middle" fill="#263238">SHOP</text>'
   else if(k==="fire")s+='<rect x="15" y="23" width="70" height="25" fill="#e57373" '+T+'/><polygon points="12,24 50,10 88,24" fill="#b71c1c" '+T+'/><rect x="41" y="31" width="18" height="17" fill="#ffcc80" stroke="#3e2723"/><rect x="21" y="29" width="14" height="10" fill="#b3e5fc" stroke="#3e2723"/><rect x="65" y="29" width="14" height="10" fill="#b3e5fc" stroke="#3e2723"/><path d="M50 10V3" stroke="#37474f" stroke-width="2"/><circle cx="50" cy="3" r="2" fill="#e53935"/>'
   else if(k==="bank")s+='<rect x="15" y="23" width="70" height="25" fill="#cfd8dc" '+T+'/><polygon points="10,23 50,8 90,23" fill="#78909c" '+T+'/><path d="M24 25v20M39 25v20M61 25v20M76 25v20" stroke="#fff" stroke-width="5"/><rect x="42" y="34" width="16" height="14" fill="#5d4037"/><text x="50" y="19" font-size="7" font-weight="900" text-anchor="middle" fill="#fff">BANK</text>';
-  if(["ranch","colonial","mansion","civic"].includes(k))s+=BUSH;
+  if(["ranch","colonial","mansion","civic","school"].includes(k))s+=BUSH;
   const c=l.reno.length;for(let q=0;q<c;q++)s+=STAR(50-(c-1)*7+q*14,7);
   if(st==="demo"){
     const p=Math.min(1,l.dp),dd=l.dd||8,q=Math.max(0,Math.min(1,(p-.2)/.55)),ry=q*52,h=Math.min(9,Math.max(0,(p-.25)*14));
@@ -1028,7 +1039,7 @@ function updateTraffic(dt){
   });
   updateRoadTraffic(dt);
 }
-function updateRoadTraffic(dt){
+function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.el.remove();return false}return true});
   const sc=$("scene"),width=sc.clientWidth;
   roadTraffic.forEach(car=>{
     const currentX=car.x,current=roadVehiclePose(car,currentX),edge=width+18;
@@ -1038,7 +1049,7 @@ function updateRoadTraffic(dt){
     let nx=currentX+car.dir*car.speed*factor*dt,wrapped=false;
     if(car.dir===1&&nx>edge){nx=-18;wrapped=true}
     else if(car.dir===-1&&nx< -18){nx=edge;wrapped=true}
-    nx=safeRoadProgress(car,currentX,nx,current,wrapped);
+    if(wrapped&&car.emerg){car.done=true;car.x=nx;return}nx=safeRoadProgress(car,currentX,nx,current,wrapped);
     const waitingAtEdge=wrapped&&nx===(car.dir===1?edge:-18);
     const actualDelta=waitingAtEdge?0:(wrapped?car.speed*factor*dt:Math.abs(nx-currentX));
     car.actualSpeed=actualDelta/Math.max(dt,.001);
@@ -1048,7 +1059,7 @@ function updateRoadTraffic(dt){
 function renderRoadTraffic(){
   const sc=$("scene");if(!sc)return;
   roadTraffic.forEach(car=>{
-    if(!car.el||!car.el.isConnected){car.el=makeVehicle(car.color,"road-traffic-car");sc.appendChild(car.el)}
+    if(!car.el||!car.el.isConnected){car.el=makeVehicle(car.color,"road-traffic-car");if(car.emerg){if(car.emerg!=="bus")car.el.className+=" emg";car.el.innerHTML=emergMarkup(car.emerg)}sc.appendChild(car.el)}
     const p=roadVehiclePose(car);car.el.style.left=(p.x-10)+"px";car.el.style.top=(p.y-5.625)+"px";car.el.style.transform="rotate("+p.a+"deg)";
   });
 }
@@ -1162,7 +1173,39 @@ function fxLayers(){const sc=$("scene");if(!sc||!meta)return;
  let f=$("lfs");const want=meta.eq.theme==="autumn";
  if(f&&(!want||!f.isConnected)){f.remove();f=null}
  if(want&&!f){f=document.createElement("div");f.id="lfs";const cols=["#e65100","#bf360c","#f9a825","#c62828","#ef6c00","#8d6e63"];for(let k=0;k<16;k++){const i=document.createElement("i");i.style.cssText="left:"+(Math.random()*96).toFixed(1)+"%;--d:"+(-Math.random()*10).toFixed(1)+"s;--t:"+(7+Math.random()*6).toFixed(1)+"s;--c:"+cols[k%6]+";--s:"+(5+Math.random()*3).toFixed(1)+"px";f.appendChild(i)}sc.appendChild(f)}
- if(f)f.style.setProperty("--h",sc.clientHeight+"px")}
+ if(f)f.style.setProperty("--h",sc.clientHeight+"px");
+ let n=$("snw");const ws=meta.eq.theme==="snow";if(n&&(!ws||!n.isConnected)){n.remove();n=null}
+ if(ws&&!n){n=document.createElement("div");n.id="snw";for(let k=0;k<30;k++){const i=document.createElement("i");i.style.cssText="left:"+(Math.random()*98).toFixed(1)+"%;--d:"+(-Math.random()*12).toFixed(1)+"s;--t:"+(6+Math.random()*7).toFixed(1)+"s;--s:"+(2+Math.random()*2.5).toFixed(1)+"px";n.appendChild(i)}sc.appendChild(n)}
+ if(n)n.style.setProperty("--h",sc.clientHeight+"px")}
+let amb={e:12,w:3},twL=[];
+function ambient(dt){
+ const sc=$("scene");if(!sc||!meta)return;
+ twL=twL.filter(o=>{o.a+=dt;if(o.a>=o.d||!o.el.isConnected){o.el.remove();return false}return true});
+ if(meta.eq.theme==="desert"){amb.w-=dt;if(amb.w<=0){amb.w=4+Math.random()*9;if(twL.length<3)spawnWeed(sc)}}
+ amb.e-=dt;if(amb.e<=0){amb.e=18+Math.random()*25;const k=[];
+  if(lots.some(l=>l.hs==="hospital"&&l.st==="ready"))k.push("amb");
+  if(lots.some(l=>l.hs==="fire"&&l.st==="ready"))k.push("fire");
+  if(lots.some(l=>l.hs==="school"&&l.st==="ready"))k.push("bus");
+  if(k.length&&!roadTraffic.some(c=>c.emerg))spawnEmerg(k[Math.floor(Math.random()*k.length)])}
+}
+function spawnWeed(sc){const rd=[...sc.querySelectorAll(".road")],r=rd[Math.floor(Math.random()*rd.length)];if(!r)return;
+ const S0=sc.getBoundingClientRect(),R0=r.getBoundingClientRect(),W=sc.clientWidth,ltr=Math.random()<.5,d=7+Math.random()*5,y=R0.top-(S0.top+sc.clientTop)+R0.height/2-4+(Math.random()*16-8);
+ const el=document.createElement("div");el.className="tw";el.innerHTML="<i></i>";
+ el.style.cssText="--y:"+y.toFixed(1)+"px;--x0:"+(ltr?-24:W+10)+"px;--x1:"+(ltr?W+10:-24)+"px;--r:"+(ltr?720:-720)+"deg;--t:"+d.toFixed(1)+"s";
+ sc.appendChild(el);twL.push({el,a:0,d:d+.3})}
+function emergMarkup(kind){
+ const wh='<rect x="4" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="4" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="15" width="4" height="3" rx="1" fill="#1f2933"/>',
+ hl='<rect x="30" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="30" y="11.5" width="1.3" height="2" fill="#fff7b0"/>',
+ lights='<rect x="14" y="4" width="3" height="5" fill="#ff1744" class="blk"/><rect x="14" y="9" width="3" height="5" fill="#2979ff" class="blk b2"/>';
+ if(kind==="bus")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#fbc02d" stroke="#263238" stroke-width="1.1"/><rect x="23" y="4.2" width="6" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 5h17M4 13h17M4 9h17" stroke="#212121" stroke-width=".9"/><rect x="1.5" y="4.5" width="1.6" height="2" fill="#e53935"/><rect x="1.5" y="11.5" width="1.6" height="2" fill="#e53935"/>'+hl+'</svg>';
+ if(kind==="amb")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 9h9M8.5 5.5v7" stroke="#e53935" stroke-width="2.2"/>'+lights+hl+'</svg>';
+ return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#d32f2f" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 7h16M3 11h16" stroke="#eceff1" stroke-width="1.4"/>'+lights+hl+'</svg>'}
+function spawnEmerg(kind){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;
+ const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W=sc.clientWidth||600;
+ const el=document.createElement("div");el.className="road-traffic-car"+(kind==="bus"?"":" emg");el.setAttribute("aria-hidden","true");el.innerHTML=emergMarkup(kind);sc.appendChild(el);
+ roadTraffic.push({road,dir,x:dir===1?-18:W+18,speed:kind==="bus"?48:62,speedFactor:1,actualSpeed:kind==="bus"?48:62,color:"#fff",el,emerg:kind});
+ if(snd&&kind!=="bus"){tone(780,.28,"triangle",.03,0,560);tone(560,.28,"triangle",.03,.3,780)}
+ toast(kind==="amb"?"🚑 Ambulance heading out!":kind==="bus"?"🚌 School bus on its route!":"🚒 Fire truck on patrol!")}
 function repairCost(i){return Math.round(Math.max(80,val(i)*.1)*(1-.2*upT("shield")))}
 function strike(){const o=$("stm");if(o){o.classList.remove("bolt");void o.offsetWidth;o.classList.add("bolt")}sfx.rumble();buzz(60);
  const c=lots.map((l,i)=>i).filter(i=>{const l=lots[i];return l.st==="rented"&&l.hs&&S[l.hs].cat==="h"&&!l.dmg});
