@@ -274,7 +274,7 @@ const unlocked=k=>lv>=(S[k]?.unlock||1);
 const availableBuildings=()=>Object.keys(S).filter(unlocked);
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
 const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
-const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses"};
+const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses",party:"🎉 Block party at the park! Nearby rents +60%",market:"🧺 Farmers market at the Civic Center! Its income doubles",parade:"🎺 School parade! Buyer offers +20%"};
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
 let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
@@ -312,10 +312,10 @@ function nBoost(i){
 }
 function parkRB(i){let b=0;adj(i).forEach(n=>{const l=lots[n];if(l&&l.hs==="park"&&done(l))b+=S.park.rb});return b}
 function val(i){const l=lots[i];return Math.max(1,Math.round((l.land+(l.hs?S[l.hs].val:0)+l.reno.reduce((a,k)=>a+R[k].vb,0))*(1+nBoost(i))))}
-function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working"||l.dmg)return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1)*(twist&&twist.k==="recession"?.6:1))}
+function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working"||l.dmg)return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1)*(twist&&twist.k==="recession"?.6:1)*(ev.k==="party"&&parkRB(i)>0?1.6:1))}
 
 function build(){
-  const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];
+  const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];if(typeof amb!=="undefined")amb.q=[];
   const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
   const rd=document.createElement("div");rd.className="road";
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div>';
@@ -436,7 +436,7 @@ function act(i,a){
 }
 function startBuild(i,k){const s=S[k],l=lots[i];if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");const limit=buildingLimit(k);if(buildingCount(k)>=limit)return toast("Maximum reached: "+limit+" "+s.n+(limit===1?" allowed.":"s allowed."));if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");money-=s.cost;meta.st.built++;l.hs=k;l.st="working";sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
 function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return toast("Fully upgraded!");if(busy()>=builders)return toast("All builders are busy!");if(money<R[k].cost)return toast("Need "+fmt(R[k].cost)+" for "+R[k].n+".");money-=R[k].cost;l.st="reno_working";sfx.build();l.pend=k;l.rp=0;l.rd=R[k].dur/speed;closeSheet();toast(R[k].n+" started…");draw()}
-function spawnOffer(i){const l=lots[i],t=7+Math.random()*3+upT("buyer"),f=ev.k==="boom"?1.25:ev.k==="crash"?.8:1;l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};startBuyerArrival(i);sfx.offer();buzz(30);toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". A buyer is pulling in to look at the house.");draw()}
+function spawnOffer(i){const l=lots[i],t=7+Math.random()*3+upT("buyer"),f=ev.k==="parade"?1.2:ev.k==="boom"?1.25:ev.k==="crash"?.8:1;l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};startBuyerArrival(i);sfx.offer();buzz(30);toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". A buyer is pulling in to look at the house.");draw()}
 function resolveOffer(i,acc){
   const l=lots[i];if(!l.offer)return;const p=l.offer.price;sendBuyerAway(i);l.offer=null;
   if(acc&&run){money+=p;meta.st.flips++;meta.st.big=Math.max(meta.st.big,p);checkAch();l.st="sold";l.sp=p;l.soldT=1.6;fx(i,"sold");pop(i,"+"+fmt(p),1);flash();if(tutOn){tutOn=false;store.set("lot_flip_tut","1");setTimeout(()=>toast("🎓 Tutorial done! Chase the ⭐ tags for 3 stars."),2500)}toast("Sold Lot "+(i+1)+" for "+fmt(p)+"!")}
@@ -448,8 +448,8 @@ function tick(now){
   const dt=Math.min(.1,(now-last)/1000);last=now;
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
-    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.t<=0){toast(ev.k==="storm"?"☀️ The storm has passed.":"Market is back to normal.");ev.k=null}}
-    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(EV[ev.k]);if(ev.k==="storm")sfx.rumble()}}
+    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?"☀️ The storm has passed.":"Market is back to normal.");ev.k=null}}
+    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade")}ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(EV[ev.k]);if(ev.k==="storm")sfx.rumble();if(ev.k==="parade")queueEmerg("bus",1)}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
       if(visitorBusiness(l)){
@@ -475,7 +475,7 @@ function tick(now){
           if(l.visitorWait<=0)startBusinessVisitorArrival(i);
         }
       }else if(l.visitorWait!=null)l.visitorWait=null;
-      if(l.hs&&S[l.hs].rev&&l.st==="ready"){l.rt-=dt;if(l.rt<=0){l.rt=3;money+=S[l.hs].rev;pop(i,"+"+fmt(S[l.hs].rev))}}
+      if(l.hs&&S[l.hs].rev&&l.st==="ready"){l.rt-=dt;if(l.rt<=0){l.rt=3;const rv=S[l.hs].rev*(ev.k==="market"&&l.hs==="civic"?2:1);money+=rv;pop(i,"+"+fmt(rv))}}
       // Empty lots periodically leave the market, creating scarcity. They return after a short cooldown.
       if(l.st==="empty"){
         if(l.marketWait==null)l.marketWait=18+Math.random()*32;
@@ -1177,11 +1177,17 @@ function fxLayers(){const sc=$("scene");if(!sc||!meta)return;
  let n=$("snw");const ws=meta.eq.theme==="snow";if(n&&(!ws||!n.isConnected)){n.remove();n=null}
  if(ws&&!n){n=document.createElement("div");n.id="snw";for(let k=0;k<30;k++){const i=document.createElement("i");i.style.cssText="left:"+(Math.random()*98).toFixed(1)+"%;--d:"+(-Math.random()*12).toFixed(1)+"s;--t:"+(6+Math.random()*7).toFixed(1)+"s;--s:"+(2+Math.random()*2.5).toFixed(1)+"px";n.appendChild(i)}sc.appendChild(n)}
  if(n)n.style.setProperty("--h",sc.clientHeight+"px")}
-let amb={e:12,w:3},twL=[];
+let amb={e:12,w:3,q:[]},twL=[];
+const readyOf=k=>lots.some(l=>l.hs===k&&l.st==="ready"),fireReady=()=>readyOf("fire");
+function queueEmerg(k,t){amb.q.push({k,t})}
+function confetti(i,n){const e=els[i];if(!e)return;for(let k=0;k<n;k++){const c=document.createElement("span");c.className="cf";c.style.cssText="--x:"+((Math.random()-.5)*110)+"px;--y:"+(-20-Math.random()*45)+"px;left:50%;top:50%;background:hsl("+Math.random()*360+",85%,60%)";e.appendChild(c);setTimeout(()=>c.remove(),900)}}
+function festFx(){const host={party:"park",market:"civic",parade:"school"}[ev.k],em={party:"🎈",market:"🧺",parade:"🎺"}[ev.k];ev.fxc=(ev.fxc||0)+1;
+ lots.forEach((l,i)=>{if(l.hs===host&&l.st==="ready"){confetti(i,10);if(ev.fxc%2===0)pop(i,em)}})}
 function ambient(dt){
  const sc=$("scene");if(!sc||!meta)return;
  twL=twL.filter(o=>{o.a+=dt;if(o.a>=o.d||!o.el.isConnected){o.el.remove();return false}return true});
  if(meta.eq.theme==="desert"){amb.w-=dt;if(amb.w<=0){amb.w=4+Math.random()*9;if(twL.length<3)spawnWeed(sc)}}
+ amb.q=amb.q.filter(o=>{o.t-=dt;if(o.t<=0){spawnEmerg(o.k);return false}return true});
  amb.e-=dt;if(amb.e<=0){amb.e=18+Math.random()*25;const k=[];
   if(lots.some(l=>l.hs==="hospital"&&l.st==="ready"))k.push("amb");
   if(lots.some(l=>l.hs==="fire"&&l.st==="ready"))k.push("fire");
@@ -1206,12 +1212,12 @@ function spawnEmerg(kind){const sc=$("scene"),rd=[...sc.querySelectorAll(".road"
  roadTraffic.push({road,dir,x:dir===1?-18:W+18,speed:kind==="bus"?48:62,speedFactor:1,actualSpeed:kind==="bus"?48:62,color:"#fff",el,emerg:kind});
  if(snd&&kind!=="bus"){tone(780,.28,"triangle",.03,0,560);tone(560,.28,"triangle",.03,.3,780)}
  toast(kind==="amb"?"🚑 Ambulance heading out!":kind==="bus"?"🚌 School bus on its route!":"🚒 Fire truck on patrol!")}
-function repairCost(i){return Math.round(Math.max(80,val(i)*.1)*(1-.2*upT("shield")))}
+function repairCost(i){return Math.round(Math.max(80,val(i)*.1)*(1-.2*upT("shield"))*(fireReady()?.75:1))}
 function strike(){const o=$("stm");if(o){o.classList.remove("bolt");void o.offsetWidth;o.classList.add("bolt")}sfx.rumble();buzz(60);
  const c=lots.map((l,i)=>i).filter(i=>{const l=lots[i];return l.st==="rented"&&l.hs&&S[l.hs].cat==="h"&&!l.dmg});
  let n=twist&&twist.k==="storm"?2:1,hit=0;
  while(n--&&c.length){const i=c.splice(Math.floor(Math.random()*c.length),1)[0];lots[i].dmg=true;hit++;pop(i,"⚡",1);const e=els[i];e.classList.add("shk");setTimeout(()=>e.classList.remove("shk"),700)}
- toast(hit?"⚡ Lightning! "+hit+" house"+(hit>1?"s":"")+" damaged. Tap to repair.":"⚡ The storm missed your houses.")}
+ if(hit){if(fireReady())queueEmerg("fire",2.5);if(readyOf("hospital"))queueEmerg("amb",5)}toast(hit?"⚡ Lightning! "+hit+" house"+(hit>1?"s":"")+" damaged. Tap to repair."+(fireReady()?" 🚒 Fire crew responding: repairs 25% off.":""):"⚡ The storm missed your houses.")}
 function cosClick(id){const[cat,k]=id.split(":"),it=COS[cat][k];if(it.c>0&&!meta.own[id]){if(meta.stars<it.c)return toast("Need "+it.c+" ⭐.");meta.stars-=it.c;meta.own[id]=1;sfx.coin()}meta.eq[cat]=k;applyTheme();checkAch();for(const x of lots)x._k=null;showRw(rwFrom)}
 const UP={shield:{n:"Storm Shutters",ic:"🛡️",d:"−20% storm repair cost per tier",c:[2,4,6,9]},cash:{n:"Seed Money",ic:"💵",d:"+$100 starting cash per tier",c:[3,5,8,12]},crew:{n:"Union Crew",ic:"👷",d:"+10% build speed per tier",c:[3,5,8,12]},buyer:{n:"Patient Buyers",ic:"🤝",d:"+1s offer time per tier",c:[2,4,6,9]}};
 const ACH=[
