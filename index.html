@@ -206,6 +206,13 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .hchip.active{border-color:var(--blue);background:rgba(41,182,246,.18);color:var(--blue)}
 .inc{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;font-size:10px;color:var(--mut);text-align:right;line-height:1.3}
 #tip{display:none;background:rgba(41,182,246,.15);border:1px solid var(--blue);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;text-align:center}
+#bonus{display:flex;flex-wrap:nowrap;gap:4px;align-items:center;justify-content:flex-start;overflow:hidden;min-height:24px;cursor:pointer}
+#bonus .sp{flex:1}
+.gi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:2px 7px;font-size:11px;font-weight:800;white-space:nowrap;color:var(--gold)}
+.gi.ok{border-color:var(--acc);color:#a5d6a7}.gi.bad{border-color:var(--warn);color:#ef9a9a}
+.al{background:rgba(41,182,246,.15);border:1px solid var(--blue);border-radius:10px;padding:2px 6px;font-size:11px;font-weight:800;white-space:nowrap;color:var(--blue)}
+.al.red{border-color:var(--warn);color:#ef9a9a;background:rgba(229,57,53,.15)}
+.sx{position:sticky;top:0;float:right;z-index:3;width:34px;height:34px;margin:-6px -6px 4px 8px;border-radius:50%;border:2px solid var(--line);background:var(--hov);color:var(--text);font:inherit;font-size:16px;font-weight:800;line-height:1;padding:0}
 </style>
 </head>
 <body>
@@ -403,7 +410,7 @@ function tapLot(i){
 function closeSheet(){sel=null;$("sheet").innerHTML="";document.body.classList.remove("so")}
 function sheet(i,conf){
   const l=lots[i];sel=i;document.body.classList.add("so");
-  const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl='<button class="opt x" data-a="close">Close</button>';let h="";
+  const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl="";let h="";
   if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy()))+'<div class="opts">'+Object.keys(S).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;return '<button class="opt'+(locked||capped||money<S[k].cost?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":(Number.isFinite(limit)?count+"/"+limit+" built · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
   else if(l.st==="ai_for_sale"){h=hd("Buy "+S[l.hs].n+" · Lot "+(i+1),"Asking "+fmt(l.aiP)+" · Value "+fmt(val(i)))+'<div class="opts"><button class="opt ok" data-a="buyai">🛒 Buy & Auto-Rent</button>'+cl+"</div>"}
   else if(conf){h=hd("⚠️ Demolish Lot "+(i+1)+"?","Costs $100 and clears the property.")+'<div class="opts"><button class="opt no" data-a="demo2">Confirm Demolish</button><button class="opt x" data-a="demo0">Cancel</button></div>'}
@@ -418,7 +425,7 @@ function sheet(i,conf){
     if(l.st==="listed")h+='<button class="opt" data-a="unlist"><b>🛑 Unlist</b><small>Resume rent</small></button>';
     h+='<button class="opt" data-a="demo"><b>🏗️ Demolish $100</b><small>Back to empty land</small></button>'+cl+"</div>";
   }
-  $("sheet").innerHTML='<div class="sh">'+h+"</div>";
+  $("sheet").innerHTML='<div class="sh"><button class="sx" data-a="close" aria-label="Close">✕</button>'+h+"</div>";
 }
 $("sheet").onclick=e=>{const b=e.target.closest("[data-a]");if(b&&sel!=null)act(sel,b.dataset.a)};
 
@@ -1096,9 +1103,15 @@ function renderTraffic(){
   renderRoadTraffic();
 }
 
-function chips(){if(!bonus)return"";const dm=lots.filter(l=>l.dmg&&l.st==="rented").length;const par=90+lv*10,pm=elapsed>par;
-  const objectiveName=S[objective?objective.k:"ranch"].n;
-  return (dm?'<span class="chip" style="border-color:#e53935;color:#ff8a80">🔧 '+dm+' damaged · tap to repair</span>':'')+(twist?'<span class="chip ok">'+twist.ic+' '+twist.n+': '+twist.d+'</span>':'')+'<span class="chip'+(money>=goal?' ok':'')+'">💰 Reach '+fmt(goal)+'</span><span class="chip'+(objective&&objective.done?' ok':'')+'">'+(objective&&objective.done?'✔ Building goal':'🏗️ Build '+objectiveName)+'</span><span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span><span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>'}
+const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",market:"🧺",parade:"🎺"};
+const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
+function chips(){if(!bonus)return"";
+  const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
+  let h=gi(money>=goal,0,"💰"+pc+"%")+gi(od,0,S[objective?objective.k:"ranch"].ic+(od?"✔":""))+gi(bonus.done,0,"⭐"+S[bonus.k].ic+(bonus.done?"✔":bonus.c+"/"+bonus.n))+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
+  if(twist)h+='<span class="al">'+twist.ic+'</span>';
+  if(dm)h+='<span class="al red">🔧'+dm+'</span>';
+  if(ev.k)h+='<span class="al">'+EVS[ev.k]+Math.ceil(ev.t)+'s</span>';
+  return h}
 function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&&run);
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
   $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent="Lv "+lv+(meta&&meta.pr?" ·P"+meta.pr:"")+(meta?" · ⭐"+meta.stars:"");
@@ -1106,7 +1119,7 @@ function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&
   $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs==="civic"&&l.st==="ready"?S.civic.rev/3:0),0).toFixed(1)+"/s";
   const pc=Math.min(100,Math.round(money/goal*100));$("gbar").style.width=pc+"%";$("pct").textContent=pc+"%";
   $("bonus").textContent=bonus?(bonus.done?"✔ Bonus complete!":"⭐ Bonus: build "+bonus.n+" "+S[bonus.k].n+(bonus.n>1?"s":"")+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r)):"";
-  $("tut").textContent=tutText();$("bonus").innerHTML=chips();$("evt").textContent=ev.k?EV[ev.k]+" ("+Math.ceil(ev.t)+"s)":"";
+  $("tut").textContent=tutText();$("bonus").innerHTML=chips();$("evt").textContent="";
   const cH=run&&money>=300&&builders<5,cT=run&&money>=250&&speed<2;
   $("hq").textContent=builders>=5?"MAX":"+$300";$("hire").classList.toggle("can",cH);$("hire").classList.toggle("off",builders>=5);
   $("spd").textContent=speed.toFixed(2).replace(/0$/,"")+"×";$("tq").textContent=speed>=2?"MAX":"$250";$("tools").classList.toggle("can",cT);$("tools").classList.toggle("off",speed>=2);
@@ -1263,8 +1276,13 @@ $("rwx").onclick=()=>{$("rw").style.display="none";$(rwFrom==="end"?"end":"ov").
 $("brw").onclick=()=>showRw("menu");$("bdr").onclick=claimDaily;
 $("bhd").onclick=()=>{meta.hard=!meta.hard;saveMeta();menuRw();toast(meta.hard?"Hard Mode ON: upgrades off, +2 ⭐ per win.":"Hard Mode OFF.")};
 let tipT,prc=false;
-function showTip(id,t){if(!meta||meta.tips[id])return;meta.tips[id]=1;saveMeta();const e=$("tip");e.textContent="💡 "+t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},10000)}
+function showTip(id,t){if(!meta||meta.tips[id])return;meta.tips[id]=1;saveMeta();const e=$("tip");e.style.textAlign="center";e.style.whiteSpace="normal";e.textContent="💡 "+t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},10000)}
 $("bpr").onclick=()=>{if(!prc){prc=true;$("bpr").textContent="⚠️ Resets this mode's levels. Tap again";return}prc=false;meta.pr++;meta.stars+=10;saveMeta();store.set(PKEY,JSON.stringify({lv:1,mode}));store.del(KEY);best={};store.set(BKEY,"{}");toast("🌟 Prestige Rank "+meta.pr+"! Goals +12%, rents +6% per rank.");sfx.win();updMenu()};
+function goalCard(){if(!bonus)return;const par=90+lv*10,left=Math.max(0,Math.ceil(par-elapsed));
+ const t=["💰 Reach "+fmt(goal)+" (now "+fmt(money)+")","🏗️ Build a "+S[objective.k].n+(objective.done?" ✔":""),"⭐ Bonus: build "+bonus.n+" "+S[bonus.k].n+(bonus.n>1?"s":"")+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r),"⏱ Finish within "+par+"s for a star ("+left+"s left)"];
+ if(twist)t.push(twist.ic+" "+twist.n+": "+twist.d);if(ev.k)t.push(EV[ev.k]);
+ const e=$("tip");e.style.whiteSpace="pre-line";e.style.textAlign="left";e.textContent=t.join("\n");e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},8000)}
+$("bonus").onclick=goalCard;
 function boot(){snd=store.get("lot_flip_snd")!=="0";$("snd").textContent=snd?"🔊":"🔇";migrate();loadMeta();applyTheme();setMode(mode);requestAnimationFrame(tick)}
 if(CP){CP.keys().then(r=>Promise.all((r.keys||[]).filter(k=>k.indexOf("lot_flip")===0&&store.get(k)===null).map(k=>CP.get({key:k}).then(v=>{if(v&&v.value!=null)try{localStorage.setItem(k,v.value)}catch(e){}})))).catch(()=>{}).then(boot)}else boot();
 </script>
