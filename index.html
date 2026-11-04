@@ -198,6 +198,14 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .hsub span:nth-child(3){text-align:right}
 #money{transform-origin:left center}
 @keyframes flash{30%{transform:scale(1.1);color:#fff}}
+.hsub{grid-template-columns:repeat(3,1fr) 1.15fr;gap:4px;align-items:stretch;padding:0}
+.hchip{background:var(--card);border:2px solid var(--line);border-radius:9px;color:var(--text);font:inherit;font-size:12px;font-weight:800;min-height:38px;padding:2px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
+.hchip em{font-style:normal;font-size:10px;color:var(--mut)}
+.hchip.can{border-color:var(--gold);animation:pulse 1.5s infinite}.hchip.can em{color:var(--gold)}
+.hchip.off{opacity:.45}
+.hchip.active{border-color:var(--blue);background:rgba(41,182,246,.18);color:var(--blue)}
+.inc{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;font-size:10px;color:var(--mut);text-align:right;line-height:1.3}
+#tip{display:none;background:rgba(41,182,246,.15);border:1px solid var(--blue);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;text-align:center}
 </style>
 </head>
 <body>
@@ -210,16 +218,12 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
       <button class="pbtn" id="snd" style="min-height:32px;padding:0 8px">🔊</button>
       <button class="pbtn" id="bp" style="min-height:32px;padding:0 10px" aria-label="Pause">⏸</button>
     </div>
-    <div class="hsub"><span>Builders <b id="bld">0/0</b></span><span>Income <b id="rent" style="color:var(--acc)">$0/s</b></span><span>Goal <b id="pct">0%</b></span></div>
+    <div class="hsub"><button class="hchip" id="hire">👷 <b id="bld">0/0</b><em id="hq">+$300</em></button><button class="hchip" id="tools">🛠️ <b id="spd">1×</b><em id="tq">$250</em></button><button class="hchip" id="sellmode">🏷️ Sell<em id="sq">lots</em></button><div class="inc"><div>Income <b id="rent" style="color:var(--acc)">$0/s</b></div><div>Goal <b id="pct">0%</b></div></div></div>
     <div class="bar"><i id="gbar"></i></div>
   </div>
-  <div id="bonus"></div><div id="evt"></div><div id="tut"></div>
+  <div id="bonus"></div><div id="evt"></div><div id="tut"></div><div id="tip"></div>
   <div id="scene"></div>
-  <div class="shop">
-    <button class="b" id="hire"></button>
-    <button class="b" id="tools"></button>
-    <button class="b" id="sellmode"></button>
-  </div>
+  
 </div>
 <div id="sheet"></div>
 <div id="toast"></div>
@@ -231,7 +235,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
     <button class="mb active" id="mt"><b>⏱️ Timed</b><small>Beat the clock</small></button>
     <button class="mb" id="mr"><b>🧘 Relaxed</b><small>No timer</small></button>
   </div>
-  <button class="mbtn gold" id="bdr" style="display:none"></button><button class="mbtn blue" id="bl" style="display:none">🗺️ Levels & Stars</button><button class="mbtn line" id="brw"></button><button class="mb" id="bhd"><b>💀 Hard Mode: OFF</b><small>No upgrades · +2 ⭐ per win</small></button>
+  <button class="mbtn gold" id="bdr" style="display:none"></button><button class="mbtn blue" id="bl" style="display:none">🗺️ Levels & Stars</button><button class="mbtn line" id="brw"></button><button class="mbtn line" id="bpr" style="display:none"></button><button class="mb" id="bhd"><b>💀 Hard Mode: OFF</b><small>No upgrades · +2 ⭐ per win</small></button>
   <button class="mbtn gold" id="bc" style="display:none">💾 Continue Saved Game</button>
   <button class="mbtn" id="go">Start Level 1</button>
 </div></div>
@@ -312,7 +316,7 @@ function nBoost(i){
 }
 function parkRB(i){let b=0;adj(i).forEach(n=>{const l=lots[n];if(l&&l.hs==="park"&&done(l))b+=S.park.rb});return b}
 function val(i){const l=lots[i];return Math.max(1,Math.round((l.land+(l.hs?S[l.hs].val:0)+l.reno.reduce((a,k)=>a+R[k].vb,0))*(1+nBoost(i))))}
-function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working"||l.dmg)return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1)*(twist&&twist.k==="recession"?.6:1)*(ev.k==="party"&&parkRB(i)>0?1.6:1))}
+function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working"||l.dmg)return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1)*(twist&&twist.k==="recession"?.6:1)*(ev.k==="party"&&parkRB(i)>0?1.6:1)*(1+.06*meta.pr))}
 
 function build(){
   const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];if(typeof amb!=="undefined")amb.q=[];
@@ -329,7 +333,7 @@ function startLevel(){
   // The objective building is always affordable at the start, with a small
   // operating reserve. This avoids mathematically impossible timed starts.
   money=Math.max(800+lv*75,S[requiredBuilding].cost+500);
-  if(twist&&twist.k==="squeeze")money=S[requiredBuilding].cost+150;money+=100*upT("cash");goal=Math.round((1600+lv*300)*(twist&&twist.k==="rush"?1.3:1));
+  if(twist&&twist.k==="squeeze")money=S[requiredBuilding].cost+150;money+=100*upT("cash");goal=Math.round((1600+lv*300)*(twist&&twist.k==="rush"?1.3:1)*(1+.12*meta.pr));
   total=mode==="timed"?240+lv*20:0;timeVal=total;elapsed=0;
   const n=Math.min(4,2+Math.floor(lv/3)),ix=[],ht=["ranch","colonial","mansion"];
   while(ix.length<n){const r=Math.floor(Math.random()*N);if(!ix.includes(r))ix.push(r)}
@@ -341,7 +345,7 @@ function startLevel(){
   build();applyTheme();run=true;last=performance.now();
   ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("scene").classList.remove("pz");
   $("tl").textContent=mode==="timed"?"Time":"Elapsed";
-  toast((twist?twist.ic+" TWIST: "+twist.n+"! ":"")+"Level "+lv+": reach "+fmt(goal)+" and build a "+S[objective.k].n+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();
+  toast((twist?twist.ic+" TWIST: "+twist.n+"! ":"")+"Level "+lv+": reach "+fmt(goal)+" and build a "+S[objective.k].n+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();if(twist)showTip("tw"+twist.k,twist.ic+" "+twist.n+": "+twist.d+". Clear it for +2 ⭐.");
 }
 
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
@@ -449,7 +453,7 @@ function tick(now){
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
     if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?"☀️ The storm has passed.":"Market is back to normal.");ev.k=null}}
-    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade")}ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(EV[ev.k]);if(ev.k==="storm")sfx.rumble();if(ev.k==="parade")queueEmerg("bus",1)}}
+    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade")}ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(EV[ev.k]);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
       if(visitorBusiness(l)){
@@ -1097,15 +1101,17 @@ function chips(){if(!bonus)return"";const dm=lots.filter(l=>l.dmg&&l.st==="rente
   return (dm?'<span class="chip" style="border-color:#e53935;color:#ff8a80">🔧 '+dm+' damaged · tap to repair</span>':'')+(twist?'<span class="chip ok">'+twist.ic+' '+twist.n+': '+twist.d+'</span>':'')+'<span class="chip'+(money>=goal?' ok':'')+'">💰 Reach '+fmt(goal)+'</span><span class="chip'+(objective&&objective.done?' ok':'')+'">'+(objective&&objective.done?'✔ Building goal':'🏗️ Build '+objectiveName)+'</span><span class="chip'+(bonus.done?' ok':'')+'">'+(bonus.done?'✔ Bonus done':'⭐ Build '+bonus.n+' '+S[bonus.k].n+(bonus.n>1?'s':'')+' ('+bonus.c+'/'+bonus.n+') +'+fmt(bonus.r))+'</span><span class="chip'+(pm?' bad':'')+'">'+(pm?'✘ Par '+par+'s missed':'⭐ Finish within '+par+'s ('+Math.max(0,Math.ceil(par-elapsed))+'s left)')+'</span>'}
 function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&&run);
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
-  $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent="Lv "+lv;
+  $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent="Lv "+lv+(meta&&meta.pr?" ·P"+meta.pr:"")+(meta?" · ⭐"+meta.stars:"");
   $("bld").textContent=(builders-busy())+"/"+builders;
   $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs==="civic"&&l.st==="ready"?S.civic.rev/3:0),0).toFixed(1)+"/s";
   const pc=Math.min(100,Math.round(money/goal*100));$("gbar").style.width=pc+"%";$("pct").textContent=pc+"%";
   $("bonus").textContent=bonus?(bonus.done?"✔ Bonus complete!":"⭐ Bonus: build "+bonus.n+" "+S[bonus.k].n+(bonus.n>1?"s":"")+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r)):"";
   $("tut").textContent=tutText();$("bonus").innerHTML=chips();$("evt").textContent=ev.k?EV[ev.k]+" ("+Math.ceil(ev.t)+"s)":"";
-  $("hire").textContent="Hire Builder $300";$("hire").disabled=!run||money<300||builders>=5;
-  $("tools").textContent="Better Tools $250 ("+speed+"×)";$("tools").disabled=!run||money<250||speed>=2;
-  $("sellmode").textContent=sellMode?"Sell Mode: ON":"Sell Empty Lots";$("sellmode").classList.toggle("active",sellMode);
+  const cH=run&&money>=300&&builders<5,cT=run&&money>=250&&speed<2;
+  $("hq").textContent=builders>=5?"MAX":"+$300";$("hire").classList.toggle("can",cH);$("hire").classList.toggle("off",builders>=5);
+  $("spd").textContent=speed.toFixed(2).replace(/0$/,"")+"×";$("tq").textContent=speed>=2?"MAX":"$250";$("tools").classList.toggle("can",cT);$("tools").classList.toggle("off",speed>=2);
+  $("sellmode").classList.toggle("active",sellMode);$("sq").textContent=sellMode?"ON":"lots";
+  if(lv>=2&&cH&&builders<=2)showTip("hire","Tap 👷 in the top bar to hire more builders, so you can build several things at once.");
   lots.forEach((l,i)=>{
     const e=els[i];if(!e)return;
     
@@ -1140,8 +1146,8 @@ $("bp").onclick=()=>{rc=false;$("brs").textContent="🔄 Restart Level";togglePa
 $("brs").onclick=()=>{if(!rc){rc=true;$("brs").textContent="⚠️ Tap again to restart";return}rc=false;$("brs").textContent="🔄 Restart Level";startLevel()};
 $("bm").onclick=()=>{paused=false;run=false;closeSheet();$("pz").style.display="none";$("ov").style.display="flex";updMenu()};
 $("bc").onclick=()=>{if(store.get(KEY)&&loadGame())return;try{const p=JSON.parse(store.get(PKEY));if(p){lv=p.lv;setMode(p.mode);startLevel()}}catch(e){}};
-$("hire").onclick=()=>{if(money>=300){money-=300;builders++;draw()}};
-$("tools").onclick=()=>{if(money>=250){money-=250;speed+=.25;draw()}};
+$("hire").onclick=()=>{if(!run||paused)return;if(builders>=5)return toast("Max builders reached.");if(money<300)return toast("Need $300 to hire a builder.");money-=300;builders++;sfx.coin();draw()};
+$("tools").onclick=()=>{if(!run||paused)return;if(speed>=2)return toast("Tools fully upgraded.");if(money<250)return toast("Need $250 for better tools.");money-=250;speed+=.25;sfx.coin();draw()};
 $("sellmode").onclick=()=>{sellMode=!sellMode;toast(sellMode?"Sell Mode ON: tap a bought, unbuilt lot to sell it.":"Sell Mode OFF.");draw()};
 $("go").onclick=()=>{if($("bc").style.display!=="none"&&!wipe){wipe=true;$("go").textContent="⚠️ Tap again to erase progress";return}store.del(KEY);store.del(PKEY);lv=1;startLevel()};
 document.addEventListener("visibilitychange",()=>{if(document.hidden){autosave();if(run&&!paused)togglePause()}});addEventListener("contextmenu",e=>e.preventDefault());addEventListener("pagehide",autosave);
@@ -1234,7 +1240,7 @@ const ACH=[
 {id:"str",n:"Regular",d:"Reach a 5-day login streak",r:4,t:m=>m.streak.n>=5}];
 const MK="lot_flip_meta_v1",DST={flips:0,big:0,built:0,cleared:0,three:0,hard:0,tw:0};
 let meta=null,rwFrom="menu",twist=null;
-function loadMeta(){let d=null;try{d=JSON.parse(store.get(MK))}catch(e){}meta=Object.assign({stars:0,up:{},ach:{},chest:{},hard:false,streak:{day:"",n:0}},d||{});meta.st=Object.assign({},DST,meta.st||{});meta.up=meta.up||{};meta.ach=meta.ach||{};meta.chest=meta.chest||{};meta.streak=meta.streak||{day:"",n:0};meta.own=meta.own||{};meta.eq=Object.assign({theme:"meadow",roof:"brick",car:"std"},meta.eq||{})}
+function loadMeta(){let d=null;try{d=JSON.parse(store.get(MK))}catch(e){}meta=Object.assign({stars:0,up:{},ach:{},chest:{},hard:false,pr:0,tips:{},streak:{day:"",n:0}},d||{});meta.st=Object.assign({},DST,meta.st||{});meta.up=meta.up||{};meta.ach=meta.ach||{};meta.chest=meta.chest||{};meta.streak=meta.streak||{day:"",n:0};meta.own=meta.own||{};meta.eq=Object.assign({theme:"meadow",roof:"brick",car:"std"},meta.eq||{})}
 const saveMeta=()=>store.set(MK,JSON.stringify(meta));
 const upT=k=>meta&&!meta.hard?(meta.up[k]||0):0;
 function checkAch(){ACH.forEach(a=>{if(!meta.ach[a.id]&&a.t(meta)){meta.ach[a.id]=1;meta.stars+=a.r;toast("🏆 "+a.n+" · +"+a.r+" ⭐");sfx.coin()}});saveMeta()}
@@ -1242,7 +1248,7 @@ const dayStr=o=>new Date(Date.now()-(o||0)*864e5).toLocaleDateString("en-CA");
 const dailyDue=()=>meta.streak.day!==dayStr();
 function dailyAmt(){const n=meta.streak.day===dayStr(1)?meta.streak.n+1:1;return{n,r:[1,1,2,2,3,3,5][(n-1)%7]}}
 function claimDaily(){if(!dailyDue())return;const d=dailyAmt();meta.streak={day:dayStr(),n:d.n};meta.stars+=d.r;checkAch();toast("🎁 Day "+d.n+" streak! +"+d.r+" ⭐");sfx.coin();menuRw()}
-function menuRw(){if(!meta)return;$("brw").textContent="⭐ Rewards & Upgrades · "+meta.stars+" ⭐";const b=$("bdr"),due=dailyDue();b.style.display=due?"flex":"none";if(due){const d=dailyAmt();b.textContent="🎁 Claim Daily Reward · Day "+d.n+" (+"+d.r+" ⭐)"}$("bhd").classList.toggle("active",meta.hard);$("bhd").querySelector("b").textContent="💀 Hard Mode: "+(meta.hard?"ON":"OFF")}
+function menuRw(){if(!meta)return;$("brw").textContent="⭐ Rewards & Upgrades · "+meta.stars+" ⭐";const b=$("bdr"),due=dailyDue();b.style.display=due?"flex":"none";if(due){const d=dailyAmt();b.textContent="🎁 Claim Daily Reward · Day "+d.n+" (+"+d.r+" ⭐)"}{prc=false;const pg=getProg(),ok=!!(pg&&pg.lv>=16),b2=$("bpr");b2.style.display=ok?"flex":"none";if(ok)b2.textContent="🔄 Prestige → Rank "+(meta.pr+1)+" (+10 ⭐)"}$("bhd").classList.toggle("active",meta.hard);$("bhd").querySelector("b").textContent="💀 Hard Mode: "+(meta.hard?"ON":"OFF")}
 function showRw(from){rwFrom=from||"menu";$("rwsub").textContent="You have "+meta.stars+" ⭐. Stars carry over between levels and modes."+(meta.hard?" Hard Mode is ON, so upgrades are paused.":"");
   let h="<b style='color:var(--gold)'>Upgrades</b>";
   Object.keys(UP).forEach(k=>{const u=UP[k],t=meta.up[k]||0,max=t>=u.c.length,c=u.c[t];h+='<button class="opt'+(!max&&meta.stars<c?" dim":"")+'" data-u="'+k+'"><b>'+u.ic+" "+u.n+" · Tier "+t+"/"+u.c.length+"</b><small>"+u.d+" · "+(max?"MAXED":"Next: "+c+" ⭐")+"</small></button>"});
@@ -1256,6 +1262,9 @@ $("rwb").onclick=e=>{const cb=e.target.closest("[data-c]");if(cb){cosClick(cb.da
 $("rwx").onclick=()=>{$("rw").style.display="none";$(rwFrom==="end"?"end":"ov").style.display="flex";menuRw()};
 $("brw").onclick=()=>showRw("menu");$("bdr").onclick=claimDaily;
 $("bhd").onclick=()=>{meta.hard=!meta.hard;saveMeta();menuRw();toast(meta.hard?"Hard Mode ON: upgrades off, +2 ⭐ per win.":"Hard Mode OFF.")};
+let tipT,prc=false;
+function showTip(id,t){if(!meta||meta.tips[id])return;meta.tips[id]=1;saveMeta();const e=$("tip");e.textContent="💡 "+t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},10000)}
+$("bpr").onclick=()=>{if(!prc){prc=true;$("bpr").textContent="⚠️ Resets this mode's levels. Tap again";return}prc=false;meta.pr++;meta.stars+=10;saveMeta();store.set(PKEY,JSON.stringify({lv:1,mode}));store.del(KEY);best={};store.set(BKEY,"{}");toast("🌟 Prestige Rank "+meta.pr+"! Goals +12%, rents +6% per rank.");sfx.win();updMenu()};
 function boot(){snd=store.get("lot_flip_snd")!=="0";$("snd").textContent=snd?"🔊":"🔇";migrate();loadMeta();applyTheme();setMode(mode);requestAnimationFrame(tick)}
 if(CP){CP.keys().then(r=>Promise.all((r.keys||[]).filter(k=>k.indexOf("lot_flip")===0&&store.get(k)===null).map(k=>CP.get({key:k}).then(v=>{if(v&&v.value!=null)try{localStorage.setItem(k,v.value)}catch(e){}})))).catch(()=>{}).then(boot)}else boot();
 </script>
