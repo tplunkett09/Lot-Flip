@@ -213,6 +213,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .al{background:rgba(41,182,246,.15);border:1px solid var(--blue);border-radius:10px;padding:2px 6px;font-size:11px;font-weight:800;white-space:nowrap;color:var(--blue)}
 .al.red{border-color:var(--warn);color:#ef9a9a;background:rgba(229,57,53,.15)}
 .sx{position:sticky;top:0;float:right;z-index:3;width:34px;height:34px;margin:-6px -6px 4px 8px;border-radius:50%;border:2px solid var(--line);background:var(--hov);color:var(--text);font:inherit;font-size:16px;font-weight:800;line-height:1;padding:0}
+.box>.sx{float:none;align-self:flex-end;margin:-12px -12px -34px 0;flex-shrink:0}
+#rwx,#lback{display:none}
 </style>
 </head>
 <body>
@@ -248,7 +250,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 </div></div>
 
 <div class="ov" id="pz" style="display:none"><div class="box">
-  <h2>⏸ Paused</h2><p>Timers and construction are frozen.</p>
+  <button class="sx" id="pzc" aria-label="Resume">✕</button><h2>⏸ Paused</h2><p>Timers and construction are frozen.</p>
   <button class="mbtn" id="br">▶ Resume</button>
   <button class="mbtn blue" id="bs">💾 Save Game</button>
   <button class="mbtn gold" id="brs">🔄 Restart Level</button>
@@ -258,11 +260,11 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 <div class="ov" id="end" style="display:none"><div class="box" id="endbox"></div></div>
 
 <div class="ov" id="lvs" style="display:none"><div class="box" style="max-height:90vh;overflow-y:auto">
-  <h2>🗺️ Levels</h2><p id="lvsub"></p><div class="lgrid" id="lgrid"></div>
+  <button class="sx" id="lvc" aria-label="Back">✕</button><h2>🗺️ Levels</h2><p id="lvsub"></p><div class="lgrid" id="lgrid"></div>
   <button class="mbtn line" id="lback">← Back</button>
 </div></div>
 
-<div class="ov" id="rw" style="display:none"><div class="box"><h2>⭐ Rewards</h2><p id="rwsub"></p><div id="rwb" style="display:flex;flex-direction:column;gap:6px;text-align:left"></div><button class="mbtn line" id="rwx">← Back</button></div></div>
+<div class="ov" id="rw" style="display:none"><div class="box"><button class="sx" id="rwc" aria-label="Back">✕</button><h2>⭐ Rewards</h2><p id="rwsub"></p><div id="rwb" style="display:flex;flex-direction:column;gap:6px;text-align:left"></div><button class="mbtn line" id="rwx">← Back</button></div></div>
 <script>
 const $=id=>document.getElementById(id),fmt=n=>"$"+Math.round(n);
 const S={
@@ -527,9 +529,9 @@ function endGame(win){
     h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>"}
   else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.<br>Building goal: '+(objective&&objective.done?'complete':'build '+S[objective?objective.k:"ranch"].n)+'.</p>';
   h+='<button class="mbtn" id="nx">'+(win?"Next Level":"Retry Level "+lv)+'</button><button class="mbtn gold" id="er">⭐ Rewards & Upgrades</button><button class="mbtn blue" id="el">🗺️ Levels</button><button class="mbtn line" id="em">🏠 Main Menu</button>';
-  $("endbox").innerHTML=h;$("end").style.display="flex";
+  $("endbox").innerHTML='<button class="sx" id="ec" aria-label="Main menu">✕</button>'+h;$("end").style.display="flex";
   $("nx").onclick=()=>{if(win)lv++;startLevel()};$("el").onclick=()=>showLevels("end");$("er").onclick=()=>showRw("end");
-  $("em").onclick=()=>{$("end").style.display="none";$("ov").style.display="flex";updMenu()};
+  $("em").onclick=()=>{$("end").style.display="none";$("ov").style.display="flex";updMenu()};$("ec").onclick=$("em").onclick;
 }
 
 const WN=(x,y,w,h)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="1" fill="#bde3f5" stroke="#3e2723"/><path d="M'+(x+w/2)+" "+y+"v"+h+"M"+x+" "+(y+h/2)+"h"+w+'" stroke="#3e2723" stroke-width=".7"/>';
@@ -1283,6 +1285,7 @@ function goalCard(){if(!bonus)return;const par=90+lv*10,left=Math.max(0,Math.cei
  if(twist)t.push(twist.ic+" "+twist.n+": "+twist.d);if(ev.k)t.push(EV[ev.k]);
  const e=$("tip");e.style.whiteSpace="pre-line";e.style.textAlign="left";e.textContent=t.join("\n");e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},8000)}
 $("bonus").onclick=goalCard;
+$("pzc").onclick=()=>togglePause();$("lvc").onclick=()=>$("lback").onclick();$("rwc").onclick=()=>$("rwx").onclick();
 function boot(){snd=store.get("lot_flip_snd")!=="0";$("snd").textContent=snd?"🔊":"🔇";migrate();loadMeta();applyTheme();setMode(mode);requestAnimationFrame(tick)}
 if(CP){CP.keys().then(r=>Promise.all((r.keys||[]).filter(k=>k.indexOf("lot_flip")===0&&store.get(k)===null).map(k=>CP.get({key:k}).then(v=>{if(v&&v.value!=null)try{localStorage.setItem(k,v.value)}catch(e){}})))).catch(()=>{}).then(boot)}else boot();
 </script>
