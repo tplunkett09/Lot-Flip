@@ -243,6 +243,21 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes bay{0%,6%{transform:scaleY(1)}12%,36%{transform:scaleY(.12)}42%,56%{transform:scaleY(1)}62%,86%{transform:scaleY(.12)}92%,100%{transform:scaleY(1)}}
 .ft{animation:ft 28s linear infinite}
 @keyframes ft{0%,8%{opacity:0;transform:translateX(0)}12%{opacity:1;transform:translateX(0)}34%{opacity:1;transform:translateX(52px)}38%,58%{opacity:0;transform:translateX(52px)}62%{opacity:1;transform:translateX(52px)}84%{opacity:1;transform:translateX(0)}88%,100%{opacity:0;transform:translateX(0)}}
+.pls{animation:pls 1.3s ease-in-out infinite}
+@keyframes pls{0%,100%{opacity:0}50%{opacity:.55}}
+.heli{animation:heli 14s linear infinite}
+@keyframes heli{0%{transform:translate(-24px,6px) scale(1.8)}50%,100%{transform:translate(124px,6px) scale(1.8)}}
+.arm{animation:arm 18s ease-in-out infinite}
+@keyframes arm{0%{transform:translateX(-34px)}18%,62%{transform:translateX(44px)}85%,100%{transform:translateX(134px)}}
+.bay{animation:bay 16s ease-in-out infinite;transform-box:fill-box;transform-origin:top}
+@keyframes bay{0%,8%{transform:scaleY(1)}16%,40%{transform:scaleY(.1)}48%,60%{transform:scaleY(1)}68%,88%{transform:scaleY(.1)}96%,100%{transform:scaleY(1)}}
+.ft{animation:ft 16s linear infinite}
+@keyframes ft{0%,10%{opacity:0;transform:translateX(0)}16%{opacity:1;transform:translateX(0)}38%{opacity:1;transform:translateX(55px)}42%,62%{opacity:0;transform:translateX(55px)}66%{opacity:1;transform:translateX(55px)}88%{opacity:1;transform:translateX(0)}92%,100%{opacity:0;transform:translateX(0)}}
+.lit{animation:lit 6s linear infinite}
+@keyframes lit{0%,40%{opacity:.95}41%,70%{opacity:.05}71%,100%{opacity:.95}}
+.clk{animation:clk 5s linear infinite;transform-origin:50px 17px}
+@keyframes clk{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.lit,.clk{animation:none}}
 </style>
 </head>
 <body>
@@ -567,7 +582,7 @@ const STAR=(cx,cy)=>'<polygon points="'+[...Array(10)].map((_,k)=>{const a=-Math
 const TREE=(x,y)=>'<rect x="'+(x-1)+'" y="'+y+'" width="2" height="6" fill="#6d4c41"/><circle cx="'+x+'" cy="'+(y-2)+'" r="6" fill="#2e7d32"/><circle cx="'+(x-2)+'" cy="'+(y-4)+'" r="3" fill="#43a047"/>';
 const GROUND='<ellipse cx="50" cy="56" rx="46" ry="7" fill="#000" opacity=".22"/><rect x="5" y="46" width="90" height="13" rx="5" fill="#5aa23e"/><polygon points="44,46 56,46 62,59 38,59" fill="#d7ccc8"/>';
 const BUSH='<circle cx="9" cy="47" r="4" fill="#388e3c"/><circle cx="91" cy="47" r="4" fill="#388e3c"/>';
-const PERS=(c,cls,dl,dy)=>'<g class="'+cls+'" style="animation-delay:'+dl+'s"><g transform="translate(0 '+(dy||0)+')"><circle cx="0" cy="49.5" r="1.7" fill="#ffcc80"/><rect x="-1.6" y="51" width="3.2" height="5" rx="1" fill="'+c+'"/></g></g>';
+const PERS=(c,cls,dl,dy)=>'<g class="'+cls+'" style="animation-delay:'+dl+'s"><g transform="translate(0 '+(dy||0)+')"><circle cx="0" cy="49" r="2.3" fill="#ffcc80"/><rect x="-2.2" y="51" width="4.4" height="6.5" rx="1.3" fill="'+c+'"/></g></g>';
 function houseArt(l,i){
   const st=l.st,k=l.hs;
   if(st==="empty"){const rd=l.land<125;return '<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".15"/><g transform="translate(-6,-17) scale(1.65)"><path d="M16 10v53M16 12h16" stroke="#4e342e" stroke-width="3" stroke-linecap="round"/><rect x="16" y="14" width="36" height="22" rx="3" fill="#fff" stroke="#1b5e20" stroke-width="2"/><rect x="16" y="14" width="36" height="8" fill="#2e7d32"/><text x="34" y="20" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">FOR SALE</text><text x="34" y="30" font-size="8" font-weight="900" text-anchor="middle">'+fmt(l.land)+'</text></g>'+(rd?'<g transform="translate(70,14) rotate(-12)"><rect x="-16" y="-6" width="32" height="12" rx="2.5" fill="#d32f2f" stroke="#fff" stroke-width="1.2"/><text y="2.5" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">REDUCED</text></g>':"")}
@@ -599,11 +614,16 @@ function houseArt(l,i){
   else if(k==="fire")s+='<rect x="15" y="23" width="70" height="25" fill="#e57373" '+T+'/><polygon points="12,24 50,10 88,24" fill="#b71c1c" '+T+'/><rect x="41" y="31" width="18" height="17" fill="#ffcc80" stroke="#3e2723"/><rect x="21" y="29" width="14" height="10" fill="#b3e5fc" stroke="#3e2723"/><rect x="65" y="29" width="14" height="10" fill="#b3e5fc" stroke="#3e2723"/><path d="M50 10V3" stroke="#37474f" stroke-width="2"/><circle cx="50" cy="3" r="2" fill="#e53935"/>'
   else if(k==="bank")s+='<rect x="15" y="23" width="70" height="25" fill="#cfd8dc" '+T+'/><polygon points="10,23 50,8 90,23" fill="#78909c" '+T+'/><path d="M24 25v20M39 25v20M61 25v20M76 25v20" stroke="#fff" stroke-width="5"/><rect x="42" y="34" width="16" height="14" fill="#5d4037"/><text x="50" y="19" font-size="7" font-weight="900" text-anchor="middle" fill="#fff">BANK</text>';
   if(st==="ready"){
-    if(k==="hospital")s+='<path class="pls" d="M50 11v11M44.5 16.5h11" stroke="#ffcdd2" stroke-width="4"/><g class="heli"><ellipse cx="0" cy="0" rx="5" ry="3" fill="#e53935" stroke="#7f0000" stroke-width=".6"/><rect x="-12" y="-.7" width="8" height="1.4" fill="#e53935"/><ellipse cx="2" cy="-.6" rx="2.2" ry="1.5" fill="#bde3f5"/><rect class="rot" x="-6.5" y="-4.6" width="13" height="1" fill="#37474f"/></g>';
-    else if(k==="pool")s+='<g class="sw1"><circle cx="22" cy="28" r="2.3" fill="#ffcc80"/><path d="M19.7 28a2.3 2.3 0 0 1 4.6 0z" fill="#e53935"/><circle class="rip" cx="22" cy="30" r="2.5" fill="none" stroke="#e1f5fe" stroke-width=".8"/></g><g class="sw2"><circle cx="22" cy="39" r="2.3" fill="#ffcc80"/><path d="M19.7 39a2.3 2.3 0 0 1 4.6 0z" fill="#fdd835"/><circle class="rip" cx="22" cy="41" r="2.5" fill="none" stroke="#e1f5fe" stroke-width=".8"/></g>';
-    else if(k==="park")s+=PERS("#3949ab","wk1",-2,-4)+PERS("#e53935","wk2",-9,-4)+'<circle class="bnc" cx="30" cy="44" r="2" fill="#e53935" stroke="#7f0000" stroke-width=".5"/>';
-    else if(k==="bank")s+='<g class="arm"><rect x="0" y="49" width="20" height="8" rx="1.5" fill="#78909c" stroke="#263238"/><rect x="14" y="51" width="5" height="3" fill="#bde3f5"/><text x="7" y="55" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">$</text><circle cx="4" cy="57.5" r="2" fill="#263238"/><circle cx="15" cy="57.5" r="2" fill="#263238"/></g>';
-    else if(k==="fire")s+='<rect x="41" y="31" width="18" height="17" fill="#3e2723"/><g class="ft"><rect x="42" y="36" width="16" height="9" rx="1.5" fill="#d32f2f" stroke="#3e2723"/><path d="M44 38h12" stroke="#eceff1" stroke-width="1.2"/><circle cx="46" cy="46" r="2" fill="#263238"/><circle cx="55" cy="46" r="2" fill="#263238"/></g><rect class="bay" x="41" y="31" width="18" height="17" fill="#bdbdbd" stroke="#3e2723"/><path d="M41 36h18M41 41h18" stroke="#757575" stroke-width=".7"/><circle class="blk" cx="50" cy="3" r="2.8" fill="#ff1744"/>';
+    if(k==="hospital")s+='<circle class="pls" cx="50" cy="16.5" r="10" fill="#ff5252"/><g class="heli"><ellipse cx="0" cy="0" rx="5" ry="3" fill="#e53935" stroke="#7f0000" stroke-width=".6"/><rect x="-12" y="-.7" width="8" height="1.4" fill="#e53935"/><ellipse cx="2" cy="-.6" rx="2.2" ry="1.5" fill="#bde3f5"/><rect class="rot" x="-6.5" y="-4.6" width="13" height="1" fill="#37474f"/></g>';
+    else if(k==="pool")s+='<g class="sw1"><circle cx="22" cy="28" r="3.4" fill="#ffcc80" stroke="#8d6e63" stroke-width=".5"/><path d="M18.6 28a3.4 3.4 0 0 1 6.8 0z" fill="#e53935"/><circle class="rip" cx="22" cy="31" r="4" fill="none" stroke="#fff" stroke-width="1.2"/></g><g class="sw2"><circle cx="22" cy="39" r="3.4" fill="#ffcc80" stroke="#8d6e63" stroke-width=".5"/><path d="M18.6 39a3.4 3.4 0 0 1 6.8 0z" fill="#fdd835"/><circle class="rip" cx="22" cy="42" r="4" fill="none" stroke="#fff" stroke-width="1.2"/></g>';
+    else if(k==="park")s+=PERS("#3949ab","wk1",-2,-4)+PERS("#e53935","wk2",-9,-4)+PERS("#fb8c00","wk1",-8,-4)+'<circle class="bnc" cx="30" cy="44" r="2.8" fill="#e53935" stroke="#7f0000" stroke-width=".6"/>';
+    else if(k==="bank")s+='<g class="arm"><rect x="0" y="47" width="28" height="10" rx="2" fill="#78909c" stroke="#263238" stroke-width="1"/><rect x="21" y="49" width="6" height="4" fill="#bde3f5"/><text x="10" y="54.5" font-size="7" font-weight="900" text-anchor="middle" fill="#fff">$</text><circle cx="6" cy="57.5" r="2.6" fill="#263238"/><circle cx="21" cy="57.5" r="2.6" fill="#263238"/></g>';
+    else if(k==="school")s+='<path class="clk" d="M50 17v-4.6" stroke="#e53935" stroke-width=".9" stroke-linecap="round"/>'+PERS("#e53935","wk1",-1,-3)+PERS("#1e88e5","wk2",-7,-3)+PERS("#43a047","wk1",-10,-3)+'<circle class="bnc" cx="26" cy="51" r="2.8" fill="#fdd835" stroke="#8d6e63" stroke-width=".6"/>';
+    else if(k==="fire")s+='<rect x="41" y="31" width="18" height="17" fill="#3e2723"/><g class="ft"><rect x="40" y="34" width="22" height="11" rx="2" fill="#d32f2f" stroke="#3e2723"/><rect x="55" y="35.5" width="5" height="4" fill="#bde3f5"/><path d="M42 37h11M42 40h11" stroke="#eceff1" stroke-width="1.3"/><rect class="blk" x="44" y="32.5" width="6" height="2" fill="#ffeb3b"/><circle cx="45" cy="46" r="2.6" fill="#263238"/><circle cx="57" cy="46" r="2.6" fill="#263238"/></g><rect class="bay" x="41" y="31" width="18" height="17" fill="#bdbdbd" stroke="#3e2723"/><path d="M41 36h18M41 41h18" stroke="#757575" stroke-width=".7"/><circle class="blk" cx="50" cy="3" r="2.8" fill="#ff1744"/>';
+  }
+  if(k==="apartment"&&(st==="rented"||st==="ready")){
+    [[33,19.5,"#ffe082",6.5,0],[47,19.5,"#ffe082",9,-3],[64,19.5,"#90caf9",2.4,-1],[33,30.5,"#ffe082",8,-5],[47,30.5,"#ffe082",5.5,-2],[64,30.5,"#ffe082",7.5,-4],[33,42,"#90caf9",3.1,0],[64,42,"#ffe082",9.5,-6]].forEach(w=>{s+='<rect class="lit" x="'+(w[0]-4)+'" y="'+(w[1]-3)+'" width="8" height="6" rx="1" fill="'+w[2]+'" style="animation-duration:'+w[3]+'s;animation-delay:'+w[4]+'s"/>'});
+    s+=PERS("#6a1b9a","wk1",-3,0)+PERS("#00897b","wk2",-10,0);
   }
   if(["ranch","colonial","mansion","civic","school"].includes(k))s+=BUSH;
   const c=l.reno.length;for(let q=0;q<c;q++)s+=STAR(50-(c-1)*7+q*14,7);
