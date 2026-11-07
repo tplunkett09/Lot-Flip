@@ -263,6 +263,11 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .bal{animation:bal 1.6s ease-in-out infinite alternate}
 @keyframes bal{to{transform:translateY(-3px)}}
 @media(prefers-reduced-motion:reduce){.ban,.bal{animation:none}}
+.dove{animation:dove 13s linear infinite}
+@keyframes dove{0%{transform:translate(-10px,14px) scale(1.5)}42%,100%{transform:translate(112px,4px) scale(1.5)}}
+.flp{animation:flp .22s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes flp{to{transform:scaleY(.2)}}
+@media(prefers-reduced-motion:reduce){.dove,.flp{animation:none}}
 </style>
 </head>
 <body>
@@ -395,14 +400,14 @@ function startLevel(){
   const n=Math.min(4,2+Math.floor(lv/3)),ix=[],ht=["ranch","colonial","mansion"];
   while(ix.length<n){const r=Math.floor(Math.random()*N);if(!ix.includes(r))ix.push(r)}
   ix.forEach(k=>{const l=lots[k];l.st="ai_owned";l.hs=ht[Math.floor(Math.random()*3)];l.aiW=3+Math.random()*6});
-  const ks=availableBuildings(),k=ks[Math.floor(Math.random()*ks.length)];
-  bonus={k,n:S[k].cat==="h"?Math.min(3,1+Math.floor(lv/3)):1,r:200+lv*50,c:0,done:false};
-  objective={k:requiredBuilding,done:false};
+  objective=makeObjective(lv).o;
+  const ks=availableBuildings().filter(x=>!(objective.t==="build"&&x===objective.k)),k=ks[Math.floor(Math.random()*ks.length)];
+  bonus=(lv>=4&&lv%3===0)?{t:"sale",k:"ranch",n:Math.round((700+lv*40)/50)*50,r:200+lv*50,c:0,done:false}:{t:"build",k,n:S[k].cat==="h"?Math.min(3,1+Math.floor(lv/3)):1,r:200+lv*50,c:0,done:false};
   builders=2;speed=(1+.1*upT("crew"))*(twist&&twist.k==="rush"?1.5:1);sellMode=false;paused=false;ev={k:null,t:0,next:30};
   build();applyTheme();run=true;last=performance.now();
   ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("scene").classList.remove("pz");
   $("tl").textContent=mode==="timed"?"Time":"Elapsed";
-  toast((twist?twist.ic+" TWIST: "+twist.n+"! ":"")+"Level "+lv+": reach "+fmt(goal)+" and build a "+S[objective.k].n+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();if(twist)showTip("tw"+twist.k,twist.ic+" "+twist.n+": "+twist.d+". Clear it for +2 ⭐.");
+  toast((twist?twist.ic+" TWIST: "+twist.n+"! ":"")+"Level "+lv+": reach "+fmt(goal)+" and "+objLong().replace(/^./,c=>c.toLowerCase())+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();if(twist)showTip("tw"+twist.k,twist.ic+" "+twist.n+": "+twist.d+". Clear it for +2 ⭐.");
 }
 
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
@@ -412,7 +417,7 @@ function getProg(){try{return JSON.parse(store.get(PKEY))}catch(e){return null}}
 function setProg(n){const p=getProg();if(!p||n>p.lv)store.set(PKEY,JSON.stringify({lv:n,mode}))}
 function saveGame(){toast(snap()?"Game saved!":"Couldn’t save in this browser.")}
 function loadGame(){
-  try{const d=JSON.parse(store.get(KEY));lv=d.lv;twist=twistFor(lv);money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;bonus=d.bonus;const milestones=[{lv:1,k:"ranch"},{lv:2,k:"park"},{lv:3,k:"civic"},{lv:5,k:"apartment"},{lv:8,k:"pool"},{lv:12,k:"school"},{lv:15,k:"hospital"},{lv:20,k:"shopping"},{lv:24,k:"fire"},{lv:30,k:"bank"}];const expected=(milestones.filter(x=>lv>=x.lv).at(-1)||{k:"ranch"}).k;objective=d.objective||{k:expected,done:false};if(objective.k&&typeof objective.k==="object")objective.k=objective.k.k;if(objective.k!==expected)objective={k:expected,done:lots.some(l=>l.hs===expected&&["rented","listed","ready"].includes(l.st))};
+  try{const d=JSON.parse(store.get(KEY));lv=d.lv;twist=twistFor(lv);money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;bonus=d.bonus;const milestones=[{lv:1,k:"ranch"},{lv:2,k:"park"},{lv:3,k:"civic"},{lv:5,k:"apartment"},{lv:8,k:"pool"},{lv:12,k:"school"},{lv:15,k:"hospital"},{lv:20,k:"shopping"},{lv:24,k:"fire"},{lv:30,k:"bank"}];const expected=(milestones.filter(x=>lv>=x.lv).at(-1)||{k:"ranch"}).k;objective=d.objective;if(!objective||(!objective.t&&!S[objective.k])||(objective.t==="build"&&!S[objective.k]))objective=makeObjective(lv).o;if(!objective.t){objective.t="build";objective.n=1;objective.c=0}if(!bonus.t)bonus.t="build";
     ev={k:null,t:0,next:30};setMode(mode);build();applyTheme();lots.forEach((l,i)=>{if(l.st==="listed"&&l.offer)startBuyerArrival(i)});run=true;paused=false;last=performance.now();
     ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();return true}catch(e){toast("Couldn’t load save.");return false}
 }
@@ -500,7 +505,7 @@ function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return
 function spawnOffer(i){const l=lots[i],t=7+Math.random()*3+upT("buyer"),f=ev.k==="parade"?1.2:ev.k==="boom"?1.25:ev.k==="crash"?.8:1;l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};startBuyerArrival(i);sfx.offer();buzz(30);toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". A buyer is pulling in to look at the house.");draw()}
 function resolveOffer(i,acc){
   const l=lots[i];if(!l.offer)return;const p=l.offer.price;sendBuyerAway(i);l.offer=null;
-  if(acc&&run){money+=p;meta.st.flips++;meta.st.big=Math.max(meta.st.big,p);checkAch();l.st="sold";l.sp=p;l.soldT=1.6;fx(i,"sold");pop(i,"+"+fmt(p),1);flash();if(tutOn){tutOn=false;store.set("lot_flip_tut","1");setTimeout(()=>toast("🎓 Tutorial done! Chase the ⭐ tags for 3 stars."),2500)}toast("Sold Lot "+(i+1)+" for "+fmt(p)+"!")}
+  if(acc&&run){money+=p;meta.st.flips++;meta.st.big=Math.max(meta.st.big,p);if(objective&&objective.t==="flip")objective.c++;if(bonus&&bonus.t==="sale")bonus.c=Math.max(bonus.c,p);checkAch();l.st="sold";l.sp=p;l.soldT=1.6;fx(i,"sold");pop(i,"+"+fmt(p),1);flash();if(tutOn){tutOn=false;store.set("lot_flip_tut","1");setTimeout(()=>toast("🎓 Tutorial done! Chase the ⭐ tags for 3 stars."),2500)}toast("Sold Lot "+(i+1)+" for "+fmt(p)+"!")}
   else{l.wait=2+Math.random()*3;toast("Offer rejected. Waiting for the next buyer…")}
   closeSheet();draw();
 }
@@ -563,8 +568,8 @@ function tick(now){
       else if(l.st==="demo"){const tr=traffic[i];if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
-    if(bonus&&!bonus.done){bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
-    if(objective){objective.done=lots.some(l=>l.hs===objective.k&&["rented","listed","ready"].includes(l.st));}
+    if(bonus&&!bonus.done){if(bonus.t!=="sale")bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;if(bonus.c>=bonus.n){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
+    updObjective();
     if(money>=goal&&objective&&objective.done){run=false;endGame(true)}else if(mode==="timed"&&timeVal<=0){run=false;endGame(false)}
     draw();
   }
@@ -575,7 +580,7 @@ function endGame(win){
   closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;win?sfx.win():sfx.lose();
   if(win){const st=1+(bonus&&bonus.done?1:0)+(elapsed<=90+lv*10?1:0);const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;checkAch();store.set(BKEY,JSON.stringify(best));
     h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>"}
-  else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.<br>Building goal: '+(objective&&objective.done?'complete':'build '+S[objective?objective.k:"ranch"].n)+'.</p>';
+  else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.<br>Building goal: '+(objective&&objective.done?'complete':objLong().toLowerCase())+'.</p>';
   h+='<button class="mbtn" id="nx">'+(win?"Next Level":"Retry Level "+lv)+'</button><button class="mbtn gold" id="er">⭐ Rewards & Upgrades</button><button class="mbtn blue" id="el">🗺️ Levels</button><button class="mbtn line" id="em">🏠 Main Menu</button>';
   $("endbox").innerHTML='<button class="sx" id="ec" aria-label="Main menu">✕</button>'+h;$("end").style.display="flex";
   $("nx").onclick=()=>{if(win)lv++;startLevel()};$("el").onclick=()=>showLevels("end");$("er").onclick=()=>showRw("end");
@@ -625,6 +630,7 @@ function houseArt(l,i){
     else if(k==="pool")s+='<g class="sw1"><circle cx="22" cy="28" r="3.4" fill="#ffcc80" stroke="#8d6e63" stroke-width=".5"/><path d="M18.6 28a3.4 3.4 0 0 1 6.8 0z" fill="#e53935"/><circle class="rip" cx="22" cy="31" r="4" fill="none" stroke="#fff" stroke-width="1.2"/></g><g class="sw2"><circle cx="22" cy="39" r="3.4" fill="#ffcc80" stroke="#8d6e63" stroke-width=".5"/><path d="M18.6 39a3.4 3.4 0 0 1 6.8 0z" fill="#fdd835"/><circle class="rip" cx="22" cy="42" r="4" fill="none" stroke="#fff" stroke-width="1.2"/></g>';
     else if(k==="park")s+=PERS("#3949ab","wk1",-2,-4)+PERS("#e53935","wk2",-9,-4)+PERS("#fb8c00","wk1",-8,-4)+'<circle class="bnc" cx="30" cy="44" r="2.8" fill="#e53935" stroke="#7f0000" stroke-width=".6"/>';
     else if(k==="bank")s+='<g class="arm"><rect x="0" y="47" width="28" height="10" rx="2" fill="#78909c" stroke="#263238" stroke-width="1"/><rect x="21" y="49" width="6" height="4" fill="#bde3f5"/><text x="10" y="54.5" font-size="7" font-weight="900" text-anchor="middle" fill="#fff">$</text><circle cx="6" cy="57.5" r="2.6" fill="#263238"/><circle cx="21" cy="57.5" r="2.6" fill="#263238"/></g>';
+    else if(k==="civic")s+='<g class="dove"><ellipse rx="2.6" ry="1.4" fill="#fff" stroke="#90a4ae" stroke-width=".4"/><path class="flp" d="M-.5 -.8L-2.8 -3.6M.5 -.8L2.8 -3.6" stroke="#90a4ae" stroke-width=".9" stroke-linecap="round"/></g>'+PERS("#5e35b1","wk1",-1,-2)+PERS("#00897b","wk2",-8,-2)+PERS("#ef6c00","wk1",-12,-2)+'<circle class="blk" cx="50" cy="0.8" r="1.6" fill="#ffeb3b"/>';
     else if(k==="school")s+='<path class="clk" d="M50 17v-4.6" stroke="#e53935" stroke-width=".9" stroke-linecap="round"/>'+PERS("#e53935","wk1",-1,-3)+PERS("#1e88e5","wk2",-7,-3)+PERS("#43a047","wk1",-10,-3)+'<circle class="bnc" cx="26" cy="51" r="2.8" fill="#fdd835" stroke="#8d6e63" stroke-width=".6"/>';
     else if(k==="fire")s+='<rect x="41" y="31" width="18" height="17" fill="#3e2723"/><g class="ft"><rect x="40" y="34" width="22" height="11" rx="2" fill="#d32f2f" stroke="#3e2723"/><rect x="55" y="35.5" width="5" height="4" fill="#bde3f5"/><path d="M42 37h11M42 40h11" stroke="#eceff1" stroke-width="1.3"/><rect class="blk" x="44" y="32.5" width="6" height="2" fill="#ffeb3b"/><circle cx="45" cy="46" r="2.6" fill="#263238"/><circle cx="57" cy="46" r="2.6" fill="#263238"/></g><rect class="bay" x="41" y="31" width="18" height="17" fill="#bdbdbd" stroke="#3e2723"/><path d="M41 36h18M41 41h18" stroke="#757575" stroke-width=".7"/><circle class="blk" cx="50" cy="3" r="2.8" fill="#ff1744"/>';
   }
@@ -1185,7 +1191,7 @@ const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",mark
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
   const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
-  let h=gi(money>=goal,0,"💰"+pc+"%")+gi(od,0,S[objective?objective.k:"ranch"].ic+(od?"✔":""))+gi(bonus.done,0,"⭐"+S[bonus.k].ic+(bonus.done?"✔":bonus.c+"/"+bonus.n))+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
+  let h=gi(money>=goal,0,"💰"+pc+"%")+gi(od,0,objShort())+gi(bonus.done,0,bonShort())+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
   if(twist)h+='<span class="al">'+twist.ic+'</span>';
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
   if(ev.k)h+='<span class="al">'+EVS[ev.k]+Math.ceil(ev.t)+'s</span>';
@@ -1196,7 +1202,7 @@ function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&
   $("bld").textContent=(builders-busy())+"/"+builders;
   $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs==="civic"&&l.st==="ready"?S.civic.rev/3:0),0).toFixed(1)+"/s";
   const pc=Math.min(100,Math.round(money/goal*100));$("gbar").style.width=pc+"%";$("pct").textContent=pc+"%";
-  $("bonus").textContent=bonus?(bonus.done?"✔ Bonus complete!":"⭐ Bonus: build "+bonus.n+" "+S[bonus.k].n+(bonus.n>1?"s":"")+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r)):"";
+
   $("tut").textContent=tutText();$("bonus").innerHTML=chips();$("evt").textContent="";
   const cH=run&&money>=300&&builders<5,cT=run&&money>=250&&speed<2;
   $("hq").textContent=builders>=5?"MAX":"+$300";$("hire").classList.toggle("can",cH);$("hire").classList.toggle("off",builders>=5);
@@ -1357,11 +1363,35 @@ let tipT,prc=false;
 function showTip(id,t){if(!meta||meta.tips[id])return;meta.tips[id]=1;saveMeta();const e=$("tip");e.style.textAlign="center";e.style.whiteSpace="normal";e.textContent="💡 "+t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},10000)}
 $("bpr").onclick=()=>{if(!prc){prc=true;$("bpr").textContent="⚠️ Resets this mode's levels. Tap again";return}prc=false;meta.pr++;meta.stars+=10;saveMeta();store.set(PKEY,JSON.stringify({lv:1,mode}));store.del(KEY);best={};store.set(BKEY,"{}");toast("🌟 Prestige Rank "+meta.pr+"! Goals +12%, rents +6% per rank.");sfx.win();updMenu()};
 function goalCard(){if(!bonus)return;const par=90+lv*10,left=Math.max(0,Math.ceil(par-elapsed));
- const t=["💰 Reach "+fmt(goal)+" (now "+fmt(money)+")","🏗️ Build a "+S[objective.k].n+(objective.done?" ✔":""),"⭐ Bonus: build "+bonus.n+" "+S[bonus.k].n+(bonus.n>1?"s":"")+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r),"⏱ Finish within "+par+"s for a star ("+left+"s left)"];
+ const t=["💰 Reach "+fmt(goal)+" (now "+fmt(money)+")","🏗️ "+objLong()+(objective.done?" ✔":""),bonLong(),"⏱ Finish within "+par+"s for a star ("+left+"s left)"];
  if(twist)t.push(twist.ic+" "+twist.n+": "+twist.d);if(ev.k)t.push(EV[ev.k]);
  const e=$("tip");e.style.whiteSpace="pre-line";e.style.textAlign="left";e.textContent=t.join("\n");e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},8000)}
 $("bonus").onclick=goalCard;
 $("pzc").onclick=()=>togglePause();$("lvc").onclick=()=>$("lback").onclick();$("rwc").onclick=()=>$("rwx").onclick();
+const MILE=[{lv:1,k:"ranch"},{lv:2,k:"park"},{lv:3,k:"civic"},{lv:5,k:"apartment"},{lv:8,k:"pool"},{lv:12,k:"school"},{lv:15,k:"hospital"},{lv:20,k:"shopping"},{lv:24,k:"fire"},{lv:30,k:"bank"}];
+const an=n=>(/^[AEIOU]/.test(n)?"an ":"a ")+n,pl=(n,c)=>c>1?(/(ch|s|x)$/.test(n)?n+"es":n+"s"):n;
+const OI={flip:"🏷️",homes:"🏘️",reno:"🔨",variety:"🧩"};
+function makeObjective(l){
+  const req=MILE.filter(x=>l>=x.lv).at(-1).k;
+  if(MILE.some(x=>x.lv===l))return{o:{t:"build",k:req,n:1,c:0,done:false},req};
+  const t=["variety","flip","homes","build","reno"][(l+Math.floor(l/5))%5],o={t,n:1,c:0,done:false};
+  if(t==="build"){const cap=Math.max(800+l*75,S[req].cost+500)-300,ks=Object.keys(S).filter(k=>l>=S[k].unlock&&k!=="ranch"&&S[k].cost<=cap);o.k=ks.length?ks[(l*7)%ks.length]:req}
+  else if(t==="flip")o.n=1+Math.floor(l/8);
+  else if(t==="homes")o.n=Math.min(6,2+Math.floor(l/6));
+  else if(t==="reno")o.n=2+Math.floor(l/8);
+  else o.n=Math.min(5,3+Math.floor(l/8));
+  return{o,req}}
+function updObjective(){const o=objective;if(!o)return;const T=["rented","listed","ready"];
+  if(o.t==="build"){o.n=1;o.c=lots.some(l=>l.hs===o.k&&T.includes(l.st))?1:0}
+  else if(o.t==="homes")o.c=lots.filter(l=>l.hs&&S[l.hs].cat==="h"&&["rented","listed"].includes(l.st)).length;
+  else if(o.t==="reno")o.c=lots.reduce((a,l)=>a+(l.hs&&["rented","listed"].includes(l.st)?l.reno.length:0),0);
+  else if(o.t==="variety")o.c=new Set(lots.filter(l=>l.hs&&T.includes(l.st)).map(l=>l.hs)).size;
+  o.done=o.c>=o.n}
+function objShort(){const o=objective;if(!o)return"";return o.t==="build"?S[o.k].ic+(o.done?"✔":""):OI[o.t]+(o.done?"✔":Math.min(o.c,o.n)+"/"+o.n)}
+function objLong(){const o=objective;if(!o)return"";const pr=" ("+Math.min(o.c,o.n)+"/"+o.n+")";
+  return o.t==="build"?"Build "+an(S[o.k].n):o.t==="flip"?"Sell "+o.n+" house"+(o.n>1?"s":"")+pr:o.t==="homes"?"Own "+o.n+" rented homes at once"+pr:o.t==="reno"?"Finish "+o.n+" renovations (paint, roof, interior)"+pr:"Have "+o.n+" different building types"+pr}
+function bonShort(){return bonus.t==="sale"?"⭐💲"+(bonus.done?"✔":fmt(bonus.n)):"⭐"+S[bonus.k].ic+(bonus.done?"✔":bonus.c+"/"+bonus.n)}
+function bonLong(){return bonus.t==="sale"?"⭐ Bonus: sell one house for "+fmt(bonus.n)+" or more → +"+fmt(bonus.r):"⭐ Bonus: build "+bonus.n+" "+pl(S[bonus.k].n,bonus.n)+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r)}
 function boot(){snd=store.get("lot_flip_snd")!=="0";$("snd").textContent=snd?"🔊":"🔇";migrate();loadMeta();applyTheme();setMode(mode);requestAnimationFrame(tick)}
 if(CP){CP.keys().then(r=>Promise.all((r.keys||[]).filter(k=>k.indexOf("lot_flip")===0&&store.get(k)===null).map(k=>CP.get({key:k}).then(v=>{if(v&&v.value!=null)try{localStorage.setItem(k,v.value)}catch(e){}})))).catch(()=>{}).then(boot)}else boot();
 </script>
