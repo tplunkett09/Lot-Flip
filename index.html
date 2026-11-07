@@ -527,7 +527,7 @@ function tick(now){
         const visitor=traffic[i];
         if(visitor&&visitor.visitor&&visitor.kind==="parked"){
           visitor.parkUntil=(visitor.parkUntil==null?10+Math.random()*12:visitor.parkUntil)-dt;
-          if(visitor.parkUntil<=5&&!visitor.secondParked){
+          if(visitor.parkUntil<=5&&!visitor.secondParked&&!visitor.armor){
             visitor.secondParked=true;
             visitor.secondSide=-(visitor.side||1);
             visitor.secondArriveT=0;
@@ -634,7 +634,7 @@ function houseArt(l,i){
     if(k==="hospital")s+='<circle class="pls" cx="50" cy="16.5" r="10" fill="#ff5252"/><g class="heli"><ellipse cx="0" cy="0" rx="5" ry="3" fill="#e53935" stroke="#7f0000" stroke-width=".6"/><rect x="-12" y="-.7" width="8" height="1.4" fill="#e53935"/><ellipse cx="2" cy="-.6" rx="2.2" ry="1.5" fill="#bde3f5"/><rect class="rot" x="-6.5" y="-4.6" width="13" height="1" fill="#37474f"/></g>';
     else if(k==="pool")s+='<g class="sw1"><circle cx="22" cy="28" r="3.4" fill="#ffcc80" stroke="#8d6e63" stroke-width=".5"/><path d="M18.6 28a3.4 3.4 0 0 1 6.8 0z" fill="#e53935"/><circle class="rip" cx="22" cy="31" r="4" fill="none" stroke="#fff" stroke-width="1.2"/></g><g class="sw2"><circle cx="22" cy="39" r="3.4" fill="#ffcc80" stroke="#8d6e63" stroke-width=".5"/><path d="M18.6 39a3.4 3.4 0 0 1 6.8 0z" fill="#fdd835"/><circle class="rip" cx="22" cy="42" r="4" fill="none" stroke="#fff" stroke-width="1.2"/></g>';
     else if(k==="park")s+=PERS("#3949ab","wk1",-2,-4)+PERS("#e53935","wk2",-9,-4)+PERS("#fb8c00","wk1",-8,-4)+'<circle class="bnc" cx="30" cy="44" r="2.8" fill="#e53935" stroke="#7f0000" stroke-width=".6"/>';
-    else if(k==="bank")s+='<polygon class="pls" points="10,23 50,8 90,23" fill="none" stroke="#ffd54f" stroke-width="2.2"/>'+[36,50,64].map((x,q)=>'<g class="coin" style="animation-delay:'+(-q*.9)+'s"><circle cx="'+x+'" cy="19" r="3.2" fill="#ffc107" stroke="#b26a00" stroke-width=".7"/><text x="'+x+'" y="21.2" font-size="5" font-weight="900" text-anchor="middle" fill="#b26a00">$</text></g>').join("")+PERS("#455a64","wk1",-2,-2)+PERS("#c2185b","wk2",-8,-2)+'<g class="arm"><rect x="0" y="47" width="28" height="10" rx="2" fill="#78909c" stroke="#263238" stroke-width="1"/><rect x="21" y="49" width="6" height="4" fill="#bde3f5"/><text x="10" y="54.5" font-size="7" font-weight="900" text-anchor="middle" fill="#fff">$</text><circle cx="6" cy="57.5" r="2.6" fill="#263238"/><circle cx="21" cy="57.5" r="2.6" fill="#263238"/></g>';
+    else if(k==="bank")s+='<polygon class="pls" points="10,23 50,8 90,23" fill="none" stroke="#ffd54f" stroke-width="2.2"/>'+[36,50,64].map((x,q)=>'<g class="coin" style="animation-delay:'+(-q*.9)+'s"><circle cx="'+x+'" cy="19" r="3.2" fill="#ffc107" stroke="#b26a00" stroke-width=".7"/><text x="'+x+'" y="21.2" font-size="5" font-weight="900" text-anchor="middle" fill="#b26a00">$</text></g>').join("")+PERS("#455a64","wk1",-2,-2)+PERS("#c2185b","wk2",-8,-2);
     else if(k==="civic")s+='<g class="dove"><ellipse rx="2.6" ry="1.4" fill="#fff" stroke="#90a4ae" stroke-width=".4"/><path class="flp" d="M-.5 -.8L-2.8 -3.6M.5 -.8L2.8 -3.6" stroke="#90a4ae" stroke-width=".9" stroke-linecap="round"/></g>'+PERS("#5e35b1","wk1",-1,-2)+PERS("#00897b","wk2",-8,-2)+PERS("#ef6c00","wk1",-12,-2)+'<circle class="blk" cx="50" cy="0.8" r="1.6" fill="#ffeb3b"/>';
     else if(k==="school")s+='<path class="clk" d="M50 17v-4.6" stroke="#e53935" stroke-width=".9" stroke-linecap="round"/>'+PERS("#e53935","wk1",-1,-3)+PERS("#1e88e5","wk2",-7,-3)+PERS("#43a047","wk1",-10,-3)+'<circle class="bnc" cx="26" cy="51" r="2.8" fill="#fdd835" stroke="#8d6e63" stroke-width=".6"/>';
     else if(k==="fire")s+='<rect x="41" y="31" width="18" height="17" fill="#3e2723"/><g class="ft"><rect x="40" y="34" width="22" height="11" rx="2" fill="#d32f2f" stroke="#3e2723"/><rect x="55" y="35.5" width="5" height="4" fill="#bde3f5"/><path d="M42 37h11M42 40h11" stroke="#eceff1" stroke-width="1.3"/><rect class="blk" x="44" y="32.5" width="6" height="2" fill="#ffeb3b"/><circle cx="45" cy="46" r="2.6" fill="#263238"/><circle cx="57" cy="46" r="2.6" fill="#263238"/></g><rect class="bay" x="41" y="31" width="18" height="17" fill="#bdbdbd" stroke="#3e2723"/><path d="M41 36h18M41 41h18" stroke="#757575" stroke-width=".7"/><circle class="blk" cx="50" cy="3" r="2.8" fill="#ff1744"/>';
@@ -1167,7 +1167,7 @@ function renderTraffic(){
   const sc=$("scene");if(!sc)return;
   Object.keys(traffic).forEach(key=>{
     const i=+key,tr=traffic[i];if(!tr)return;
-    if(!tr.el||!tr.el.isConnected){tr.el=makeVehicle(tr.color,"traffic-car",tr.truck);sc.appendChild(tr.el)}
+    if(!tr.el||!tr.el.isConnected){tr.el=makeVehicle(tr.color,"traffic-car",tr.truck);if(tr.armor)tr.el.innerHTML=armorMarkup();sc.appendChild(tr.el)}
     if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
     const g=trafficGeometry(i);if(!g)return;
     if(tr.kind==="parked"){
@@ -1295,6 +1295,7 @@ function ambient(dt){
  const sc=$("scene");if(!sc||!meta)return;
  twL=twL.filter(o=>{o.a+=dt;if(o.a>=o.d||!o.el.isConnected){o.el.remove();return false}return true});
  if(meta.eq.theme==="desert"){amb.w-=dt;if(amb.w<=0){amb.w=4+Math.random()*9;if(twL.length<3)spawnWeed(sc)}}
+ amb.b=(amb.b==null?8:amb.b)-dt;if(amb.b<=0){amb.b=22+Math.random()*20;lots.forEach((l,i)=>{if(l.hs==="bank"&&l.st==="ready"&&!traffic[i])startArmoredArrival(i)})}
  amb.q=amb.q.filter(o=>{o.t-=dt;if(o.t<=0){spawnEmerg(o.k);return false}return true});
  amb.e-=dt;if(amb.e<=0){amb.e=18+Math.random()*25;const k=[];
   if(lots.some(l=>l.hs==="hospital"&&l.st==="ready"))k.push("amb");
@@ -1302,6 +1303,12 @@ function ambient(dt){
   if(lots.some(l=>l.hs==="school"&&l.st==="ready"))k.push("bus");
   if(k.length&&!roadTraffic.some(c=>c.emerg))spawnEmerg(k[Math.floor(Math.random()*k.length)])}
 }
+function armorMarkup(){return '<svg viewBox="0 0 32 18" aria-hidden="true"><rect x="4" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="4" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="1" y="3" width="30" height="12" rx="3" fill="#78909c" stroke="#263238" stroke-width="1.1"/><rect x="23" y="4.2" width="5.5" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 5h17M3 13h17" stroke="#455a64" stroke-width="1"/><text x="11.5" y="12.4" font-size="9" font-weight="900" text-anchor="middle" fill="#fff" stroke="#263238" stroke-width=".4">$</text><rect x="30" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="30" y="11.5" width="1.3" height="2" fill="#fff7b0"/></svg>'}
+function startArmoredArrival(i){const l=lots[i];if(!visitorBusiness(l)||traffic[i])return;
+ traffic[i]={kind:"arrive",t:0,dur:1,dir:1,color:"#78909c",visitor:true,armor:true,side:-1,stay:5};
+ const g=trafficGeometry(i);if(!g){delete traffic[i];return}
+ const dir=nearSideLaneDirection(g);traffic[i].dir=dir;traffic[i].dur=trafficDuration(g,dir,"arrive");
+ toast("🚚 Armored truck making a bank run!")}
 function spawnWeed(sc){const rd=[...sc.querySelectorAll(".road")],r=rd[Math.floor(Math.random()*rd.length)];if(!r)return;
  const S0=sc.getBoundingClientRect(),R0=r.getBoundingClientRect(),W=sc.clientWidth,ltr=Math.random()<.5,d=7+Math.random()*5,y=R0.top-(S0.top+sc.clientTop)+R0.height/2-4+(Math.random()*16-8);
  const el=document.createElement("div");el.className="tw";el.innerHTML="<i></i>";
