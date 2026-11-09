@@ -273,6 +273,26 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .arm{animation:arm 12s ease-in-out infinite}
 @keyframes arm{0%{transform:translateX(-34px)}20%,55%{transform:translateX(44px)}80%,100%{transform:translateX(134px)}}
 @media(prefers-reduced-motion:reduce){.coin{animation:none}}
+
+/* themed scene animations: Tropical, Moonlit, Candy Land, Volcanic */
+.fxl{position:absolute;inset:0;z-index:70;pointer-events:none;overflow:hidden;border-radius:11px}
+.fxl i{position:absolute;top:0;display:block;will-change:transform}
+#ptl i{width:var(--s);height:calc(var(--s)*.7);background:var(--c);border-radius:80% 0 80% 0;opacity:.92;animation:leaf var(--t) linear var(--d) infinite}
+#spr i{width:var(--s);height:calc(var(--s)*.4);background:var(--c);border-radius:3px;animation:leaf var(--t) linear var(--d) infinite}
+#ffl::before{content:"";position:absolute;inset:0;background:rgba(10,20,55,.24)}
+#ffl::after{content:"🌙";position:absolute;right:10px;top:4px;font-size:22px;line-height:1;filter:drop-shadow(0 0 8px rgba(255,255,210,.8))}
+#ffl i{width:var(--s);height:var(--s);border-radius:50%;background:#eaff80;box-shadow:0 0 6px 2px rgba(220,255,110,.85);animation:ffd var(--t) ease-in-out var(--d) infinite alternate,ffg var(--g) ease-in-out var(--d) infinite}
+@keyframes ffd{from{transform:translate(0,0)}to{transform:translate(var(--dx),var(--dy))}}
+@keyframes ffg{0%,100%{opacity:.08}50%{opacity:1}}
+#emb::before{content:"";position:absolute;left:0;right:0;bottom:0;height:46px;background:linear-gradient(to top,rgba(255,80,20,.5),transparent);animation:lava 2.4s ease-in-out infinite alternate}
+@keyframes lava{from{opacity:.35}to{opacity:1}}
+#emb i{top:auto;bottom:0;width:var(--s);height:var(--s);border-radius:50%;background:#ff9a2e;box-shadow:0 0 5px 2px rgba(255,110,30,.85);animation:ember var(--t) ease-out var(--d) infinite}
+@keyframes ember{0%{transform:translate(0,0) scale(1);opacity:0}12%{opacity:1}100%{transform:translate(var(--dx),calc(var(--h)*-1)) scale(.3);opacity:0}}
+.tw.pep{width:11px;height:11px}
+.tw.pep i{border:1.5px solid #fff;background:repeating-conic-gradient(#e91e63 0 30deg,#fff 30deg 60deg)}
+.tw.bf{width:auto;height:auto;font-size:14px;line-height:1;z-index:72}
+.tw.bf b{display:block;font-weight:400;animation:twb .4s ease-in-out infinite alternate}
+@media(prefers-reduced-motion:reduce){#ptl i,#spr i,#ffl i,#emb i,#emb::before,.tw.bf b{animation:none}}
 </style>
 </head>
 <body>
@@ -1290,7 +1310,13 @@ function fxLayers(){const sc=$("scene");if(!sc||!meta)return;
  if(f)f.style.setProperty("--h",sc.clientHeight+"px");
  let n=$("snw");const ws=meta.eq.theme==="snow";if(n&&(!ws||!n.isConnected)){n.remove();n=null}
  if(ws&&!n){n=document.createElement("div");n.id="snw";for(let k=0;k<30;k++){const i=document.createElement("i");i.style.cssText="left:"+(Math.random()*98).toFixed(1)+"%;--d:"+(-Math.random()*12).toFixed(1)+"s;--t:"+(6+Math.random()*7).toFixed(1)+"s;--s:"+(2+Math.random()*2.5).toFixed(1)+"px";n.appendChild(i)}sc.appendChild(n)}
- if(n)n.style.setProperty("--h",sc.clientHeight+"px")}
+ if(n)n.style.setProperty("--h",sc.clientHeight+"px");
+ const r=(a,b)=>a+Math.random()*(b-a);
+ const mk=(id,theme,cnt,fn)=>{let e=$(id);const w=meta.eq.theme===theme;if(e&&(!w||!e.isConnected)){e.remove();e=null}if(w&&!e){e=document.createElement("div");e.id=id;e.className="fxl";for(let k=0;k<cnt;k++){const i=document.createElement("i");i.style.cssText=fn(k);e.appendChild(i)}sc.appendChild(e)}if(e)e.style.setProperty("--h",sc.clientHeight+"px")};
+ mk("ptl","tropical",18,k=>"left:"+r(0,96).toFixed(1)+"%;--d:"+(-r(0,10)).toFixed(1)+"s;--t:"+r(7,12).toFixed(1)+"s;--s:"+r(6,9).toFixed(1)+"px;--c:"+["#ff6f91","#ffa726","#ffffff","#ffee58","#f06292"][k%5]);
+ mk("ffl","night",22,k=>"left:"+r(2,96).toFixed(1)+"%;top:"+r(5,92).toFixed(1)+"%;--d:"+(-r(0,6)).toFixed(1)+"s;--t:"+r(4,9).toFixed(1)+"s;--g:"+r(1.6,3.6).toFixed(1)+"s;--s:"+r(2.5,4).toFixed(1)+"px;--dx:"+r(-30,30).toFixed(0)+"px;--dy:"+r(-22,22).toFixed(0)+"px");
+ mk("spr","candy",26,k=>"left:"+r(0,97).toFixed(1)+"%;--d:"+(-r(0,10)).toFixed(1)+"s;--t:"+r(7,12).toFixed(1)+"s;--s:"+r(6,9).toFixed(1)+"px;--c:"+["#ff4081","#7cf5c0","#fff176","#80d8ff","#ffffff","#ce93d8"][k%6]);
+ mk("emb","volcanic",24,k=>"left:"+r(1,98).toFixed(1)+"%;--d:"+(-r(0,7)).toFixed(1)+"s;--t:"+r(3.5,7).toFixed(1)+"s;--s:"+r(2,4).toFixed(1)+"px;--dx:"+r(-25,25).toFixed(0)+"px")}
 let amb={e:12,w:3,q:[]},twL=[];
 const readyOf=k=>lots.some(l=>l.hs===k&&l.st==="ready"),fireReady=()=>readyOf("fire");
 function queueEmerg(k,t){amb.q.push({k,t})}
@@ -1300,7 +1326,7 @@ function festFx(){const host={party:"park",market:"civic",parade:"school"}[ev.k]
 function ambient(dt){
  const sc=$("scene");if(!sc||!meta)return;
  twL=twL.filter(o=>{o.a+=dt;if(o.a>=o.d||!o.el.isConnected){o.el.remove();return false}return true});
- if(meta.eq.theme==="desert"){amb.w-=dt;if(amb.w<=0){amb.w=4+Math.random()*9;if(twL.length<3)spawnWeed(sc)}}
+ const th=meta.eq.theme;if(th==="desert"||th==="candy"||th==="tropical"){amb.w-=dt;if(amb.w<=0){amb.w=th==="tropical"?3+Math.random()*6:4+Math.random()*9;if(twL.length<3)spawnWeed(sc,th)}}
  amb.b=(amb.b==null?8:amb.b)-dt;if(amb.b<=0){amb.b=22+Math.random()*20;lots.forEach((l,i)=>{if(l.hs==="bank"&&l.st==="ready"&&!traffic[i])startArmoredArrival(i)})}
  amb.q=amb.q.filter(o=>{o.t-=dt;if(o.t<=0){spawnEmerg(o.k);return false}return true});
  amb.e-=dt;if(amb.e<=0){amb.e=18+Math.random()*25;const k=[];
@@ -1315,10 +1341,10 @@ function startArmoredArrival(i){const l=lots[i];if(!visitorBusiness(l)||traffic[
  const g=trafficGeometry(i);if(!g){delete traffic[i];return}
  const dir=nearSideLaneDirection(g);traffic[i].dir=dir;traffic[i].dur=trafficDuration(g,dir,"arrive");
  toast("🚚 Armored truck making a bank run!")}
-function spawnWeed(sc){const rd=[...sc.querySelectorAll(".road")],r=rd[Math.floor(Math.random()*rd.length)];if(!r)return;
+function spawnWeed(sc,th){const rd=[...sc.querySelectorAll(".road")],r=rd[Math.floor(Math.random()*rd.length)];if(!r)return;
  const S0=sc.getBoundingClientRect(),R0=r.getBoundingClientRect(),W=sc.clientWidth,ltr=Math.random()<.5,d=7+Math.random()*5,y=R0.top-(S0.top+sc.clientTop)+R0.height/2-4+(Math.random()*16-8);
- const el=document.createElement("div");el.className="tw";el.innerHTML="<i></i>";
- el.style.cssText="--y:"+y.toFixed(1)+"px;--x0:"+(ltr?-24:W+10)+"px;--x1:"+(ltr?W+10:-24)+"px;--r:"+(ltr?720:-720)+"deg;--t:"+d.toFixed(1)+"s";
+ const el=document.createElement("div");el.className="tw"+(th==="candy"?" pep":th==="tropical"?" bf":"");el.innerHTML=th==="tropical"?"<b>🦋</b>":"<i></i>";
+ el.style.cssText="--y:"+(th==="tropical"?Math.random()*(sc.clientHeight-30):y).toFixed(1)+"px;--x0:"+(ltr?-24:W+10)+"px;--x1:"+(ltr?W+10:-24)+"px;--r:"+(th==="tropical"?0:ltr?720:-720)+"deg;--t:"+d.toFixed(1)+"s";
  sc.appendChild(el);twL.push({el,a:0,d:d+.3})}
 function emergMarkup(kind){
  const wh='<rect x="4" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="4" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="15" width="4" height="3" rx="1" fill="#1f2933"/>',
