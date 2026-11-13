@@ -1488,7 +1488,7 @@ const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",mark
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
   const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
-  let h=lvDone?gi(1,0,"✅ All goals done"):(money>=goal?"":gi(0,0,"💰"+pc+"%"))+(od?"":gi(0,0,objShort()))+(bonus.done?"":gi(0,0,bonShort()))+(pm?gi(0,1,"⏱✘"):gi(0,0,"⏱"+left+"s"))+'<span class="sp"></span>';
+  const ck=(ok,t)=>gi(ok,0,(ok?"✅":"")+t);let h=ck(money>=goal,money>=goal?"💰":"💰"+pc+"%")+ck(od,objShort().replace(/✔$/,""))+ck(!!bonus.done,bonShort().replace(/✔$/,""))+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
   if(twist)h+='<span class="al">'+twist.ic+'</span>';
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
   if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
@@ -1716,7 +1716,7 @@ let tipT,prc=false;
 function showTip(id,t){if(!meta||meta.tips[id])return;meta.tips[id]=1;saveMeta();const e=$("tip");e.style.textAlign="center";e.style.whiteSpace="normal";e.textContent="💡 "+t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},10000)}
 $("bpr").onclick=()=>{if(meta.pr>=10)return;if(!prc){prc=true;$("bpr").textContent="⚠️ Resets this mode's levels. Tap again";return}prc=false;meta.pr++;meta.stars+=10;meta.ws={};saveMeta();store.set(PKEY,JSON.stringify({lv:1,mode}));store.del(KEY);best={};store.set(BKEY,"{}");toast("🌟 Prestige Rank "+meta.pr+"/10! Goals +12%, cash −4% and time −3% per rank.");sfx.win();updMenu()};
 function goalCard(){if(!bonus)return;const par=90+lv*10,left=Math.max(0,Math.ceil(par-elapsed));
- const t=[W().ic+" World "+(worldOf(lv)+1)+": "+W().n,"💰 Reach "+fmt(goal)+" (now "+fmt(money)+")","🏗️ "+objLong()+(objective.done?" ✔":""),bonLong(),"⏱ Finish within "+par+"s for a star ("+left+"s left)"];
+ const ck=ok=>ok?"✅ ":"⬜ ",t=[W().ic+" World "+(worldOf(lv)+1)+": "+W().n,ck(money>=goal)+"💰 Reach "+fmt(goal)+" (now "+fmt(money)+")",ck(objective.done)+"🏗️ "+objLong(),ck(bonus.done)+bonLong(),(elapsed>par?"❌ ":lvDone?"✅ ":"⬜ ")+"⏱ Finish within "+par+"s for a star ("+(elapsed>par?"missed":left+"s left")+")"];
  if(W().sea)t.push("🌊 Top-row homes are beachfront: +25% value");
  if(twist)t.push(twist.ic+" "+twist.n+": "+twist.d);if(ev.k)t.push(evText(ev.k));
  const e=$("tip");e.style.whiteSpace="pre-line";e.style.textAlign="left";e.textContent=t.join("\n");e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},8000)}
