@@ -1459,7 +1459,9 @@ const ACH=[
 {id:"leg",n:"Lot Flip Legend",d:"Clear Level 100 at Prestige 10",r:25,t:m=>!!m.legend}];
 const MK="lot_flip_meta_v1",DST={flips:0,big:0,built:0,cleared:0,three:0,hard:0,tw:0};
 let meta=null,rwFrom="menu",twist=null;
-function loadMeta(){let d=null;try{d=JSON.parse(store.get(MK))}catch(e){}meta=Object.assign({stars:0,up:{},ach:{},chest:{},hard:false,pr:0,tips:{},streak:{day:"",n:0}},d||{});meta.st=Object.assign({},DST,meta.st||{});meta.up=meta.up||{};meta.ach=meta.ach||{};meta.chest=meta.chest||{};meta.streak=meta.streak||{day:"",n:0};meta.own=meta.own||{};meta.ws=meta.ws||{};meta.pr=Math.min(10,meta.pr||0);meta.eq=Object.assign({theme:"meadow",roof:"brick",car:"std"},meta.eq||{})}
+function loadMeta(){let d=null;try{d=JSON.parse(store.get(MK))}catch(e){}meta=Object.assign({stars:0,up:{},ach:{},chest:{},hard:false,pr:0,tips:{},streak:{day:"",n:0}},d||{});meta.st=Object.assign({},DST,meta.st||{});meta.up=meta.up||{};meta.ach=meta.ach||{};meta.chest=meta.chest||{};meta.streak=meta.streak||{day:"",n:0};meta.own=meta.own||{};meta.ws=meta.ws||{};meta.pr=Math.min(10,meta.pr||0);meta.eq=Object.assign({theme:"meadow",roof:"brick",car:"std"},meta.eq||{});
+  // A saved cosmetic that no longer exists (renamed or removed) falls back to the default.
+  Object.keys(COS).forEach(c=>{if(!COS[c][meta.eq[c]])meta.eq[c]=Object.keys(COS[c])[0]})}
 const saveMeta=()=>store.set(MK,JSON.stringify(meta));
 const upT=k=>meta&&!meta.hard?(meta.up[k]||0):0;
 function checkAch(){ACH.forEach(a=>{if(!meta.ach[a.id]&&a.t(meta)){meta.ach[a.id]=1;meta.stars+=a.r;toast("🏆 "+a.n+" · +"+a.r+" ⭐");sfx.coin()}});saveMeta()}
@@ -1530,7 +1532,7 @@ function objLong(o=objective){if(!o)return"";const pr=" ("+Math.min(o.c,o.n)+"/"
   if(o.t==="flipk")return"Sell "+o.n+" "+pl(S[o.k].n,o.n)+pr;if(o.t==="buyai")return"Buy "+o.n+" neighbor house"+(o.n>1?"s":"")+" that go for sale"+pr;if(o.t==="remodel")return"Demolish "+o.n+" "+pl(S[o.from].n,o.n)+" ("+Math.min(o.d||0,o.n)+"/"+o.n+") and build "+o.n+" "+pl(S[o.to].n,o.n)+" ("+Math.min(o.b||0,o.n)+"/"+o.n+")";if(o.t==="pair")return"Build "+an(S[o.a].n)+" next to "+an(S[o.b].n);return o.t==="build"?"Build "+an(S[o.k].n):o.t==="flip"?"Sell "+o.n+" house"+(o.n>1?"s":"")+pr:o.t==="homes"?"Own "+o.n+" rented homes at once"+pr:o.t==="front"?"Own "+o.n+" beachfront homes (top row) at once"+pr:o.t==="reno"?"Finish "+o.n+" renovations (paint, roof, interior)"+pr:"Have "+o.n+" different building types"+pr}
 function bonShort(){if(!["sale","build"].includes(bonus.t))return"⭐"+objShort(bonus);return bonus.t==="sale"?"⭐💲"+(bonus.done?"✔":fmt(bonus.n)):"⭐"+S[bonus.k].ic+(bonus.done?"✔":bonus.c+"/"+bonus.n)}
 function bonLong(){if(!["sale","build"].includes(bonus.t))return"⭐ Bonus: "+objLong(bonus)+" → +"+fmt(bonus.r);return bonus.t==="sale"?"⭐ Bonus: sell one house for "+fmt(bonus.n)+" or more → +"+fmt(bonus.r):"⭐ Bonus: build "+bonus.n+" "+pl(S[bonus.k].n,bonus.n)+" ("+bonus.c+"/"+bonus.n+") → +"+fmt(bonus.r)}
-function boot(){snd=store.get("lot_flip_snd")!=="0";$("snd").textContent=snd?"🔊":"🔇";migrate();loadMeta();applyTheme();setMode(mode);requestAnimationFrame(tick)}
+function boot(){requestAnimationFrame(tick);[()=>{snd=store.get("lot_flip_snd")!=="0";$("snd").textContent=snd?"🔊":"🔇"},migrate,loadMeta,applyTheme,()=>setMode(mode)].forEach(f=>{try{f()}catch(e){reportErr(e)}})}
 if(CP){CP.keys().then(r=>Promise.all((r.keys||[]).filter(k=>k.indexOf("lot_flip")===0&&store.get(k)===null).map(k=>CP.get({key:k}).then(v=>{if(v&&v.value!=null)try{localStorage.setItem(k,v.value)}catch(e){}})))).catch(()=>{}).then(boot)}else boot();
 </script>
 </body>
