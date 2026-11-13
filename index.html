@@ -744,7 +744,7 @@ function marinaArt(st){
   let s='<rect x="4" y="0" width="192" height="34" rx="4" fill="#29a3e6" stroke="#0277bd" stroke-width="1.2"/><path d="M12 9q6-3 12 0t12 0M70 6q6-3 12 0t12 0M130 10q6-3 12 0t12 0M160 4q6-3 12 0t12 0" stroke="#bfe9fb" stroke-width="1.2" fill="none"/>'
    +'<rect x="4" y="33" width="192" height="26" rx="5" fill="#ecd9a0"/><rect x="6" y="31" width="188" height="5" fill="#a1887f" stroke="#5d4037" stroke-width=".8"/>'
    +[36,76,116,156].map(x=>'<rect x="'+x+'" y="6" width="5" height="26" fill="#a1887f" stroke="#5d4037" stroke-width=".7"/><path d="M'+x+' 12h5M'+x+' 19h5M'+x+' 26h5" stroke="#6d4c41" stroke-width=".5"/>').join("")
-   +boat(57,22,"#e53935",0)+boat(97,24,"#1e88e5",-.8)
+
    +'<rect x="150" y="38" width="36" height="17" fill="#fff" stroke="#3e2723" stroke-width="1.2"/><polygon points="147,39 168,30 189,39" fill="#26a69a" stroke="#3e2723" stroke-width="1.2"/><rect x="164" y="44" width="8" height="11" fill="#0277bd" stroke="#3e2723"/>'+WN(153,42,8,6)+WN(176,42,8,6)
    +'<rect x="16" y="40" width="40" height="11" rx="2" fill="#0d47a1" stroke="#fff" stroke-width="1"/><text x="36" y="48" font-size="7" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="1">MARINA</text><path d="M24 51v6M48 51v6" stroke="#5d4037" stroke-width="1.5"/>'
    +'<g transform="translate(70 46)"><circle r="5" fill="none" stroke="#e53935" stroke-width="2.4"/><path d="M0 -5v10M-5 0h10" stroke="#fff" stroke-width="1"/></g>';
@@ -1480,24 +1480,33 @@ function ambient(dt){
 // Marina harbor: a water channel joins the ocean strip to the Marina, and boats sail in to park in its open slip.
 function harbor(sc,dt){
  const sea=sc.querySelector(".sea"),mi=lots.findIndex(l=>l.hs==="marina"&&l.st==="ready");
- let ch=sc.querySelector(".chan");
- if(!sea||mi<0||!els[mi]){if(ch)ch.remove();if(amb.bt){amb.bt.el.remove();amb.bt=null}return}
+ let ch=sc.querySelector(".chan");amb.mb=(amb.mb||[]).filter(b=>b.el.isConnected);
+ if(!sea||mi<0||!els[mi]){if(ch)ch.remove();amb.mb.forEach(b=>b.el.remove());amb.mb=[];return}
  const S0=sc.getBoundingClientRect(),ox=S0.left+sc.clientLeft,oy=S0.top+sc.clientTop,A=sea.getBoundingClientRect(),V=els[mi].querySelector("svg").getBoundingClientRect();
  if(!ch){ch=document.createElement("div");ch.className="chan";sc.appendChild(ch)}
  const top=A.bottom-oy-5,bot=V.top-oy+V.height*16/90;
  ch.style.cssText="left:"+(V.left-ox+V.width*.02).toFixed(1)+"px;width:"+(V.width*.96).toFixed(1)+"px;top:"+top.toFixed(1)+"px;height:"+Math.max(0,bot-top).toFixed(1)+"px";
- const seaY=A.top-oy+A.height*.5,slipX=V.left-ox+V.width*138/200,dockY=V.top-oy+V.height*35/90;
- let b=amb.bt;if(b&&!b.el.isConnected){amb.bt=b=null}
- if(!b){amb.bw=(amb.bw==null?1.5:amb.bw)-dt;if(amb.bw>0)return;
-  const el=document.createElement("div");el.className="mboat";el.innerHTML='<svg viewBox="0 0 24 10" width="24" height="10"><path d="M1 5Q3 .6 13 .8L23 5L13 9.2Q3 9.4 1 5z" fill="#fff" stroke="#37474f" stroke-width=".8"/><rect x="6" y="3" width="6" height="4" rx="1" fill="#4fc3f7" stroke="#37474f" stroke-width=".5"/><path d="M15 3.4v3.2" stroke="'+["#e53935","#1e88e5","#43a047","#fb8c00"][Math.floor(Math.random()*4)]+'" stroke-width="1.6"/></svg>';sc.appendChild(el);
-  b=amb.bt={el,x:-30,y:seaY,a:0,ph:"in",t:0}}
+ // Eastbound boats use the outer lane, westbound the inner lane, so passing boats never overlap.
+ const laneY=d=>A.top-oy+(d===1?8:19),slotX=k=>V.left-ox+V.width*[58,98,138][k]/200,dockY=V.top-oy+V.height*35/90,W0=S0.width;
+ const near=(b,x,y,r)=>amb.mb.some(o=>o!==b&&Math.abs(o.x-x)<r&&Math.abs(o.y-y)<7);
+ amb.bw=(amb.bw==null?1:amb.bw)-dt;
+ const free=[0,1,2].filter(k=>!amb.mb.some(b=>b.slot===k));
+ if(amb.bw<=0){amb.bw=1.5+Math.random()*5;
+  if(free.length){const dir=Math.random()<.5?1:-1,x=dir===1?-30:W0+30,y=laneY(dir);
+   if(!near(null,x,y,60)){const el=document.createElement("div");el.className="mboat";el.innerHTML='<svg viewBox="0 0 24 10" width="24" height="10"><path d="M1 5Q3 .6 13 .8L23 5L13 9.2Q3 9.4 1 5z" fill="'+["#fff","#fff","#fff8e1","#e3f2fd"][Math.floor(Math.random()*4)]+'" stroke="#37474f" stroke-width=".8"/><rect x="6" y="3" width="6" height="4" rx="1" fill="#4fc3f7" stroke="#37474f" stroke-width=".5"/><path d="M15 3.4v3.2" stroke="'+["#e53935","#1e88e5","#43a047","#fb8c00","#8e24aa"][Math.floor(Math.random()*5)]+'" stroke-width="1.6"/></svg>';sc.appendChild(el);
+    amb.mb.push({el,x,y,a:dir===1?0:180,ph:"in",dir,slot:free[Math.floor(Math.random()*free.length)]})}}}
  const sp=40*dt;
- if(b.ph==="in"){b.y=seaY;b.a=0;b.x=Math.min(slipX,b.x+sp);if(b.x>=slipX)b.ph="down"}
- else if(b.ph==="down"){b.a=90;b.y=Math.min(dockY,b.y+sp*.7);if(b.y>=dockY){b.ph="dock";b.t=6+Math.random()*5;pop(mi,"⚓");money+=25;pop(mi,"+$25")}}
- else if(b.ph==="dock"){b.t-=dt;if(b.t<=0)b.ph="up"}
- else if(b.ph==="up"){b.a=-90;b.y=Math.max(seaY,b.y-sp*.7);if(b.y<=seaY)b.ph="out"}
- else{b.a=0;b.x+=sp;if(b.x>S0.width+30){b.el.remove();amb.bt=null;amb.bw=4+Math.random()*6;return}}
- b.el.style.left=(b.x-12).toFixed(1)+"px";b.el.style.top=(b.y-5).toFixed(1)+"px";b.el.style.transform="rotate("+b.a+"deg)"}
+ amb.mb.forEach(b=>{
+  if(b.ph==="in"){const tx=slotX(b.slot);b.y=laneY(b.dir);const nx=b.x+b.dir*sp;
+   if(!near(b,nx+b.dir*14,b.y,26))b.x=nx;if((tx-b.x)*b.dir<=0){b.x=tx;b.ph="down";b.a=90}}
+  else if(b.ph==="down"){b.x=slotX(b.slot);b.y=Math.min(dockY,b.y+sp*.7);if(b.y>=dockY){b.ph="dock";b.t=5+Math.random()*10;pop(mi,"⚓");money+=25;pop(mi,"+$25")}}
+  else if(b.ph==="dock"){b.x=slotX(b.slot);b.y=dockY;b.t-=dt;if(b.t<=0){b.ph="up";b.od=Math.random()<.5?1:-1;b.a=-90}}
+  else if(b.ph==="up"){b.x=slotX(b.slot);const ty=laneY(b.od),ny=Math.max(ty,b.y-sp*.7);
+   // Wait at the channel mouth until the lane is clear.
+   if(ny<A.bottom-oy+2&&near(b,b.x,ty,34))return;b.y=ny;if(b.y<=ty){b.ph="out";b.a=b.od===1?0:-180;b.slot=-1}}
+  else{b.x+=b.od*sp;if(b.x>W0+30||b.x<-30){b.el.remove();b.gone=1}}
+  b.el.style.left=(b.x-12).toFixed(1)+"px";b.el.style.top=(b.y-5).toFixed(1)+"px";b.el.style.transform="rotate("+b.a+"deg)"});
+ amb.mb=amb.mb.filter(b=>!b.gone)}
 function armorMarkup(){return '<svg viewBox="0 0 32 18" aria-hidden="true"><rect x="4" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="4" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="1" y="3" width="30" height="12" rx="3" fill="#78909c" stroke="#263238" stroke-width="1.1"/><rect x="23" y="4.2" width="5.5" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 5h17M3 13h17" stroke="#455a64" stroke-width="1"/><text x="11.5" y="12.4" font-size="9" font-weight="900" text-anchor="middle" fill="#fff" stroke="#263238" stroke-width=".4">$</text><rect x="30" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="30" y="11.5" width="1.3" height="2" fill="#fff7b0"/></svg>'}
 function startArmoredArrival(i){const l=lots[i];if(!visitorBusiness(l)||traffic[i])return;
  traffic[i]={kind:"arrive",t:0,dur:1,dir:1,color:"#78909c",visitor:true,armor:true,side:-1,stay:5};
