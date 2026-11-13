@@ -183,7 +183,10 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes surf{to{transform:translateX(40px)}}
 .sea .boat{position:absolute;top:1px;font-size:14px;line-height:1;animation:sail 38s linear infinite}
 @keyframes sail{from{left:-24px}to{left:100%}}
-@media(prefers-reduced-motion:reduce){.sea .wv1,.sea .wv2,.sea .boat{animation:none}}
+.chan{position:absolute;z-index:3;pointer-events:none;background:repeating-linear-gradient(180deg,transparent 0 7px,rgba(255,255,255,.35) 7px 8px),linear-gradient(180deg,#7fd3f5,#29a3e6 60%);border-left:3px solid #a1887f;border-right:3px solid #a1887f}
+.mboat{position:absolute;z-index:4;width:24px;height:10px;pointer-events:none;transition:transform .5s;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}.mboat svg{display:block}
+.bob{animation:bob 2.2s ease-in-out infinite alternate}@keyframes bob{to{transform:translateY(1.4px)}}
+@media(prefers-reduced-motion:reduce){.sea .wv1,.sea .wv2,.sea .boat,.bob{animation:none}}
 
 /* compact pinned HUD */
 .hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);display:flex;flex-direction:column;gap:3px;padding:2px 0 4px}
@@ -374,15 +377,16 @@ realestate:{n:"Realty Office",cost:1200,val:1200,rm:0,dur:8,cat:"i",ic:"🔑",un
 gas:{n:"Gas Station",cost:2200,val:2100,rm:0,dur:11,rev:30,cat:"i",ic:"⛽",unlock:38,d:"$30 every 3s · traffic lowers nearby home values"},
 sports:{n:"Sports Complex",cost:3500,val:3300,rm:0,dur:14,rev:35,rb:.15,cat:"i",ic:"🏟️",unlock:64,d:"$35 every 3s · +15% rent nearby · Game Day event · noisy for mansions"},
 surf:{n:"Surf Shop",cost:1200,val:1100,rm:0,dur:7,rev:20,cat:"i",ic:"🏄",unlock:15,world:"beach",d:"Beach only · $20 every 3s · double income in Tourist Season"},
+marina:{n:"Marina",cost:3500,val:3200,rm:0,dur:15,rev:60,cat:"i",ic:"⚓",unlock:17,world:"beach",span:2,front:1,d:"Landmark · needs 2 side-by-side beachfront lots · $60 every 3s · +20% to beachfront homes"},
 airport:{n:"Airport",cost:6000,val:6000,rm:0,dur:20,rev:90,globalBoost:.1,cat:"i",ic:"✈️",unlock:100,d:"$90 every 3s · +10% all lots & buyer offers · heavy penalty to adjacent homes"}};
 /* ===== Worlds: 10 themed worlds of 10 levels each. Add a world by filling in its data. ===== */
 const HN0={};Object.keys(S).forEach(k=>HN0[k]={n:S[k].n,ic:S[k].ic});
 const WORLDS=[
 {k:"suburbs",n:"Suburbs",ic:"🏡",ready:1,d:"Where it all started: quiet streets and family homes.",pal:null},
 {k:"beach",n:"Beach",ic:"🏖️",ready:1,sea:1,d:"Sun, sand and vacation rentals along the shore.",
- pal:{v:"#e6cf93",bd:"#c4a863",l:"#f3e3b5",lb:"#c9ad72",g:"#ecd9a0"},
+ pal:{v:"#e6cf93",bd:"#c4a863",l:"#f3e3b5",lb:"#c9ad72",g:"#ecd9a0"},lm:{k:"marina",lv:19},
  homes:{ranch:["Beach Cottage","🐚"],colonial:["Stilt House","🌊"],mansion:["Beach Villa","🌴"],park:["Beach Park","🏐"],civic:["Lighthouse","🌅"],apartment:["Beach Condo","🏨"],pool:["Beach Club","🍹"],shopping:["Surf Mall","🏄"]},
- m:["🏘️ New homes: Beach Cottage, Stilt House and Beach Villa","🏖️ Beach makeovers: Park → Beach Park, Civic Center → Lighthouse, Apartments → Beach Condo, Pool → Beach Club","🏄 New at Level 15: the Surf Shop, a Beach-only business that earns double during Tourist Season","🌊 Beachfront: homes in the top row, next to the ocean, are worth +25% and earn more rent","☀️ Tourist Season: rents jump +40% for a while","🌀 Hurricanes: storms damage 2 houses and hit the beachfront first. Storm Shutters and a Fire Station help","🎯 New goal: own several beachfront rentals at once"]},
+ m:["🏘️ New homes: Beach Cottage, Stilt House and Beach Villa","🏖️ Beach makeovers: Park → Beach Park, Civic Center → Lighthouse, Apartments → Beach Condo, Pool → Beach Club","🏄 New at Level 15: the Surf Shop, a Beach-only business that earns double during Tourist Season","⚓ Landmark at Level 17: the Marina. Merge 2 side-by-side beachfront lots into one big harbor. Boats sail in to dock, and it lifts every beachfront home. Level 19 asks you to build one","🌊 Beachfront: homes in the top row, next to the ocean, are worth +25% and earn more rent","☀️ Tourist Season: rents jump +40% for a while","🌀 Hurricanes: storms damage 2 houses and hit the beachfront first. Storm Shutters and a Fire Station help","🎯 New goal: own several beachfront rentals at once"]},
 {k:"city",n:"City",ic:"🏙️",d:"Tight lots, high prices and zoning permits.",pal:{v:"#9aa3a8",bd:"#6f787d",l:"#b9c0c4",lb:"#7d868b",g:"#a9b1b5"}},
 {k:"mountain",n:"Mountain",ic:"🏔️",d:"Ski-season rentals and lots that need road access.",pal:{v:"#5f8f5a",bd:"#3f6b3b",l:"#7fa877",lb:"#4c7a47",g:"#6d9a64"}},
 {k:"themepark",n:"Theme Park",ic:"🎢",d:"Tourists everywhere: hotels and rentals near the park gates earn big.",pal:{v:"#7cc26a",bd:"#4f9a40",l:"#a8dc8f",lb:"#5aa748",g:"#8fd07a"}},
@@ -394,8 +398,8 @@ const WORLDS=[
 const worldOf=l=>Math.max(0,Math.min(9,Math.floor((l-1)/10)));
 const W=l=>WORLDS[worldOf(l==null?lv:l)];
 function applyWorld(){const w=W();Object.keys(S).forEach(k=>{const o=w.homes&&w.homes[k];S[k].n=o?o[0]:HN0[k].n;S[k].ic=o?o[1]:HN0[k].ic})}
-const BUILDING_LIMITS={surf:1,realestate:1,gas:2,sports:1,airport:1,park:3,apartment:3,pool:2,civic:1,school:1,hospital:1,shopping:1,fire:1,bank:1};
-const MILE=Object.keys(S).filter(k=>!["colonial","mansion"].includes(k)).map(k=>({lv:S[k].unlock,k})).sort((a,b)=>a.lv-b.lv);
+const BUILDING_LIMITS={surf:1,marina:1,realestate:1,gas:2,sports:1,airport:1,park:3,apartment:3,pool:2,civic:1,school:1,hospital:1,shopping:1,fire:1,bank:1};
+const MILE=Object.keys(S).filter(k=>!["colonial","mansion"].includes(k)&&!S[k].span).map(k=>({lv:S[k].unlock,k})).sort((a,b)=>a.lv-b.lv);
 const buildingCount=k=>lots.filter(l=>l&&l.hs===k&&!['sold','ai_owned','ai_for_sale'].includes(l.st)).length;
 const buildingLimit=k=>BUILDING_LIMITS[k]??Infinity;
 const inWorld=(k,l)=>!S[k].world||S[k].world===W(l).k;
@@ -413,8 +417,11 @@ const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].include
 const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,marketWait:18+Math.random()*32,offer:null,rent:0,rt:0,land:Math.round(120+Math.random()*80),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false,dmg:false});
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo").length;
 // Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
-const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf"].includes(l.hs));
+const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina"].includes(l.hs));
 const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&(S[l.hs].cat==="i"||l.hs==="apartment"));
+// Multi-lot landmarks: the left lot is the parent; the lots to its right become "merged" parts.
+function spanPair(i,k){const n=S[k].span||1;for(let p=i-(n-1);p<=i;p++){if(p<0||Math.floor(p/5)!==Math.floor((p+n-1)/5))continue;if(S[k].front&&(p+n-1)>=5)continue;let ok=true;for(let q=p;q<p+n;q++)if(!lots[q]||lots[q].st!=="owned")ok=false;if(ok)return p}return -1}
+function unmerge(i){lots.forEach(x=>{if(x.st==="merged"&&x.par===i){x.st="owned";x.par=null}})}
 const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
 function adj(i){const a=[],c=i%5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);if(i>=5)a.push(i-5);if(i+5<lots.length)a.push(i+5);return a}
@@ -422,7 +429,7 @@ const civicB=()=>lots.reduce((b,l)=>b+(l.hs&&done(l)?(S[l.hs].globalBoost||0):0)
 function nBoost(i){
   const l=lots[i];let b=civicB();
   // Beach world: the top row sits on the ocean, so homes there are beachfront.
-  if(W().sea&&i<5&&l.hs&&S[l.hs].cat==="h")b+=.25;
+  if(W().sea&&i<5&&l.hs&&S[l.hs].cat==="h"){b+=.25;if(readyOf("marina"))b+=.2}
   // Nearby amenities lift home values; apartment blocks and retail traffic can
   // reduce premium residential values when directly adjacent.
   adj(i).forEach(n=>{const x=lots[n];if(!x||!done(x))return;const k=x.hs;
@@ -532,7 +539,7 @@ function pop(i,t,big){const e=els[i];if(!e)return;const s=document.createElement
 function flash(){const m=$("money");m.classList.remove("flash");void m.offsetWidth;m.classList.add("flash")}
 
 function tapLot(i){
-  if(!run||paused)return;const l=lots[i],e=els[i];e.classList.add("tap");setTimeout(()=>e.classList.remove("tap"),180);sfx.tap();
+  if(!run||paused)return;if(lots[i]&&lots[i].st==="merged"&&lots[i].par!=null)return tapLot(lots[i].par);const l=lots[i],e=els[i];e.classList.add("tap");setTimeout(()=>e.classList.remove("tap"),180);sfx.tap();
   if(sellMode){if(l.st==="owned"){money+=l.land;pop(i,"+"+fmt(l.land),1);toast("Sold unbuilt lot for "+fmt(l.land));reset(l);flash()}else toast("Sell Mode only works on bought, unbuilt lots.");draw();return}
   if(l.st==="off_market")return toast("This lot has been taken off the market for now. Watch for it to return!");
   if(l.st==="empty"){if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");money-=l.land;l.st="owned";toast("Lot bought! Tap it to build.");draw();return}
@@ -546,7 +553,7 @@ function closeSheet(){sel=null;$("sheet").innerHTML="";document.body.classList.r
 function sheet(i,conf){
   const l=lots[i];sel=i;document.body.classList.add("so");
   const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl="";let h="";
-  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;return '<button class="opt'+(locked||capped||money<S[k].cost?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":(Number.isFinite(limit)?count+"/"+limit+" built · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
+  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0;return '<button class="opt'+(locked||capped||nofit||money<S[k].cost?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+". Buy the lot next to this one.":(Number.isFinite(limit)?count+"/"+limit+" built · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
   else if(l.st==="ai_for_sale"){h=hd("Buy "+S[l.hs].n+" · Lot "+(i+1),"Asking "+fmt(l.aiP)+" · Value "+fmt(val(i)))+'<div class="opts"><button class="opt ok" data-a="buyai">🛒 Buy & Auto-Rent</button>'+cl+"</div>"}
   else if(conf){h=hd("⚠️ Demolish Lot "+(i+1)+"?","Costs $100 and clears the property.")+'<div class="opts"><button class="opt no" data-a="demo2">Confirm Demolish</button><button class="opt x" data-a="demo0">Cancel</button></div>'}
   else if(["rented","listed","ready"].includes(l.st)){
@@ -580,7 +587,8 @@ function act(i,a){
   else if(a==="reject")resolveOffer(i,false);
   else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;[objective,bonus].forEach(o=>{if(o&&o.t==="buyai")o.c++});l.sp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
 }
-function startBuild(i,k){const s=S[k],l=lots[i];if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");const limit=buildingLimit(k);if(buildingCount(k)>=limit)return toast("Maximum reached: "+limit+" "+s.n+(limit===1?" allowed.":"s allowed."));if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");money-=s.cost;meta.st.built++;l.hs=k;l.st="working";sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
+function startBuild(i,k){const s=S[k],l=lots[i];if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");const limit=buildingLimit(k);if(buildingCount(k)>=limit)return toast("Maximum reached: "+limit+" "+s.n+(limit===1?" allowed.":"s allowed."));if(busy()>=builders)return toast("All builders are busy!");if(money<s.cost)return toast("Need "+fmt(s.cost)+" for a "+s.n+".");if(s.span){const p=spanPair(i,k);if(p<0)return toast("🧩 "+s.n+" needs "+s.span+" side-by-side lots you own"+(s.front?" on the beachfront (top row)":"")+".");for(let q=p+1;q<p+s.span;q++){lots[q].st="merged";lots[q].par=p}return startBuild2(p,k)}money-=s.cost;meta.st.built++;l.hs=k;l.st="working";sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("Building "+s.n+"…");draw()}
+function startBuild2(i,k){const s=S[k],l=lots[i];money-=s.cost;meta.st.built++;l.hs=k;l.st="working";sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("🧩 Lots merged! Building "+s.n+"…");draw()}
 function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return toast("Fully upgraded!");if(busy()>=builders)return toast("All builders are busy!");if(money<R[k].cost)return toast("Need "+fmt(R[k].cost)+" for "+R[k].n+".");money-=R[k].cost;l.st="reno_working";sfx.build();l.pend=k;l.rp=0;l.rd=R[k].dur/speed;closeSheet();toast(R[k].n+" started…");draw()}
 function spawnOffer(i){const l=lots[i],t=7+Math.random()*3+upT("buyer"),f=(ev.k==="parade"?1.2:ev.k==="boom"?1.25:ev.k==="crash"?.8:1)*(readyOf("airport")?1.1:1)*(adj(i).some(n=>lots[n]&&lots[n].hs==="realestate"&&lots[n].st==="ready")?1.08:1);l.offer={price:Math.round(val(i)*(.88+Math.random()*.42)*f),ttl:t,max:t};startBuyerArrival(i);sfx.offer();buzz(30);toast("💰 Lot "+(i+1)+" offer: "+fmt(l.offer.price)+". A buyer is pulling in to look at the house.");draw()}
 function resolveOffer(i,acc){
@@ -649,7 +657,7 @@ function tick(now){
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt*(readyOf("realestate")?1.5:1);if(l.wait<=0)spawnOffer(i)}
         else{l.offer.ttl-=dt;if(l.offer.ttl<=0){sendBuyerAway(i);l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired. The buyer is heading back to the street.");if(sel===i)sheet(i)}}}
-      else if(l.st==="demo"){const tr=traffic[i];if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));[objective,bonus].forEach(o=>{if(o&&o.t==="remodel"&&l.hs===o.from)o.d=(o.d||0)+1});reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
+      else if(l.st==="demo"){const tr=traffic[i];if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));[objective,bonus].forEach(o=>{if(o&&o.t==="remodel"&&l.hs===o.from)o.d=(o.d||0)+1});unmerge(i);reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
     if(bonus&&!bonus.done){if(bonus.t==="build")bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;else if(bonus.t!=="sale")updObjective(bonus);if(bonus.t==="build"||bonus.t==="sale"?bonus.c>=bonus.n:bonus.done){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
@@ -729,11 +737,24 @@ function beachBld(l,k,st,T,s){
     if(st==="ready")s+='<g class="pen"><rect x="2" y="30" width="9" height="6" fill="#fff" stroke="#3e2723" stroke-width=".6"/><text x="6.5" y="34.6" font-size="3.6" font-weight="900" text-anchor="middle" fill="#e53935">OPEN</text></g>'+PERS("#e53935","wk1",0,0)+PERS("#3949ab","wk2",-6,0)+PERS("#43a047","wk1",-10,0);
     return s}
   return s}
+
+// Marina landmark, drawn 200 units wide because it spans two lots. Water faces the ocean (top).
+function marinaArt(st){
+  const boat=(x,y,c,d)=>'<g transform="translate('+x+' '+y+')"><g class="bob" style="animation-delay:'+d+'s"><path d="M-9 0h18l-4 4.5h-10z" fill="#fff" stroke="#37474f" stroke-width=".8"/><path d="M-9 0h18" stroke="'+c+'" stroke-width="1.6"/><path d="M0 0v-15" stroke="#5d4037" stroke-width="1"/><polygon points="0,-14 0,-2 8,-2" fill="#fff" stroke="#90a4ae" stroke-width=".5"/><polygon points="-1,-12 -1,-2 -6,-2" fill="'+c+'" opacity=".85"/></g></g>';
+  let s='<rect x="4" y="0" width="192" height="34" rx="4" fill="#29a3e6" stroke="#0277bd" stroke-width="1.2"/><path d="M12 9q6-3 12 0t12 0M70 6q6-3 12 0t12 0M130 10q6-3 12 0t12 0M160 4q6-3 12 0t12 0" stroke="#bfe9fb" stroke-width="1.2" fill="none"/>'
+   +'<rect x="4" y="33" width="192" height="26" rx="5" fill="#ecd9a0"/><rect x="6" y="31" width="188" height="5" fill="#a1887f" stroke="#5d4037" stroke-width=".8"/>'
+   +[36,76,116,156].map(x=>'<rect x="'+x+'" y="6" width="5" height="26" fill="#a1887f" stroke="#5d4037" stroke-width=".7"/><path d="M'+x+' 12h5M'+x+' 19h5M'+x+' 26h5" stroke="#6d4c41" stroke-width=".5"/>').join("")
+   +boat(57,22,"#e53935",0)+boat(97,24,"#1e88e5",-.8)
+   +'<rect x="150" y="38" width="36" height="17" fill="#fff" stroke="#3e2723" stroke-width="1.2"/><polygon points="147,39 168,30 189,39" fill="#26a69a" stroke="#3e2723" stroke-width="1.2"/><rect x="164" y="44" width="8" height="11" fill="#0277bd" stroke="#3e2723"/>'+WN(153,42,8,6)+WN(176,42,8,6)
+   +'<rect x="16" y="40" width="40" height="11" rx="2" fill="#0d47a1" stroke="#fff" stroke-width="1"/><text x="36" y="48" font-size="7" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="1">MARINA</text><path d="M24 51v6M48 51v6" stroke="#5d4037" stroke-width="1.5"/>'
+   +'<g transform="translate(70 46)"><circle r="5" fill="none" stroke="#e53935" stroke-width="2.4"/><path d="M0 -5v10M-5 0h10" stroke="#fff" stroke-width="1"/></g>';
+  if(st==="ready")s+='<path d="M196 0v12" stroke="#37474f" stroke-width="1"/><polygon class="flag" points="196,0 188,3 196,6" fill="#ffeb3b"/>'+PERS("#e53935","wk1",-2,-2)+PERS("#00897b","wk2",-7,-2);
+  return s}
 const FEST={party:["park","PARTY!","#ff4081"],market:["civic","MARKET","#43a047"],parade:["school","PARADE","#8e24aa"],game:["sports","GAME DAY","#1e88e5"]};
 function festOf(l){const f=FEST[ev.k];return f&&l.hs===f[0]&&l.st==="ready"?ev.k:""}
 const PERS=(c,cls,dl,dy)=>'<g class="'+cls+'" style="animation-delay:'+dl+'s"><g transform="translate(0 '+(dy||0)+')"><circle cx="0" cy="49" r="2.3" fill="#ffcc80"/><rect x="-2.2" y="51" width="4.4" height="6.5" rx="1.3" fill="'+c+'"/></g></g>';
 function houseArt(l,i){
-  const st=l.st,k=l.hs;
+  const st=l.st,k=l.hs,sx=(k&&S[k]&&S[k].span)||1;
   if(st==="empty"){const rd=l.land<125;return '<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".15"/><g transform="translate(-6,-17) scale(1.65)"><path d="M16 10v53M16 12h16" stroke="#4e342e" stroke-width="3" stroke-linecap="round"/><rect x="16" y="14" width="36" height="22" rx="3" fill="#fff" stroke="#1b5e20" stroke-width="2"/><rect x="16" y="14" width="36" height="8" fill="#2e7d32"/><text x="34" y="20" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">FOR SALE</text><text x="34" y="30" font-size="8" font-weight="900" text-anchor="middle">'+fmt(l.land)+'</text></g>'+(rd?'<g transform="translate(70,14) rotate(-12)"><rect x="-16" y="-6" width="32" height="12" rx="2.5" fill="#d32f2f" stroke="#fff" stroke-width="1.2"/><text y="2.5" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">REDUCED</text></g>':"")}
   if(st==="off_market")return '<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".12"/><rect x="5" y="46" width="90" height="13" rx="5" fill="#5aa23e"/><circle cx="18" cy="39" r="5" fill="#388e3c"/><circle cx="82" cy="39" r="5" fill="#388e3c"/><g transform="translate(22,20)"><rect x="0" y="0" width="56" height="25" rx="4" fill="#607d8b" stroke="#37474f" stroke-width="1.5"/><text x="28" y="10" font-size="6" font-weight="900" text-anchor="middle" fill="#fff">NOT</text><text x="28" y="18" font-size="6" font-weight="900" text-anchor="middle" fill="#fff">AVAILABLE</text></g>';
   if(st==="owned")return '<ellipse cx="50" cy="56" rx="40" ry="6" fill="#000" opacity=".2"/><circle cx="50" cy="30" r="15" fill="#ffb300"/><text x="50" y="38" font-size="22" font-weight="900" text-anchor="middle" fill="#fff">+</text>';
@@ -741,6 +762,7 @@ function houseArt(l,i){
   const bh=W().k==="beach"&&["ranch","colonial","mansion"].includes(k);
   const bx=W().k==="beach"&&["park","civic","apartment","pool","shopping","surf"].includes(k);
   if(bh)s+=beachArt(l,k,T);
+  else if(k==="marina")s=marinaArt(st);
   else if(bx)s=beachBld(l,k,st,T,s);
   else if(k==="ranch")s+='<rect x="68" y="16" width="8" height="12" fill="#8d6e63" stroke="#3e2723"/><circle class="smk" cx="72" cy="13" r="3" fill="#fff"/><circle class="smk s2" cx="74" cy="13" r="2.5" fill="#fff"/><rect x="16" y="24" width="68" height="22" fill="'+b+'" '+T+'/><rect x="16" y="40" width="68" height="6" fill="#000" opacity=".08"/><polygon points="10,25 50,10 90,25" fill="'+r+'" '+T+'/><polygon points="10,25 50,10 50,25" fill="#fff" opacity=".13"/><rect x="52" y="28" width="28" height="18" fill="#cfd8dc" stroke="#3e2723"/><path d="M52 33h28M52 38h28M52 43h28" stroke="#90a4ae"/><rect x="38" y="32" width="10" height="14" fill="#5c3826"/><circle cx="45" cy="39" r="1" fill="#ffb300"/><rect x="17" y="28" width="3" height="12" fill="#37474f"/><rect x="34" y="28" width="3" height="12" fill="#37474f"/>'+WN(20,28,14,12);
   else if(k==="colonial")s+='<rect x="18" y="16" width="64" height="30" fill="'+b+'" '+T+'/><rect x="18" y="40" width="64" height="6" fill="#000" opacity=".08"/><polygon points="14,18 50,4 86,18" fill="'+r+'" '+T+'/><polygon points="14,18 50,4 50,18" fill="#fff" opacity=".13"/><polygon points="50,7 44,13 56,13" fill="'+r+'" stroke="#3e2723"/>'+WN(47,10,6,5)+'<rect x="38" y="24" width="24" height="22" fill="#fff" stroke="#3e2723"/><path d="M40 24v22M60 24v22" stroke="#cfd8dc" stroke-width="2"/><rect x="44" y="32" width="12" height="14" fill="#4e342e"/><circle cx="53" cy="39" r="1" fill="#ffb300"/>'+WN(24,20,10,10)+WN(66,20,10,10)+WN(24,33,10,10)+WN(66,33,10,10);
@@ -795,11 +817,11 @@ function houseArt(l,i){
     const p=Math.min(1,l.dp),dd=l.dd||8,q=Math.max(0,Math.min(1,(p-.2)/.55)),ry=q*52,h=Math.min(9,Math.max(0,(p-.25)*14));
     const deb=p>.2&&p<.85?'<rect x="22" y="52" width="6" height="3" fill="#8d6e63"/><rect x="34" y="53" width="8" height="3" fill="#a1887f"/><rect x="60" y="52" width="6" height="3" fill="#6d4c41"/><rect x="72" y="53" width="7" height="3" fill="#8d6e63"/>':"";
     const dust=p>.15&&p<.85?'<circle class="smk" cx="30" cy="50" r="5" fill="#cfcfcf"/><circle class="smk s2" cx="55" cy="50" r="6" fill="#cfcfcf"/><circle class="smk" cx="75" cy="50" r="5" fill="#cfcfcf"/>':"";
-    return '<defs><clipPath id="d'+i+'"><rect x="0" y="'+ry+'" width="100" height="'+(65-ry)+'"/></clipPath></defs><g class="'+(p>.15&&p<.8?"shk":"")+'"><g clip-path="url(#d'+i+')">'+s+'</g></g>'+deb+dust+'<g class="tk" style="animation-duration:'+dd+'s;animation-delay:-'+(p*dd).toFixed(2)+'s"><rect x="10" y="38" width="22" height="10" rx="1" fill="#f9a825" stroke="#3e2723"/><polygon points="12,38 16,'+(38-h)+' 24,'+(37-h)+' 30,38" fill="#8d6e63"/><rect x="0" y="41" width="10" height="7" rx="1" fill="#f57f17" stroke="#3e2723"/><rect x="1.5" y="42.5" width="5" height="3" fill="#bde3f5"/><circle cx="6" cy="49" r="3" fill="#263238"/><circle cx="17" cy="49" r="3" fill="#263238"/><circle cx="27" cy="49" r="3" fill="#263238"/></g>';
+    return '<defs><clipPath id="d'+i+'"><rect x="0" y="'+ry+'" width="'+(100*sx)+'" height="'+(65-ry)+'"/></clipPath></defs><g class="'+(p>.15&&p<.8?"shk":"")+'"><g clip-path="url(#d'+i+')">'+s+'</g></g><g transform="scale('+sx+' 1)">'+deb+dust+'</g>'+'<g class="tk" style="animation-duration:'+dd+'s;animation-delay:-'+(p*dd).toFixed(2)+'s"><rect x="10" y="38" width="22" height="10" rx="1" fill="#f9a825" stroke="#3e2723"/><polygon points="12,38 16,'+(38-h)+' 24,'+(37-h)+' 30,38" fill="#8d6e63"/><rect x="0" y="41" width="10" height="7" rx="1" fill="#f57f17" stroke="#3e2723"/><rect x="1.5" y="42.5" width="5" height="3" fill="#bde3f5"/><circle cx="6" cy="49" r="3" fill="#263238"/><circle cx="17" cy="49" r="3" fill="#263238"/><circle cx="27" cy="49" r="3" fill="#263238"/></g>';
   }
   if(st==="working"||st==="reno_working"){
     const pr=Math.max(.05,Math.min(1,st==="working"?l.p:l.rp)),ry=60-pr*56,rh=pr*56;
-    return '<defs><clipPath id="c'+i+'"><rect x="0" y="'+ry+'" width="100" height="'+rh+'"/></clipPath></defs><rect x="10" y="46" width="80" height="8" rx="2" fill="#8d6e63" stroke="#5d4037"/><g clip-path="url(#c'+i+')">'+s+'</g><g class="scaf" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none"><rect x="12" y="'+Math.max(10,ry-4)+'" width="76" height="'+Math.min(40,rh+6)+'" rx="2"/><path d="M12 '+ry+'h76M30 10v40M70 10v40"/></g><text class="hm" x="68" y="'+Math.max(24,ry+6)+'" font-size="16">🔨</text>';
+    return '<defs><clipPath id="c'+i+'"><rect x="0" y="'+ry+'" width="'+(100*sx)+'" height="'+rh+'"/></clipPath></defs><g transform="scale('+sx+' 1)"><rect x="10" y="46" width="80" height="8" rx="2" fill="#8d6e63" stroke="#5d4037"/></g><g clip-path="url(#c'+i+')">'+s+'</g><g transform="scale('+sx+' 1)"><g class="scaf" stroke="#f57c00" stroke-width="1.5" stroke-dasharray="3 2" fill="none"><rect x="12" y="'+Math.max(10,ry-4)+'" width="76" height="'+Math.min(40,rh+6)+'" rx="2"/><path d="M12 '+ry+'h76M30 10v40M70 10v40"/></g></g><text class="hm" x="'+(68*sx)+'" y="'+Math.max(24,ry+6)+'" font-size="16">🔨</text>';
   }
   if(st==="listed"||st==="ai_for_sale")s+='<g transform="translate(18,5) scale(1.25)"><path d="M18 18v26M18 20h14" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/><rect x="18" y="22" width="28" height="18" rx="2" fill="#fff" stroke="#1565c0" stroke-width="1.5"/><rect x="18" y="22" width="28" height="6" fill="#1565c0"/><text x="32" y="26.5" font-size="4" font-weight="900" text-anchor="middle" fill="#fff">REALTY</text><text x="32" y="34" font-size="5" font-weight="900" text-anchor="middle" fill="#d32f2f">FOR SALE</text></g>';
   if(l.dmg&&st==="rented")s+='<polygon points="30,16 54,9 66,19 42,27" fill="#1e88e5" stroke="#0d47a1" opacity=".9"/><path d="M34 18l8 5M46 13l9 6" stroke="#fff" opacity=".5"/><circle class="smk" cx="58" cy="16" r="3" fill="#555"/><circle class="smk s2" cx="48" cy="18" r="3" fill="#555"/><g class="scaf"><circle cx="50" cy="12" r="10" fill="#e53935" stroke="#fff" stroke-width="1.5"/><text x="50" y="18" font-size="15" font-weight="900" text-anchor="middle" fill="#fff">!</text></g>';
@@ -1361,7 +1383,10 @@ function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&
   if(lv>=2&&cH&&builders<=2)showTip("hire","Tap 👷 in the top bar to hire more builders, so you can build several things at once.");
   lots.forEach((l,i)=>{
     const e=els[i];if(!e)return;
-
+    const spn=l.hs&&S[l.hs]&&S[l.hs].span&&l.st!=="sold"?S[l.hs].span:1;
+    if(e._sp!==spn){e._sp=spn;e.style.gridColumn=spn>1?"span "+spn:"";e.querySelector("svg").setAttribute("viewBox","0 0 "+(100*spn)+" 90");e._k=null}
+    const hid=l.st==="merged";if(e._hid!==hid){e._hid=hid;e.style.display=hid?"none":""}
+    if(hid)return;
     const ai=l.st==="ai_owned"||l.st==="ai_for_sale";
     const hasBuilding=!!l.hs&&l.st!=="sold";
     const streetAbove=Math.floor(i/5)>0;
@@ -1443,6 +1468,7 @@ function ambient(dt){
  const sc=$("scene");if(!sc||!meta)return;
  twL=twL.filter(o=>{o.a+=dt;if(o.a>=o.d||!o.el.isConnected){o.el.remove();return false}return true});
  if((!W().pal&&meta.eq.theme==="desert")||W().k==="desert"){amb.w-=dt;if(amb.w<=0){amb.w=4+Math.random()*9;if(twL.length<3)spawnWeed(sc)}}
+ harbor(sc,dt);
  amb.b=(amb.b==null?8:amb.b)-dt;if(amb.b<=0){amb.b=22+Math.random()*20;lots.forEach((l,i)=>{if(l.hs==="bank"&&l.st==="ready"&&!traffic[i])startArmoredArrival(i)})}
  amb.q=amb.q.filter(o=>{o.t-=dt;if(o.t<=0){spawnEmerg(o.k);return false}return true});
  amb.e-=dt;if(amb.e<=0){amb.e=18+Math.random()*25;const k=[];
@@ -1451,6 +1477,27 @@ function ambient(dt){
   if(lots.some(l=>l.hs==="school"&&l.st==="ready"))k.push("bus");
   if(k.length&&!roadTraffic.some(c=>c.emerg))spawnEmerg(k[Math.floor(Math.random()*k.length)])}
 }
+// Marina harbor: a water channel joins the ocean strip to the Marina, and boats sail in to park in its open slip.
+function harbor(sc,dt){
+ const sea=sc.querySelector(".sea"),mi=lots.findIndex(l=>l.hs==="marina"&&l.st==="ready");
+ let ch=sc.querySelector(".chan");
+ if(!sea||mi<0||!els[mi]){if(ch)ch.remove();if(amb.bt){amb.bt.el.remove();amb.bt=null}return}
+ const S0=sc.getBoundingClientRect(),ox=S0.left+sc.clientLeft,oy=S0.top+sc.clientTop,A=sea.getBoundingClientRect(),V=els[mi].querySelector("svg").getBoundingClientRect();
+ if(!ch){ch=document.createElement("div");ch.className="chan";sc.appendChild(ch)}
+ const top=A.bottom-oy-5,bot=V.top-oy+V.height*16/90;
+ ch.style.cssText="left:"+(V.left-ox+V.width*.02).toFixed(1)+"px;width:"+(V.width*.96).toFixed(1)+"px;top:"+top.toFixed(1)+"px;height:"+Math.max(0,bot-top).toFixed(1)+"px";
+ const seaY=A.top-oy+A.height*.5,slipX=V.left-ox+V.width*138/200,dockY=V.top-oy+V.height*35/90;
+ let b=amb.bt;if(b&&!b.el.isConnected){amb.bt=b=null}
+ if(!b){amb.bw=(amb.bw==null?1.5:amb.bw)-dt;if(amb.bw>0)return;
+  const el=document.createElement("div");el.className="mboat";el.innerHTML='<svg viewBox="0 0 24 10" width="24" height="10"><path d="M1 5Q3 .6 13 .8L23 5L13 9.2Q3 9.4 1 5z" fill="#fff" stroke="#37474f" stroke-width=".8"/><rect x="6" y="3" width="6" height="4" rx="1" fill="#4fc3f7" stroke="#37474f" stroke-width=".5"/><path d="M15 3.4v3.2" stroke="'+["#e53935","#1e88e5","#43a047","#fb8c00"][Math.floor(Math.random()*4)]+'" stroke-width="1.6"/></svg>';sc.appendChild(el);
+  b=amb.bt={el,x:-30,y:seaY,a:0,ph:"in",t:0}}
+ const sp=40*dt;
+ if(b.ph==="in"){b.y=seaY;b.a=0;b.x=Math.min(slipX,b.x+sp);if(b.x>=slipX)b.ph="down"}
+ else if(b.ph==="down"){b.a=90;b.y=Math.min(dockY,b.y+sp*.7);if(b.y>=dockY){b.ph="dock";b.t=6+Math.random()*5;pop(mi,"⚓");money+=25;pop(mi,"+$25")}}
+ else if(b.ph==="dock"){b.t-=dt;if(b.t<=0)b.ph="up"}
+ else if(b.ph==="up"){b.a=-90;b.y=Math.max(seaY,b.y-sp*.7);if(b.y<=seaY)b.ph="out"}
+ else{b.a=0;b.x+=sp;if(b.x>S0.width+30){b.el.remove();amb.bt=null;amb.bw=4+Math.random()*6;return}}
+ b.el.style.left=(b.x-12).toFixed(1)+"px";b.el.style.top=(b.y-5).toFixed(1)+"px";b.el.style.transform="rotate("+b.a+"deg)"}
 function armorMarkup(){return '<svg viewBox="0 0 32 18" aria-hidden="true"><rect x="4" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="4" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="1" y="3" width="30" height="12" rx="3" fill="#78909c" stroke="#263238" stroke-width="1.1"/><rect x="23" y="4.2" width="5.5" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 5h17M3 13h17" stroke="#455a64" stroke-width="1"/><text x="11.5" y="12.4" font-size="9" font-weight="900" text-anchor="middle" fill="#fff" stroke="#263238" stroke-width=".4">$</text><rect x="30" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="30" y="11.5" width="1.3" height="2" fill="#fff7b0"/></svg>'}
 function startArmoredArrival(i){const l=lots[i];if(!visitorBusiness(l)||traffic[i])return;
  traffic[i]={kind:"arrive",t:0,dur:1,dir:1,color:"#78909c",visitor:true,armor:true,side:-1,stay:5};
@@ -1537,6 +1584,7 @@ const an=n=>(/^[AEIOU]/.test(n)?"an ":"a ")+n,pl=(n,c)=>c>1?(/(ch|s|x)$/.test(n)
 const OI={flip:"🏷️",homes:"🏘️",reno:"🔨",variety:"🧩",front:"🌊"};
 function makeObjective(l,bn){
   const req=MILE.filter(x=>l>=x.lv).at(-1).k;
+  if(!bn&&W(l).lm&&W(l).lm.lv===l)return{o:{t:"build",k:W(l).lm.k,n:1,c:0,done:false},req};
   if(!bn&&MILE.some(x=>x.lv===l))return{o:{t:"build",k:req,n:1,c:0,done:false},req};
   const rnd=(s=>()=>(s=(s*1664525+1013904223)>>>0)/4294967296)((l*7919+(meta?meta.pr:0)*104729+13+(bn?7777:0))>>>0),pick=a=>a[Math.floor(rnd()*a.length)];rnd();rnd();
   const H=["ranch","colonial","mansion"],cap=Math.max(800+l*75,S[req].cost+500)-300;
