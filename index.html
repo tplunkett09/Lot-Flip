@@ -589,6 +589,10 @@ function resolveOffer(i,acc){
 }
 
 function tick(now){
+  requestAnimationFrame(tick);
+  try{
+  // Recover from a stuck pause (paused with no pause or world card on screen).
+  if(paused&&run&&["pz","wi"].every(x=>$(x).style.display==="none")){paused=false;$("scene").classList.remove("pz");last=now}
   const dt=Math.min(.1,(now-last)/1000);last=now;
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
@@ -651,8 +655,12 @@ function tick(now){
     if(money>=goal&&objective&&objective.done){run=false;endGame(true)}else if(mode==="timed"&&timeVal<=0){run=false;endGame(false)}
     draw();
   }
-  requestAnimationFrame(tick);
+  }catch(e){reportErr(e)}
 }
+// One bad frame must never stop the game loop. Show the error so it can be reported.
+let errSeen={};
+function reportErr(e){const m=(e&&e.message||String(e)).slice(0,140),k=m+((e&&e.stack||"").split("\n")[1]||"");if(errSeen[k])return;errSeen[k]=1;try{console.error(e)}catch(_){}const t=$("tip");t.style.display="block";t.style.whiteSpace="normal";t.style.textAlign="left";t.textContent="⚠️ Game error (please screenshot this): "+m+" "+((e&&e.stack||"").split("\n").slice(0,2).join(" | ").slice(0,200));t.onclick=()=>{t.style.display="none"}}
+addEventListener("error",ev=>reportErr(ev.error||ev.message));
 
 function endGame(win){
   closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;win?sfx.win():sfx.lose();
