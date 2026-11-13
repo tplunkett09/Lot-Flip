@@ -167,7 +167,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 #lfs i{position:absolute;top:0;width:var(--s);height:calc(var(--s)*.65);background:var(--c);border-radius:60% 0 60% 0;opacity:.85;animation:leaf var(--t) linear var(--d) infinite;will-change:transform}
 @keyframes leaf{0%{transform:translate3d(0,-14px,0) rotate(0)}25%{transform:translate3d(16px,calc(var(--h)*.25),0) rotate(110deg)}50%{transform:translate3d(-8px,calc(var(--h)*.5),0) rotate(230deg)}75%{transform:translate3d(14px,calc(var(--h)*.75),0) rotate(320deg)}100%{transform:translate3d(0,var(--h),0) rotate(420deg)}}
 #stm{position:absolute;inset:0;z-index:80;pointer-events:none;opacity:0;transition:opacity .9s;background:rgba(18,26,44,.45);border-radius:11px;overflow:hidden}
-#stm.on{opacity:1}
+#stm.on{opacity:1}#stm.snowy{background:rgba(200,215,235,.35)}#stm.snowy .rain{display:none}
 #stm .rain{position:absolute;left:-30%;right:-30%;top:-90px;bottom:-90px;opacity:.75;background:repeating-linear-gradient(90deg,transparent 0 11px,rgba(200,222,255,.85) 11px 12px);-webkit-mask-image:repeating-linear-gradient(180deg,#000 0 16px,transparent 16px 44px);mask-image:repeating-linear-gradient(180deg,#000 0 16px,transparent 16px 44px);animation:rain .4s linear infinite}
 #stm .r2{opacity:.45;background:repeating-linear-gradient(90deg,transparent 0 16px,rgba(200,222,255,.8) 16px 17px);-webkit-mask-image:repeating-linear-gradient(180deg,#000 0 10px,transparent 10px 36px);mask-image:repeating-linear-gradient(180deg,#000 0 10px,transparent 10px 36px);animation-duration:.3s}
 @keyframes rain{from{transform:rotate(14deg) translateY(0)}to{transform:rotate(14deg) translateY(44px)}}
@@ -192,6 +192,10 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .skyl .ped{position:absolute;bottom:0;font-size:10px;line-height:1;animation:pedR 24s linear infinite}.skyl .ped.l{animation-name:pedL}.skyl .ped i{display:inline-block;font-style:normal}.skyl .ped.r i{transform:scaleX(-1)}
 @keyframes pedR{from{left:-14px}to{left:100%}}@keyframes pedL{from{left:100%}to{left:-14px}}
 @media(prefers-reduced-motion:reduce){.skyl .ped{animation:none}}
+.mtn{position:relative;z-index:1;height:34px;margin:-10px -10px -4px;border-radius:11px 11px 0 0;overflow:hidden;background:linear-gradient(180deg,#90caf9,#e3f2fd)}
+.mtn .gond{position:absolute;width:9px;height:7px;background:#e53935;border:1px solid #37474f;border-radius:2px;animation:gond 26s linear infinite}.mtn .gond::before{content:"";position:absolute;left:3px;top:-5px;width:1px;height:4px;background:#37474f}
+@keyframes gond{from{left:-12px;top:11px}to{left:100%;top:19px}}
+@media(prefers-reduced-motion:reduce){.mtn .gond{animation:none}}
 .chan{position:absolute;z-index:3;pointer-events:none;background:repeating-linear-gradient(180deg,transparent 0 7px,rgba(255,255,255,.35) 7px 8px),linear-gradient(180deg,#7fd3f5,#29a3e6 60%);border-left:3px solid #a1887f;border-right:3px solid #a1887f}
 .mboat{position:absolute;z-index:4;width:24px;height:10px;pointer-events:none;transition:transform .5s;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}.mboat svg{display:block}
 .bob{animation:bob 2.2s ease-in-out infinite alternate}@keyframes bob{to{transform:translateY(1.4px)}}
@@ -393,7 +397,9 @@ surf:{n:"Surf Shop",cost:1200,val:1100,rm:0,dur:7,rev:20,cat:"i",ic:"🏄",unloc
 marina:{n:"Marina",cost:3500,val:3200,rm:0,dur:15,rev:60,cat:"i",ic:"⚓",unlock:17,world:"beach",span:2,front:1,d:"Landmark · needs 2 side-by-side beachfront lots · $60 every 3s · +20% to beachfront homes"},
 subway:{n:"Subway Station",cost:900,val:900,rm:0,dur:6,boost:.2,cat:"i",ic:"🚇",unlock:22,world:"city",d:"City only · +20% value to neighboring lots"},
 coffee:{n:"Coffee Shop",cost:1000,val:950,rm:0,dur:6,rev:18,cat:"i",ic:"☕",unlock:26,world:"city",d:"City only · $18 every 3s · double during Rush Hour"},
-skyscraper:{n:"Skyscraper",cost:5000,val:4800,rm:0,dur:18,rev:80,cat:"i",ic:"🏙️",unlock:27,world:"city",span:2,d:"Landmark · needs 2 side-by-side lots · $80 every 3s · +15% to homes in its row"},
+skyscraper:{n:"Skyscraper",cost:5000,val:4800,rm:0,dur:18,rev:80,cat:"i",ic:"🏙️",unlock:27,world:"city",span:2,tall:1,d:"Landmark · needs 2 side-by-side lots · $80 every 3s · +15% to homes in its row"},
+skishop:{n:"Ski Rental Shop",cost:1100,val:1000,rm:0,dur:6,rev:20,cat:"i",ic:"🎿",unlock:33,world:"mountain",d:"Mountain only · $20 every 3s · double during Snow Season"},
+skiresort:{n:"Ski Resort",cost:5500,val:5200,rm:0,dur:18,rev:85,globalBoost:.15,cat:"i",ic:"🚡",unlock:37,world:"mountain",span:2,tall:1,d:"Landmark · needs 2 side-by-side lots · $85 every 3s · +15% to all lots"},
 airport:{n:"Airport",cost:6000,val:6000,rm:0,dur:20,rev:90,globalBoost:.1,cat:"i",ic:"✈️",unlock:100,d:"$90 every 3s · +10% all lots & buyer offers · heavy penalty to adjacent homes"}};
 /* ===== Worlds: 10 themed worlds of 10 levels each. Add a world by filling in its data. ===== */
 const HN0={};Object.keys(S).forEach(k=>HN0[k]={n:S[k].n,ic:S[k].ic});
@@ -406,7 +412,9 @@ const WORLDS=[
 {k:"city",n:"City",ic:"🏙️",ready:1,d:"Tight lots, high prices and zoning permits.",pal:{v:"#9aa3a8",bd:"#6f787d",l:"#b9c0c4",lb:"#7d868b",g:"#a9b1b5"},lm:{k:"skyscraper",lv:29},
  homes:{ranch:["Brownstone","🧱"],colonial:["Townhouse","🏘️"],mansion:["Penthouse Tower","🌆"],apartment:["High-Rise","🏬"],park:["City Plaza","⛲"],pool:["Rooftop Pool","🏊"],civic:["City Hall","🏛️"],realestate:["Downtown Realty","🔑"]},
  m:["🏘️ New homes: Brownstone, Townhouse and Penthouse Tower","🏙️ City makeovers: Apartments → High-Rise, Park → City Plaza, Pool → Rooftop Pool, Civic Center → City Hall, Realty → Downtown Realty","💰 Pricier land: lots cost about 40% more, but homes rent for 20% more","📋 Zoning permits: anything costing $800+ needs a 10% permit fee and a short permit wait before work starts","🚕 Rush Hour: taxis flood the streets, businesses earn double, and buyers arrive slower","🚇 Level 22: Subway Station (+20% to its neighbors) · ☕ Level 26: Coffee Shop","🏙️ Landmark at Level 27: the Skyscraper (2 lots, any row). Level 29 asks you to build one"]},
-{k:"mountain",n:"Mountain",ic:"🏔️",d:"Ski-season rentals and lots that need road access.",pal:{v:"#5f8f5a",bd:"#3f6b3b",l:"#7fa877",lb:"#4c7a47",g:"#6d9a64"}},
+{k:"mountain",n:"Mountain",ic:"🏔️",ready:1,d:"Ski-season rentals, forest lots and mountain views.",pal:{v:"#5f8f5a",bd:"#3f6b3b",l:"#7fa877",lb:"#4c7a47",g:"#6d9a64"},lm:{k:"skiresort",lv:39},
+ homes:{ranch:["Log Cabin","🪵"],colonial:["Chalet","🏠"],mansion:["Ski Lodge Estate","🏔️"],apartment:["Ski Condos","🏨"],park:["Hiking Trailhead","🥾"],pool:["Hot Springs","♨️"],civic:["Ranger Station","🌲"],school:["Mountain Schoolhouse","🔔"],gas:["Trading Post","🏪"]},
+ m:["🏘️ New homes: Log Cabin, Chalet and Ski Lodge Estate","🏔️ Mountain makeovers: Apartments → Ski Condos, Park → Hiking Trailhead, Pool → Hot Springs, Civic Center → Ranger Station, School → Mountain Schoolhouse, Gas Station → Trading Post","🌲 Forest lots: some lots are covered in trees. They're 25% cheaper, but you pay to clear them before building","🏞️ Mountain views: homes in the top row are worth +20%","❄️ Snow Season: homes rent +40% and ski businesses earn double","🌨️ Blizzards replace storms: they can damage houses and slow down traffic","🎿 Level 33: Ski Rental Shop","🚡 Landmark at Level 37: the Ski Resort (2 lots). Level 39 asks you to build one"]},
 {k:"themepark",n:"Theme Park",ic:"🎢",d:"Tourists everywhere: hotels and rentals near the park gates earn big.",pal:{v:"#7cc26a",bd:"#4f9a40",l:"#a8dc8f",lb:"#5aa748",g:"#8fd07a"}},
 {k:"desert",n:"Desert",ic:"🌵",d:"Cheap land, but water and utilities come first.",pal:{v:"#d9b77a",bd:"#b8935a",l:"#efd9a8",lb:"#b8935a",g:"#d6b176"}},
 {k:"lake",n:"Lakeside",ic:"🛶",d:"Waterfront cabins and weekend renters.",pal:{v:"#4e9a6b",bd:"#2f7550",l:"#6fb889",lb:"#3d8a5c",g:"#5ea878"}},
@@ -416,7 +424,7 @@ const WORLDS=[
 const worldOf=l=>Math.max(0,Math.min(9,Math.floor((l-1)/10)));
 const W=l=>WORLDS[worldOf(l==null?lv:l)];
 function applyWorld(){const w=W();Object.keys(S).forEach(k=>{const o=w.homes&&w.homes[k];S[k].n=o?o[0]:HN0[k].n;S[k].ic=o?o[1]:HN0[k].ic})}
-const BUILDING_LIMITS={surf:1,marina:1,subway:1,coffee:1,skyscraper:1,realestate:1,gas:2,sports:1,airport:1,park:3,apartment:3,pool:2,civic:1,school:1,hospital:1,shopping:1,fire:1,bank:1};
+const BUILDING_LIMITS={skishop:1,skiresort:1,surf:1,marina:1,subway:1,coffee:1,skyscraper:1,realestate:1,gas:2,sports:1,airport:1,park:3,apartment:3,pool:2,civic:1,school:1,hospital:1,shopping:1,fire:1,bank:1};
 const MILE=Object.keys(S).filter(k=>!["colonial","mansion"].includes(k)&&!S[k].span).map(k=>({lv:S[k].unlock,k})).sort((a,b)=>a.lv-b.lv);
 const buildingCount=k=>lots.filter(l=>l&&l.hs===k&&!['sold','ai_owned','ai_for_sale'].includes(l.st)).length;
 const buildingLimit=k=>BUILDING_LIMITS[k]??Infinity;
@@ -425,8 +433,8 @@ const unlocked=k=>!!S[k]&&lv>=(S[k].unlock||1)&&inWorld(k);
 const availableBuildings=()=>Object.keys(S).filter(unlocked);
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
 const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
-const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses",party:"🎉 Block party at the park! Nearby rents +60%",market:"🧺 Farmers market at the Civic Center! Its income doubles",game:"🏟️ Game Day at the Sports Complex! Its income doubles",parade:"🎺 School parade! Buyer offers +20%",season:"☀️ Tourist season! Rents +40% for 15s",rushhr:"🚕 Rush hour! Businesses earn double, buyers arrive slower"};
-const evText=k=>k==="storm"&&W().k==="beach"?"🌀 Hurricane warning! Beachfront homes are most at risk":EV[k];
+const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses",party:"🎉 Block party at the park! Nearby rents +60%",market:"🧺 Farmers market at the Civic Center! Its income doubles",game:"🏟️ Game Day at the Sports Complex! Its income doubles",parade:"🎺 School parade! Buyer offers +20%",season:"☀️ Tourist season! Rents +40% for 15s",rushhr:"🚕 Rush hour! Businesses earn double, buyers arrive slower",snow:"❄️ Snow season! Homes rent +40%, ski businesses earn double"};
+const evText=k=>k==="storm"&&W().k==="beach"?"🌀 Hurricane warning! Beachfront homes are most at risk":k==="storm"&&W().k==="mountain"?"🌨️ Blizzard incoming! Snow may damage houses and slow traffic":EV[k];
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
 let lvDone=false,doneAt=null,lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
@@ -434,12 +442,13 @@ let lvDone=false,doneAt=null,lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,bui
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
 const landMul=()=>W().k==="city"?1.4:1;
 const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,marketWait:18+Math.random()*32,offer:null,rent:0,rt:0,land:Math.round((120+Math.random()*80)*landMul()),pt:3+Math.random()*4,aiP:0,aiW:0,aiT:0,reno:[],rp:0,rd:0,pend:null,paint:"#e8d8c3",soldT:0,sp:0,disc:false,dmg:false});
-const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo").length;
+const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo"||l.st==="clearing").length;
+const clearFee=()=>Math.round(90+lv*2);
 // Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
-const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina","coffee"].includes(l.hs));
-const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&l.hs!=="skyscraper"&&(S[l.hs].cat==="i"||l.hs==="apartment"));
+const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina","coffee","skishop"].includes(l.hs));
+const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&!S[l.hs].tall&&(S[l.hs].cat==="i"||l.hs==="apartment"));
 // Multi-lot landmarks: the left lot is the parent; the lots to its right become "merged" parts.
-function spanPair(i,k){const n=S[k].span||1;for(let p=i-(n-1);p<=i;p++){if(p<0||Math.floor(p/5)!==Math.floor((p+n-1)/5))continue;if(S[k].front&&(p+n-1)>=5)continue;let ok=true;for(let q=p;q<p+n;q++)if(!lots[q]||lots[q].st!=="owned")ok=false;if(ok)return p}return -1}
+function spanPair(i,k){const n=S[k].span||1;for(let p=i-(n-1);p<=i;p++){if(p<0||Math.floor(p/5)!==Math.floor((p+n-1)/5))continue;if(S[k].front&&(p+n-1)>=5)continue;let ok=true;for(let q=p;q<p+n;q++)if(!lots[q]||lots[q].st!=="owned"||lots[q].forest)ok=false;if(ok)return p}return -1}
 function unmerge(i){lots.forEach(x=>{if(x.st==="merged"&&x.par===i){x.st="owned";x.par=null}})}
 const reset=l=>{const p=l.land,t=l.pt;Object.assign(l,mkLot(),{land:p,pt:t})};
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
@@ -448,6 +457,7 @@ const civicB=()=>lots.reduce((b,l)=>b+(l.hs&&done(l)?(S[l.hs].globalBoost||0):0)
 function nBoost(i){
   const l=lots[i];let b=civicB();
   // Beach world: the top row sits on the ocean, so homes there are beachfront.
+  if(W().k==="mountain"&&i<5&&l.hs&&S[l.hs].cat==="h")b+=.2;
   if(W().k==="city"&&l.hs&&S[l.hs].cat==="h"){const r=Math.floor(i/5);if(lots.some((x,j)=>x.hs==="skyscraper"&&x.st==="ready"&&Math.floor(j/5)===r))b+=.15}
   if(W().sea&&i<5&&l.hs&&S[l.hs].cat==="h"){b+=.25;if(readyOf("marina"))b+=.2}
   // Nearby amenities lift home values; apartment blocks and retail traffic can
@@ -474,7 +484,7 @@ function nBoost(i){
 }
 function parkRB(i){let b=0;adj(i).forEach(n=>{const l=lots[n];if(l&&l.hs&&S[l.hs].rb&&done(l))b+=S[l.hs].rb});return b}
 function val(i){const l=lots[i];return Math.max(1,Math.round((l.land+(l.hs?S[l.hs].val:0)+l.reno.reduce((a,k)=>a+R[k].vb,0))*(1+nBoost(i))))}
-function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working"||l.dmg)return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1)*(ev.k==="season"?1.4:1)*(W().k==="city"?1.2:1)*(twist&&twist.k==="recession"?.6:1)*(ev.k==="party"&&adj(i).some(n=>lots[n]&&lots[n].hs==="park"&&done(lots[n]))?1.6:1))}
+function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_working"||l.dmg)return 0;return Math.round(val(i)*.035*S[l.hs].rm*(1+parkRB(i))*(ev.k==="rent"?1.5:1)*(ev.k==="season"?1.4:1)*(W().k==="city"?1.2:1)*(ev.k==="snow"?1.4:1)*(twist&&twist.k==="recession"?.6:1)*(ev.k==="party"&&adj(i).some(n=>lots[n]&&lots[n].hs==="park"&&done(lots[n]))?1.6:1))}
 
 function build(){
   const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];if(typeof amb!=="undefined")amb.q=[];
@@ -483,6 +493,7 @@ function build(){
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div>';
   if(W().sea){const s=document.createElement("div");s.className="sea";s.innerHTML='<i class="wv2"></i><i class="wv1"></i>';sc.append(s)}
   else if(W().k==="city"){const s=document.createElement("div");s.className="skyl";s.innerHTML=SKYLINE;sc.append(s)}
+  else if(W().k==="mountain"){const s=document.createElement("div");s.className="mtn";s.innerHTML=MTN;sc.append(s)}
   sc.append(row(0),rd,row(5));if(lots.length>10){const r2=rd.cloneNode(true);sc.append(r2,row(10))}els=[...sc.querySelectorAll(".lot")];initRoadTraffic();fxLayers();
 }
 
@@ -501,6 +512,7 @@ function startLevel(){
   total=mode==="timed"?Math.round((240+lv*20)*(1-.03*meta.pr)):0;timeVal=total;elapsed=0;
   const n=Math.min(4,2+Math.floor(lv/3)),ix=[],ht=["ranch","colonial","mansion"];
   while(ix.length<n){const r=Math.floor(Math.random()*N);if(!ix.includes(r))ix.push(r)}
+  if(W().k==="mountain")lots.forEach((l,q)=>{if(!ix.includes(q)&&Math.random()<.35){l.forest=true;l.land=Math.round(l.land*.75)}});
   ix.forEach(k=>{const l=lots[k];l.st="ai_owned";l.hs=ht[Math.floor(Math.random()*3)];l.aiW=3+Math.random()*6});
   objective=makeObjective(lv).o;
   const ks=availableBuildings().filter(x=>!(objective.t==="build"&&x===objective.k)),k=ks[Math.floor(Math.random()*ks.length)];
@@ -577,14 +589,14 @@ function tapLot(i){
   if(l.st==="off_market")return toast("This lot has been taken off the market for now. Watch for it to return!");
   if(l.st==="empty"){if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");return showBuy(i)}
   if(l.st==="ai_owned")return toast("A neighbor lives here. Watch for it to go up for sale!");
-  if(l.st==="demo")return toast("Demolition in progress…");if(l.st==="working"||l.st==="reno_working")return toast("Under construction…");
+  if(l.st==="demo")return toast("Demolition in progress…");if(l.st==="clearing")return toast("🪓 Clearing trees…");if(l.st==="working"||l.st==="reno_working")return toast("Under construction…");
   if(l.st==="sold")return;
   sheet(i);
 }
 
 let buyIdx=null;
 function showBuy(i){const l=lots[i];buyIdx=i;closeSheet();$("buyt").textContent="🏷️ Buy Lot "+(i+1)+"?";
-  $("buyd").textContent="Price "+fmt(l.land)+" · You'll have "+fmt(money-l.land)+" left."+(W().sea&&i<5?" 🌊 Beachfront lot.":"");$("buyok").textContent="Buy for "+fmt(l.land);$("buy").style.display="flex"}
+  $("buyd").textContent="Price "+fmt(l.land)+" · You'll have "+fmt(money-l.land)+" left."+(W().sea&&i<5?" 🌊 Beachfront lot.":"")+(l.forest?" 🌲 Forest lot: clearing the trees costs "+fmt(clearFee())+" before you can build.":"")+(W().k==="mountain"&&i<5?" 🏞️ Mountain view.":"");$("buyok").textContent="Buy for "+fmt(l.land);$("buy").style.display="flex"}
 $("buyx").onclick=()=>{$("buy").style.display="none";buyIdx=null};
 $("buyok").onclick=()=>{const i=buyIdx,l=lots[i];$("buy").style.display="none";buyIdx=null;if(!run||!l)return;
   if(l.st!=="empty")return toast("Lot "+(i+1)+" is no longer for sale.");if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");
@@ -593,7 +605,8 @@ function closeSheet(){sel=null;$("sheet").innerHTML="";document.body.classList.r
 function sheet(i,conf){
   const l=lots[i];sel=i;document.body.classList.add("so");
   const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl="";let h="";
-  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const pf=permitFee(k),nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0,pe=!locked&&!capped?placeErr(k,i):"";return '<button class="opt'+(locked||capped||nofit||pe||money<S[k].cost+pf?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost)+(pf?" +📋"+fmt(pf):""))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":pe?pe:nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+". Buy the lot next to this one.":(Number.isFinite(limit)?"Max "+limit+(count?" ("+count+" built)":"")+" · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
+  if(l.st==="owned"&&l.forest){const f=clearFee();h=hd("Lot "+(i+1)+" · Forest","The trees must be cleared before you can build here.")+'<div class="opts"><button class="opt'+(money<f?" dim":"")+'" data-a="clear"><b>🪓 Clear trees '+fmt(f)+"</b><small>Uses a builder for a few seconds</small></button></div>"}
+  else if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const pf=permitFee(k),nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0,pe=!locked&&!capped?placeErr(k,i):"";return '<button class="opt'+(locked||capped||nofit||pe||money<S[k].cost+pf?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost)+(pf?" +📋"+fmt(pf):""))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":pe?pe:nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+". Buy the lot next to this one.":(Number.isFinite(limit)?"Max "+limit+(count?" ("+count+" built)":"")+" · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
   else if(l.st==="ai_for_sale"){h=hd("Buy "+S[l.hs].n+" · Lot "+(i+1),"Asking "+fmt(l.aiP)+" · Value "+fmt(val(i)))+'<div class="opts"><button class="opt ok" data-a="buyai">🛒 Buy & Auto-Rent</button>'+cl+"</div>"}
   else if(conf){h=hd("⚠️ Demolish Lot "+(i+1)+"?","Costs $100 and clears the property.")+'<div class="opts"><button class="opt no" data-a="demo2">Confirm Demolish</button><button class="opt x" data-a="demo0">Cancel</button></div>'}
   else if(["rented","listed","ready"].includes(l.st)){
@@ -615,6 +628,7 @@ function act(i,a){
   const l=lots[i];
   if(S[a]){if(l.st==="owned")startBuild(i,a);return}
   if(a==="close")closeSheet();
+  else if(a==="clear"&&l.st==="owned"&&l.forest){const f=clearFee();if(money<f)return toast("Need "+fmt(f)+" to clear the trees.");if(busy()>=builders)return toast("All builders are busy!");money-=f;l.st="clearing";l.cp=0;l.cd=4/speed;sfx.build();closeSheet();toast("🪓 Clearing trees on Lot "+(i+1)+"…");draw()}
   else if(a==="upgrade")reno(i);
   else if(a==="list"&&l.st==="rented"&&l.dmg)toast("Repair the storm damage before listing.");
   else if(a==="list"&&l.st==="rented"){l.st="listed";l.wait=1.5+Math.random()*2;startTraffic(i,"leave");closeSheet();toast("Listed! The owner is pulling out, and rent is paused until it sells.");draw()}
@@ -627,7 +641,7 @@ function act(i,a){
   else if(a==="reject")resolveOffer(i,false);
   else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;[objective,bonus].forEach(o=>{if(o&&o.t==="buyai")o.c++});l.sp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
 }
-function startBuild(i,k){const s=S[k],l=lots[i];if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");const limit=buildingLimit(k);if(buildingCount(k)>=limit)return toast("Maximum reached: "+limit+" "+s.n+(limit===1?" allowed.":"s allowed."));if(busy()>=builders)return toast("All builders are busy!");{const pe=placeErr(k,i);if(pe)return toast(pe)}const fee=permitFee(k);if(money<s.cost+fee)return toast("Need "+fmt(s.cost+fee)+" for a "+s.n+(fee?" ("+fmt(s.cost)+" + "+fmt(fee)+" permit)":"")+".");if(s.span){const p=spanPair(i,k);if(p<0)return toast("🧩 "+s.n+" needs "+s.span+" side-by-side lots you own"+(s.front?" on the beachfront (top row)":"")+".");for(let q=p+1;q<p+s.span;q++){lots[q].st="merged";lots[q].par=p}return startBuild2(p,k,fee)}money-=s.cost+fee;meta.st.built++;l.hs=k;l.st="working";l.permit=fee?3:0;sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast(fee?"📋 Permit filed ("+fmt(fee)+"). Building "+s.n+" once it clears…":"Building "+s.n+"…");draw()}
+function startBuild(i,k){const s=S[k],l=lots[i];if(l&&l.forest)return toast("🌲 Clear the trees first.");if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");const limit=buildingLimit(k);if(buildingCount(k)>=limit)return toast("Maximum reached: "+limit+" "+s.n+(limit===1?" allowed.":"s allowed."));if(busy()>=builders)return toast("All builders are busy!");{const pe=placeErr(k,i);if(pe)return toast(pe)}const fee=permitFee(k);if(money<s.cost+fee)return toast("Need "+fmt(s.cost+fee)+" for a "+s.n+(fee?" ("+fmt(s.cost)+" + "+fmt(fee)+" permit)":"")+".");if(s.span){const p=spanPair(i,k);if(p<0)return toast("🧩 "+s.n+" needs "+s.span+" side-by-side lots you own"+(s.front?" on the beachfront (top row)":"")+".");for(let q=p+1;q<p+s.span;q++){lots[q].st="merged";lots[q].par=p}return startBuild2(p,k,fee)}money-=s.cost+fee;meta.st.built++;l.hs=k;l.st="working";l.permit=fee?3:0;sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast(fee?"📋 Permit filed ("+fmt(fee)+"). Building "+s.n+" once it clears…":"Building "+s.n+"…");draw()}
 const placeErr=(k,i)=>W().k==="beach"&&k==="civic"&&i>=5?"🌅 Lighthouses can only be built on the coast (top row).":"";
 const permitFee=k=>W().k==="city"&&S[k].cost>=800?Math.round(S[k].cost*.1):0;
 function startBuild2(i,k,fee){const s=S[k],l=lots[i];money-=s.cost+(fee||0);meta.st.built++;l.hs=k;l.st="working";l.permit=fee?3:0;sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("🧩 Lots merged! Building "+s.n+"…");draw()}
@@ -648,8 +662,8 @@ function tick(now){
   const dt=Math.min(.1,(now-last)/1000);last=now;
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
-    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"||ev.k==="game"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?"☀️ The storm has passed.":"Market is back to normal.");ev.k=null}}
-    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
+    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"||ev.k==="game"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?(W().k==="mountain"?"☀️ The blizzard has cleared.":"☀️ The storm has passed."):ev.k==="snow"?"🌤️ Snow season is over.":"Market is back to normal.");ev.k=null;fxLayers()}}
+    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
       if(visitorBusiness(l)){
@@ -675,7 +689,7 @@ function tick(now){
           if(l.visitorWait<=0)startBusinessVisitorArrival(i);
         }
       }else if(l.visitorWait!=null)l.visitorWait=null;
-      if(l.hs&&S[l.hs].rev&&l.st==="ready"){l.rt-=dt;if(l.rt<=0){l.rt=3;const rv=S[l.hs].rev*(ev.k==="market"&&l.hs==="civic"||ev.k==="game"&&l.hs==="sports"||ev.k==="season"&&l.hs==="surf"||ev.k==="rushhr"?2:1);money+=rv;pop(i,"+"+fmt(rv))}}
+      if(l.hs&&S[l.hs].rev&&l.st==="ready"){l.rt-=dt;if(l.rt<=0){l.rt=3;const rv=S[l.hs].rev*(ev.k==="market"&&l.hs==="civic"||ev.k==="game"&&l.hs==="sports"||ev.k==="season"&&l.hs==="surf"||ev.k==="rushhr"||ev.k==="snow"&&(l.hs==="skishop"||l.hs==="skiresort")?2:1);money+=rv;pop(i,"+"+fmt(rv))}}
       // Empty lots periodically leave the market, creating scarcity. They return after a short cooldown.
       if(l.st==="empty"){
         if(l.marketWait==null)l.marketWait=18+Math.random()*32;
@@ -695,6 +709,7 @@ function tick(now){
         if(l.aiT<=0){l.st="ai_owned";l.aiW=10+Math.random()*12;if(sel===i)closeSheet()}}
       else if(l.st==="rented"){l.rent=rentOf(i);l.rt-=dt;if(l.rt<=0){l.rt+=3;if(l.rent>0){money+=l.rent;pop(i,"+"+fmt(l.rent))}}}
       else if(l.st==="working"){if(l.permit>0)l.permit-=dt;else l.p+=dt/l.dur;if(l.p>=1){l.p=0;l.rt=3;if(S[l.hs].cat==="i"){l.st="ready";if(visitorBusiness(l))l.visitorWait=2+Math.random()*5;toast(S[l.hs].n+" finished on Lot "+(i+1)+"!")}else{l.st="rented";l.rent=rentOf(i);toast(S[l.hs].n+" finished! Renting for "+fmt(l.rent)+"/3s.")}fx(i,"done")}}
+      else if(l.st==="clearing"){l.cp+=dt/l.cd;if(l.cp>=1){l.st="owned";l.forest=false;l.cp=0;fx(i,"done");toast("🌲 Lot "+(i+1)+" cleared! Tap it to build.")}}
       else if(l.st==="reno_working"){l.rp+=dt/l.rd;if(l.rp>=1){l.reno.push(l.pend);if(l.pend==="paint")l.paint=PAINT[Math.floor(Math.random()*PAINT.length)];toast(R[l.pend].n+" done on Lot "+(i+1)+"!");l.pend=null;l.rp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;fx(i,"done")}}
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt*(readyOf("realestate")?1.5:1)*(ev.k==="rushhr"?.6:1);if(l.wait<=0)spawnOffer(i)}
@@ -871,10 +886,82 @@ function cityOnly(l,k,st,T,s){
     [[1,0],[4,1],[6,2],[2,3],[5,4],[0,5],[3,2],[7,4],[2,6],[5,7],[0,1],[6,6]].forEach((c,q)=>{s+='<rect class="lit" x="'+(79+c[0]*5.5)+'" y="'+(17+c[1]*5)+'" width="3.5" height="3.2" fill="#fff59d" style="animation-duration:'+(3+q*.7).toFixed(1)+'s;animation-delay:'+(-q*1.3).toFixed(1)+'s"/>'});
     s+=PERS("#e53935","wk1",-2,26)+PERS("#1565c0","wk2",-7,26)+PERS("#43a047","wk1",-11,26)}
   return s}
+
+// ===== Mountain world art =====
+const PINE=(x,y,s)=>'<g transform="translate('+x+' '+y+') scale('+s+')"><rect x="-1.2" y="0" width="2.4" height="5" fill="#5d4037"/><polygon points="0,-17 -7,-5 7,-5" fill="#2e7d32"/><polygon points="0,-12 -8.5,2 8.5,2" fill="#388e3c"/><polygon points="0,-17 -2.6,-12.5 2.6,-12.5" fill="#fafafa"/></g>';
+const MTN=(()=>{let g='<svg viewBox="0 0 200 30" preserveAspectRatio="none" width="100%" height="34" style="display:block"><polygon points="0,30 0,18 18,8 34,16 52,3 72,17 90,6 110,18 128,2 150,16 170,7 200,18 200,30" fill="#78909c"/>';
+ [[18,8],[52,3],[90,6],[128,2],[170,7]].forEach(([x,y])=>{g+='<polygon points="'+(x-5)+','+(y+3.2)+' '+x+','+y+' '+(x+5)+','+(y+3.2)+' '+(x+2)+','+(y+2.4)+' '+x+','+(y+3.6)+' '+(x-2)+','+(y+2.4)+'" fill="#fafafa"/>'});
+ g+='<polygon points="0,30 0,24 30,20 60,25 100,19 140,24 170,20 200,24 200,30" fill="#558b2f"/>';
+ for(let x=4;x<200;x+=9)g+='<polygon points="'+x+','+(29-(x%3))+' '+(x+3)+','+(21-(x%4))+' '+(x+6)+','+(29-(x%3))+'" fill="#2e7d32"/>';
+ return g+'<path d="M0 6L200 13" stroke="#37474f" stroke-width=".5"/></svg><span class="gond"></span><span class="gond" style="animation-delay:-13s"></span>'})();
+function forestLot(p){const t=[[18,40,1],[34,30,.9],[50,42,1.1],[66,28,.9],[82,40,1],[26,52,.8],[74,52,.8]],keep=Math.ceil(t.length*(1-p));
+ let s='<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".15"/><rect x="5" y="46" width="90" height="13" rx="5" fill="#5aa23e"/>';
+ t.slice(0,keep).forEach(a=>{s+=p>0?'<g class="shk">'+PINE(a[0],a[1],a[2])+'</g>':PINE(a[0],a[1],a[2])});
+ if(p>0)s+='<circle class="smk" cx="40" cy="44" r="5" fill="#d7ccc8"/><circle class="smk s2" cx="62" cy="44" r="5" fill="#d7ccc8"/><text class="hm" x="62" y="30" font-size="16">🪓</text>';
+ else s+='<circle cx="50" cy="22" r="11" fill="#6d4c41" stroke="#fff" stroke-width="1.5"/><text x="50" y="27" font-size="12" text-anchor="middle">🪓</text>';
+ return s}
+function mtnHome(l,k,st,T,s){
+  const b=l.paint==="#e8d8c3"?{ranch:"#8d6e63",colonial:"#a1887f",mansion:"#8d6e63"}[k]:l.paint,r=l.reno.includes("roof")?"#ff7043":"#4e342e",snow='stroke="#fafafa" fill="none" stroke-linejoin="round" stroke-linecap="round"';
+  if(k==="ranch"){s+='<rect x="66" y="12" width="8" height="14" fill="#9e9e9e" stroke="#3e2723"/><circle class="smk" cx="70" cy="9" r="3" fill="#fff"/><circle class="smk s2" cx="72" cy="9" r="2.5" fill="#fff"/><rect x="18" y="26" width="64" height="20" fill="'+b+'" '+T+'/>'
+    +[30,34,38,42].map(y=>'<path d="M18 '+y+'h64" stroke="#4e342e" stroke-opacity=".55"/><circle cx="18" cy="'+(y-2)+'" r="1.6" fill="#d7ccc8"/><circle cx="82" cy="'+(y-2)+'" r="1.6" fill="#d7ccc8"/>').join("")
+    +'<polygon points="12,27 50,8 88,27" fill="'+r+'" '+T+'/><path d="M14 26L50 8.6L86 26" '+snow+' stroke-width="3"/><rect x="44" y="32" width="11" height="14" fill="#4e342e" stroke="#3e2723"/><circle cx="52" cy="39" r="1" fill="#ffb300"/>'+WN(24,31,12,9)+WN(64,31,12,9);return s}
+  if(k==="colonial"){s+='<polygon points="16,46 50,4 84,46" fill="'+b+'" '+T+'/><path d="M27 32h46M21 39h58M33 24h34" stroke="#5d4037" stroke-opacity=".5"/><path d="M12 48L50 2L88 48" stroke="'+r+'" stroke-width="5" fill="none" stroke-linejoin="round"/><path d="M33 23L50 2L67 23" '+snow+' stroke-width="2.6"/>'
+    +'<polygon points="50,12 39,29 61,29" fill="#bde3f5" stroke="#3e2723"/><path d="M50 12v17M44.5 21h11" stroke="#3e2723" stroke-width=".6"/><rect x="29" y="31" width="42" height="2" fill="#5d4037"/><path d="M31 33v4M37 33v4M43 33v4M57 33v4M63 33v4M69 33v4M29 37h42" stroke="#5d4037" stroke-width="1"/><rect x="45" y="37" width="10" height="9" fill="#4e342e" stroke="#3e2723"/>';return s}
+  s+='<rect x="46" y="2" width="7" height="12" fill="#9e9e9e" stroke="#3e2723"/><circle class="smk" cx="49.5" cy="0" r="2.5" fill="#fff"/><rect x="10" y="34" width="80" height="12" fill="#9e9e9e" '+T+'/><path d="M10 40h80M22 34v6M38 34v6M58 34v6M74 34v6M30 40v6M48 40v6M66 40v6M82 40v6" stroke="#757575" stroke-width=".7"/>'
+   +'<rect x="14" y="20" width="72" height="14" fill="'+b+'" '+T+'/><path d="M30 20v14M50 20v14M70 20v14" stroke="#4e342e" stroke-width="1.4"/><polygon points="10,21 30,6 50,21" fill="'+r+'" '+T+'/><polygon points="50,21 70,6 90,21" fill="'+r+'" '+T+'/><path d="M13 20L30 7L47 20M53 20L70 7L87 20" '+snow+' stroke-width="2.4"/>'
+   +WN(18,23,9,8)+WN(73,23,9,8)+'<rect x="35" y="23" width="12" height="8" fill="#bde3f5" stroke="#3e2723"/><rect x="53" y="23" width="12" height="8" fill="#bde3f5" stroke="#3e2723"/><rect x="34" y="36" width="12" height="8" fill="#bde3f5" stroke="#3e2723"/><rect x="54" y="36" width="12" height="8" fill="#bde3f5" stroke="#3e2723"/><rect x="46" y="36" width="8" height="10" fill="#4e342e"/>';
+  if(st==="rented")[[35,23],[54,36]].forEach((w,q)=>{s+='<rect class="lit" x="'+w[0]+'" y="'+w[1]+'" width="11" height="7" fill="#ffe082" style="animation-duration:'+(5+q*2)+'s"/>'});
+  return s}
+function mtnBld(l,k,st,T,s){
+  const on=st==="ready"||st==="rented",snow='stroke="#fafafa" fill="none" stroke-linejoin="round" stroke-linecap="round"';
+  if(k==="apartment"){s+='<rect x="20" y="14" width="60" height="34" fill="#a1887f" '+T+'/><polygon points="16,15 50,1 84,15" fill="#4e342e" '+T+'/><path d="M18 14L50 1.6L82 14" '+snow+' stroke-width="2.6"/>';
+    [17,28,39].forEach(y=>{[24,38,52,66].forEach(x=>{s+='<rect x="'+x+'" y="'+y+'" width="9" height="6" fill="#bde3f5" stroke="#3e2723" stroke-width=".5"/>'});if(y<39)s+='<rect x="20" y="'+(y+7)+'" width="60" height="1.6" fill="#5d4037"/>'});
+    s+='<rect x="45" y="40" width="10" height="8" fill="#4e342e"/>';
+    if(on){[[24,17],[52,17],[38,28],[66,28],[24,39],[66,39]].forEach((w,q)=>{s+='<rect class="lit" x="'+w[0]+'" y="'+w[1]+'" width="9" height="6" fill="#ffe082" style="animation-duration:'+(3+q*.9).toFixed(1)+'s;animation-delay:'+(-q*1.2).toFixed(1)+'s"/>'});s+=PERS("#d84315","wk1",-3,0)+PERS("#1565c0","wk2",-10,0)}
+    return s}
+  if(k==="park"){s='<rect x="6" y="10" width="88" height="48" rx="8" fill="#7cb342" stroke="#558b2f" stroke-width="1.5"/><path d="M10 54Q30 40 50 44T90 22" stroke="#d7ccc8" stroke-width="5" fill="none"/>'
+    +PINE(18,32,1)+PINE(30,24,.8)+PINE(80,48,1)+PINE(70,36,.8)+PINE(88,30,.7)+'<circle cx="58" cy="52" r="3" fill="#9e9e9e"/><circle cx="62" cy="54" r="2" fill="#bdbdbd"/>'
+    +'<path d="M46 40V28" stroke="#5d4037" stroke-width="1.6"/><rect x="38" y="24" width="18" height="7" rx="1" fill="#6d4c41" stroke="#3e2723"/><text x="47" y="29.4" font-size="4.6" font-weight="900" text-anchor="middle" fill="#fff8e1">TRAIL</text>';
+    if(st==="ready")s+=PERS("#d84315","wk1",-2,-4)+PERS("#1565c0","wk2",-9,-4);
+    return s}
+  if(k==="pool"){s+='<ellipse cx="50" cy="38" rx="42" ry="15" fill="#9e9e9e" stroke="#616161"/><ellipse cx="40" cy="38" rx="22" ry="9" fill="#4dd0e1" stroke="#00838f" stroke-width="1.2"/><ellipse cx="73" cy="33" rx="11" ry="5.5" fill="#80deea" stroke="#00838f"/>'
+    +[[14,36,4],[20,46,3.5],[62,46,4],[86,40,3.5],[60,30,3]].map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="'+c[2]+'" fill="#757575" stroke="#616161"/>').join("")+PINE(10,26,.7)+PINE(90,26,.7);
+    if(st==="ready")s+='<circle class="smk" cx="36" cy="32" r="4" fill="#fff"/><circle class="smk s2" cx="48" cy="33" r="4" fill="#fff"/><circle class="smk" cx="73" cy="29" r="3" fill="#fff"/><g class="bob"><circle cx="34" cy="39" r="2.4" fill="#ffcc80"/></g><g class="bob" style="animation-delay:-1s"><circle cx="46" cy="40" r="2.4" fill="#ffcc80"/></g>';
+    return s}
+  if(k==="civic"){s+='<rect x="20" y="26" width="60" height="20" fill="#8d6e63" '+T+'/><polygon points="14,27 50,12 86,27" fill="#2e7d32" '+T+'/><path d="M16 26L50 12.6L84 26" '+snow+' stroke-width="2.6"/><rect x="34" y="29" width="32" height="7" rx="1" fill="#33691e" stroke="#fff" stroke-width=".7"/><text x="50" y="34.3" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">RANGER</text><rect x="45" y="37" width="10" height="9" fill="#4e342e"/>'+WN(24,36,9,7)+WN(67,36,9,7)+'<path d="M90 46V10" stroke="#5d4037" stroke-width="1.2"/>';
+    if(st==="ready")s+='<polygon class="flag" points="90,10 98,13 90,16" fill="#43a047"/>'+PERS("#33691e","wk1",-1,-2)+PERS("#795548","wk2",-8,-2);
+    return s}
+  if(k==="school"){s+='<rect x="22" y="24" width="56" height="22" fill="#c62828" '+T+'/><polygon points="18,25 50,12 82,25" fill="#4e342e" '+T+'/><path d="M20 24L50 12.6L80 24" '+snow+' stroke-width="2.4"/><rect x="44" y="4" width="12" height="9" fill="#fff" '+T+'/><polygon points="42,4 50,-2 58,4" fill="#4e342e" '+T+'/>'
+    +'<path class="'+(st==="ready"?"pen":"")+'" d="M47.5 6h5l-.8 4h-3.4z" fill="#ffb300"/><rect x="45" y="34" width="10" height="12" fill="#fff" stroke="#3e2723"/>'+WN(28,29,10,8)+WN(62,29,10,8);
+    if(st==="ready")s+=PERS("#e53935","wk1",-1,-3)+PERS("#1e88e5","wk2",-7,-3)+'<circle class="bnc" cx="26" cy="51" r="2.6" fill="#fdd835" stroke="#8d6e63" stroke-width=".6"/>';
+    return s}
+  if(k==="gas"){s+='<rect x="16" y="13" width="68" height="11" fill="#a1887f" '+T+'/><text x="50" y="20.6" font-size="5.6" font-weight="900" text-anchor="middle" fill="#3e2723" letter-spacing=".4">TRADING POST</text><rect x="16" y="24" width="68" height="22" fill="#8d6e63" '+T+'/>'
+    +'<path d="M24 24v22M32 24v22M40 24v22M60 24v22M68 24v22M76 24v22" stroke="#6d4c41" stroke-width=".7"/><rect x="12" y="28" width="76" height="3" fill="#5d4037"/><path d="M14 31v15M86 31v15" stroke="#5d4037" stroke-width="1.5"/>'
+    +'<rect x="45" y="34" width="10" height="12" fill="#4e342e" stroke="#3e2723"/>'+WN(22,33,14,8)+WN(64,33,14,8)+'<rect x="4" y="38" width="7" height="8" rx="2" fill="#795548" stroke="#3e2723"/><rect x="90" y="34" width="6" height="12" rx="1" fill="#e53935" stroke="#3e2723"/>';
+    if(st==="ready")s+=PERS("#795548","wk1",-2,0)+PERS("#33691e","wk2",-8,0);
+    return s}
+  return s}
+function mtnOnly(l,k,st,T,s){
+  if(k==="skishop"){s+='<rect x="18" y="24" width="58" height="22" fill="#efebe9" '+T+'/><polygon points="12,25 47,8 82,25" fill="#d84315" '+T+'/><path d="M14 24L47 8.6L80 24" stroke="#fafafa" fill="none" stroke-width="2.6" stroke-linejoin="round"/><rect x="25" y="27" width="44" height="7" rx="1" fill="#0277bd"/><text x="47" y="32.4" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">SKI RENTAL</text>'
+    +WN(24,36,15,8)+'<rect x="52" y="35" width="10" height="11" fill="#5d4037" stroke="#3e2723"/><path d="M82 24h15" stroke="#5d4037" stroke-width="1.5"/>'+[[84,"#e53935"],[88,"#1e88e5"],[92,"#fdd835"],[96,"#43a047"]].map(c=>'<rect x="'+c[0]+'" y="20" width="2.4" height="26" rx="1.2" fill="'+c[1]+'" stroke="#263238" stroke-width=".4"/>').join("");
+    if(st==="ready")s+=PERS("#e53935","wk1",-1,0)+PERS("#1e88e5","wk2",-7,0);
+    return s}
+  // Ski Resort: two lots wide, full lot height, with a moving chairlift
+  s='<polygon points="4,86 64,34 96,46 156,6 196,38 196,86" fill="#eceff1" stroke="#90a4ae" stroke-width="1.2"/><polygon points="156,6 140,22 150,20 156,26 164,16" fill="#cfd8dc"/><polygon points="64,34 56,44 66,40 72,44" fill="#cfd8dc"/>'
+   +'<path d="M156 8Q140 40 150 84M150 12Q170 44 184 84" stroke="#b0bec5" stroke-width="1.2" stroke-dasharray="3 2" fill="none"/><rect x="149" y="0" width="14" height="8" fill="#8d6e63" stroke="#3e2723"/><polygon points="147,1 156,-4 165,1" fill="#4e342e"/>';
+  [[10,84],[22,82],[84,84],[100,80],[114,84],[128,82],[188,84],[176,82]].forEach(t=>{s+=PINE(t[0],t[1],.9)});
+  s+='<polygon points="18,84 40,58 62,84" fill="#8d6e63" '+T+'/><path d="M14 86L40 55L66 86" stroke="#4e342e" stroke-width="4" fill="none" stroke-linejoin="round"/><path d="M28 70L40 55.6L52 70" stroke="#fafafa" stroke-width="2.4" fill="none" stroke-linejoin="round"/><polygon points="40,64 33,76 47,76" fill="#bde3f5" stroke="#3e2723"/><rect x="36" y="78" width="8" height="8" fill="#4e342e"/><rect x="27" y="58" width="26" height="6" rx="1" fill="#0d47a1" stroke="#fff" stroke-width=".6"/><text x="40" y="62.6" font-size="4.4" font-weight="900" text-anchor="middle" fill="#fff">SKI RESORT</text>'
+   +'<path d="M58 70L150 10" stroke="#37474f" stroke-width="1"/><path d="M88.7 50v18M119.3 30v20" stroke="#546e7a" stroke-width="1.6"/><path d="M85 50h7M116 30h7" stroke="#546e7a" stroke-width="1.4"/>';
+  if(st==="ready"){[0,2.5,5,7.5].forEach(d=>{s+='<g><path d="M0 0v4" stroke="#37474f" stroke-width=".8"/><rect x="-3.2" y="4" width="6.4" height="2.6" rx="1" fill="#e53935"/><circle cx="0" cy="2.6" r="1.4" fill="#ffcc80"/><animateMotion dur="10s" repeatCount="indefinite" begin="-'+d+'s" path="M58 70L150 10"/></g>'});
+    [[0,"#1e88e5"],[-3,"#fdd835"]].forEach(k=>{s+='<g><circle r="1.6" fill="'+k[1]+'" stroke="#263238" stroke-width=".4"/><animateMotion dur="6s" repeatCount="indefinite" begin="'+k[0]+'s" path="M156 10Q140 40 150 84"/></g>'});
+    s+=PERS("#e53935","wk1",-2,30)+PERS("#1565c0","wk2",-7,30)}
+  return s}
 const WART={
  beach:{ranch:(l,st,T,s)=>s+beachArt(l,"ranch",T),colonial:(l,st,T,s)=>s+beachArt(l,"colonial",T),mansion:(l,st,T,s)=>s+beachArt(l,"mansion",T),
   park:(l,st,T,s)=>beachBld(l,"park",st,T,s),civic:(l,st,T,s)=>beachBld(l,"civic",st,T,s),apartment:(l,st,T,s)=>beachBld(l,"apartment",st,T,s),
   pool:(l,st,T,s)=>beachBld(l,"pool",st,T,s),shopping:(l,st,T,s)=>beachBld(l,"shopping",st,T,s),surf:(l,st,T,s)=>beachBld(l,"surf",st,T,s),keep:["pool"]},
+ mountain:{ranch:(l,st,T,s)=>mtnHome(l,"ranch",st,T,s),colonial:(l,st,T,s)=>mtnHome(l,"colonial",st,T,s),mansion:(l,st,T,s)=>mtnHome(l,"mansion",st,T,s),
+  apartment:(l,st,T,s)=>mtnBld(l,"apartment",st,T,s),park:(l,st,T,s)=>mtnBld(l,"park",st,T,s),pool:(l,st,T,s)=>mtnBld(l,"pool",st,T,s),civic:(l,st,T,s)=>mtnBld(l,"civic",st,T,s),school:(l,st,T,s)=>mtnBld(l,"school",st,T,s),gas:(l,st,T,s)=>mtnBld(l,"gas",st,T,s)},
  city:{ranch:(l,st,T,s)=>cityHome(l,"ranch",st,T,s),colonial:(l,st,T,s)=>cityHome(l,"colonial",st,T,s),mansion:(l,st,T,s)=>cityHome(l,"mansion",st,T,s),
   apartment:(l,st,T,s)=>cityBld(l,"apartment",st,T,s),park:(l,st,T,s)=>cityBld(l,"park",st,T,s),pool:(l,st,T,s)=>cityBld(l,"pool",st,T,s),civic:(l,st,T,s)=>cityBld(l,"civic",st,T,s)}};
 const FEST={party:["park","PARTY!","#ff4081"],market:["civic","MARKET","#43a047"],parade:["school","PARADE","#8e24aa"],game:["sports","GAME DAY","#1e88e5"]};
@@ -890,6 +977,7 @@ function houseArt(l,i){
   if(ov)s=ov(l,st,T,s);
   else if(k==="marina")s=marinaArt(st);
   else if(k==="subway"||k==="coffee"||k==="skyscraper")s=cityOnly(l,k,st,T,s);
+  else if(k==="skishop"||k==="skiresort")s=mtnOnly(l,k,st,T,s);
   else if(k==="ranch")s+='<rect x="68" y="16" width="8" height="12" fill="#8d6e63" stroke="#3e2723"/><circle class="smk" cx="72" cy="13" r="3" fill="#fff"/><circle class="smk s2" cx="74" cy="13" r="2.5" fill="#fff"/><rect x="16" y="24" width="68" height="22" fill="'+b+'" '+T+'/><rect x="16" y="40" width="68" height="6" fill="#000" opacity=".08"/><polygon points="10,25 50,10 90,25" fill="'+r+'" '+T+'/><polygon points="10,25 50,10 50,25" fill="#fff" opacity=".13"/><rect x="52" y="28" width="28" height="18" fill="#cfd8dc" stroke="#3e2723"/><path d="M52 33h28M52 38h28M52 43h28" stroke="#90a4ae"/><rect x="38" y="32" width="10" height="14" fill="#5c3826"/><circle cx="45" cy="39" r="1" fill="#ffb300"/><rect x="17" y="28" width="3" height="12" fill="#37474f"/><rect x="34" y="28" width="3" height="12" fill="#37474f"/>'+WN(20,28,14,12);
   else if(k==="colonial")s+='<rect x="18" y="16" width="64" height="30" fill="'+b+'" '+T+'/><rect x="18" y="40" width="64" height="6" fill="#000" opacity=".08"/><polygon points="14,18 50,4 86,18" fill="'+r+'" '+T+'/><polygon points="14,18 50,4 50,18" fill="#fff" opacity=".13"/><polygon points="50,7 44,13 56,13" fill="'+r+'" stroke="#3e2723"/>'+WN(47,10,6,5)+'<rect x="38" y="24" width="24" height="22" fill="#fff" stroke="#3e2723"/><path d="M40 24v22M60 24v22" stroke="#cfd8dc" stroke-width="2"/><rect x="44" y="32" width="12" height="14" fill="#4e342e"/><circle cx="53" cy="39" r="1" fill="#ffb300"/>'+WN(24,20,10,10)+WN(66,20,10,10)+WN(24,33,10,10)+WN(66,33,10,10);
   else if(k==="mansion")s+='<rect x="12" y="20" width="22" height="26" fill="'+b+'" stroke="#3e2723"/><polygon points="10,20 23,10 36,20" fill="'+r+'" stroke="#3e2723"/><rect x="66" y="20" width="22" height="26" fill="'+b+'" stroke="#3e2723"/><polygon points="64,20 77,10 90,20" fill="'+r+'" stroke="#3e2723"/><rect x="28" y="16" width="44" height="30" fill="'+b+'" '+T+'/><rect x="12" y="40" width="76" height="6" fill="#000" opacity=".08"/><polygon points="25,17 50,5 75,17" fill="'+r+'" '+T+'/><polygon points="25,17 50,5 50,17" fill="#fff" opacity=".13"/><rect x="40" y="30" width="20" height="16" fill="#fff" stroke="#3e2723"/><rect x="44" y="32" width="6" height="14" fill="#4e342e"/><rect x="50" y="32" width="6" height="14" fill="#4e342e"/><path d="M38 30h24" stroke="#3e2723" stroke-width="1.5"/>'+WN(16,24,14,10)+WN(70,24,14,10)+WN(34,20,12,9)+WN(54,20,12,9);
@@ -979,7 +1067,8 @@ function drivewayArt(i,parked,l){
   return '<g class="drive-art"><path d="'+roadEdge+'" fill="none" stroke="#777b75" stroke-width="12" stroke-linecap="round"/><path d="'+roadEdge+'" fill="none" stroke="#c7c8bf" stroke-width="8" stroke-linecap="round"/><rect x="64" y="'+lotY+'" width="32" height="27" rx="2.5" fill="#777b75" stroke="#545954" stroke-width="1.2"/><rect x="66" y="'+(lotY+2)+'" width="28" height="23" rx="1.5" fill="#c7c8bf"/><path d="M80 '+(lotY+2)+'v23" stroke="#f7f7ef" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M66 '+(lotY+2)+'h28M66 '+(lotY+25)+'h28" stroke="#ecece5" stroke-width=".8"/>'+parkedCars+'</g>';
 }
 function art(l,i){
-  const main=houseArt(l,i).replace(/#5aa23e/g,(W().pal||COS.theme[meta.eq.theme]).g);
+  let main=houseArt(l,i);if(l.forest&&!l.hs){if(l.st==="empty"||l.st==="off_market")main=PINE(14,46,1)+PINE(86,46,1)+PINE(24,30,.8)+PINE(78,30,.8)+main;else if(l.st==="owned")main=forestLot(0);else if(l.st==="clearing")main=forestLot(l.cp)}
+  main=main.replace(/#5aa23e/g,(W().pal||COS.theme[meta.eq.theme]).g);
   // Vacant lots stay clear. Add pavement only when a building exists or construction is underway.
   const hasBuilding=!!l.hs&&l.st!=="sold";
   const parked=hasBuilding&&!['working','reno_working','demo','sold','listed','ai_for_sale'].includes(l.st)&&!traffic[i];
@@ -987,7 +1076,7 @@ function art(l,i){
   // This is important because the lot SVG occupies only the upper portion of each tall lot;
   // drawing the driveway inside its 0..90 viewBox leaves a visible gap before the road.
   const streetAbove=Math.floor(i/5)>0;
-  return '<g transform="translate(0 '+(l.hs==="skyscraper"&&l.st!=="sold"?'0':streetAbove?'40':'14')+')">'+main+'</g>';
+  return '<g transform="translate(0 '+(l.hs&&S[l.hs].tall&&l.st!=="sold"?'0':streetAbove?'40':'14')+')">'+main+'</g>';
 }
 
 let tutOn=false;
@@ -1439,7 +1528,7 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
     let targetFactor=followingTargetFactor({road:car.road,dir:car.dir,x:current.x,laneY:current.y,
       baseSpeed:car.speed,roadSelf:car});
     const factor=setSpeedFactor(car,targetFactor,dt);
-    let nx=currentX+car.dir*car.speed*factor*dt,wrapped=false;
+    const slow=W().k==="mountain"&&(ev.k==="snow"||ev.k==="storm")?.6:1;let nx=currentX+car.dir*car.speed*factor*dt*slow,wrapped=false;
     if(car.dir===1&&nx>edge){nx=-18;wrapped=true}
     else if(car.dir===-1&&nx< -18){nx=edge;wrapped=true}
     if(wrapped&&(car.emerg||car.tmp)){car.done=true;car.x=nx;return}nx=safeRoadProgress(car,currentX,nx,current,wrapped);
@@ -1485,16 +1574,16 @@ function renderTraffic(){
   renderRoadTraffic();
 }
 
-const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",market:"🧺",parade:"🎺",game:"🏟️",season:"☀️",rushhr:"🚕"};
+const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",market:"🧺",parade:"🎺",game:"🏟️",season:"☀️",rushhr:"🚕",snow:"❄️"};
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
   const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
   const ck=(ok,t)=>gi(ok,0,t+(ok?" ✅":""));let h=ck(money>=goal,money>=goal?"💰":"💰"+pc+"%")+ck(od,objShort().replace(/✔$/,""))+ck(!!bonus.done,bonShort().replace(/✔$/,""))+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
   if(twist)h+='<span class="al">'+twist.ic+'</span>';
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
-  if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
+  if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":ev.k==="storm"&&W().k==="mountain"?"🌨️":EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
   return h}
-function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&&run);
+function draw(){const so=$("stm");if(so){so.classList.toggle("on",ev.k==="storm"&&run);so.classList.toggle("snowy",W().k==="mountain")}
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
   $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";{const lh="<b>"+W().ic+" Lv "+lv+"</b><small>⭐"+(meta?meta.stars:0)+(meta&&meta.pr?" · P"+meta.pr:"")+"</small>";if($("lvl")._h!==lh){$("lvl")._h=lh;$("lvl").innerHTML=lh}}
   $("bld").textContent=(builders-busy())+"/"+builders;
@@ -1517,16 +1606,16 @@ function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&
     const hasBuilding=!!l.hs&&l.st!=="sold";
     const streetAbove=Math.floor(i/5)>0;
     e.classList.toggle("to-bottom",!streetAbove);e.classList.toggle("to-top",streetAbove);
-    e.classList.toggle("has-parking",hasBuilding&&l.hs!=="skyscraper");
+    e.classList.toggle("has-parking",hasBuilding&&!S[l.hs].tall);
     e.classList.toggle("business-parking",hasBuilding&&hasBusinessParking(l));
-    const mine=["owned","working","reno_working","demo","ready","rented","listed"].includes(l.st);
+    const mine=["owned","working","reno_working","demo","ready","rented","listed","clearing"].includes(l.st);
     e.classList.toggle("purchased",mine);e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
     const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
-    const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
+    const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),l.forest?1:0,l.st==="clearing"?Math.round(l.cp*6):0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
-    let lb="",pb=0;const sn=l.hs?S[l.hs].n.replace(/^(Beach|City) /,"").split(" ")[0]:"";
-    if(l.st==="empty")lb="Buy "+fmt(l.land);else if(l.st==="off_market")lb="Off market";else if(l.st==="owned")lb=sellMode?"Sell lot":"Build here";
+    let lb="",pb=0;const sn=l.hs?S[l.hs].n.replace(/^(Beach|City|Mountain|Ski|Hiking|Log|Hot) /,"").split(" ")[0]:"";
+    if(l.st==="empty")lb="Buy "+fmt(l.land);else if(l.st==="off_market")lb="Off market";else if(l.st==="owned")lb=sellMode?"Sell lot":l.forest?"🌲 Clear trees":"Build here";else if(l.st==="clearing"){lb="🪓 Clearing…";pb=l.cp}
     else if(l.st==="working"){lb=l.permit>0?"📋 Permit…":sn+"…";pb=l.p}else if(l.st==="reno_working"){lb="Upgrading…";pb=l.rp}else if(l.st==="demo"){lb="Demolishing…";pb=l.dp}
     else if(l.st==="ready")lb=sn+" ✔";else if(l.st==="rented")lb=l.dmg?"⚡ REPAIR "+fmt(repairCost(i)):fmt(rentOf(i))+"/3s";
     else if(l.st==="listed")lb=l.offer?"💰 "+fmt(l.offer.price):"On market";else if(l.st==="ai_owned")lb=sn;
@@ -1567,7 +1656,7 @@ $("snd").textContent=snd?"🔊":"🔇";$("snd").onclick=()=>{snd=!snd;store.set(
 
 /* ===== Rewards: permanent stars, upgrades, achievements, chests, daily streak, hard mode ===== */
 const TW={recession:{k:"recession",n:"Recession",ic:"📉",d:"Rents −40%"},rush:{k:"rush",n:"Rush Job",ic:"⚡",d:"Builds 1.5× faster, goal +30%"},squeeze:{k:"squeeze",n:"Tight Budget",ic:"💸",d:"Minimum starting cash"},storm:{k:"storm",n:"Storm Season",ic:"⛈️",d:"Frequent storms damage houses"}};
-const twistFor=l=>l>=6&&l%3===0?TW[["recession","rush","squeeze","storm"][(l/3-2)%4]]:null;
+const twistFor=l=>l>=6&&l%3===0&&!(W(l).lm&&W(l).lm.lv===l)?TW[["recession","rush","squeeze","storm"][(l/3-2)%4]]:null;
 const COS={theme:{meadow:{n:"Meadow",v:"#62aa48",bd:"#4d8837",l:"#73b853",lb:"#488433",g:"#5aa23e",c:0},autumn:{n:"Autumn",v:"#b9843a",bd:"#8f6428",l:"#e0c796",lb:"#a8854f",g:"#c49a58",c:4},snow:{n:"Snowfield",v:"#cfdde4",bd:"#9fb4be",l:"#f1f6f8",lb:"#a9bdc7",g:"#e6eff2",c:5},desert:{n:"Desert",v:"#d9b77a",bd:"#b8935a",l:"#efd9a8",lb:"#b8935a",g:"#d6b176",c:5}},
 roof:{brick:{n:"Brick Red",v:"#a8483a",c:0},slate:{n:"Slate Blue",v:"#4f6d8f",c:3},moss:{n:"Moss Green",v:"#5b8a4a",c:3}},
 car:{std:{n:"Classic Colors",c:0},taxi:{n:"All Taxis",v:"#f5c400",c:4},night:{n:"Midnight",v:"#2b2f3a",c:4}}};
@@ -1581,7 +1670,7 @@ function fxLayers(){const sc=$("scene");if(!sc||!meta)return;
  if(f&&(!want||!f.isConnected)){f.remove();f=null}
  if(want&&!f){f=document.createElement("div");f.id="lfs";const cols=["#e65100","#bf360c","#f9a825","#c62828","#ef6c00","#8d6e63"];for(let k=0;k<16;k++){const i=document.createElement("i");i.style.cssText="left:"+(Math.random()*96).toFixed(1)+"%;--d:"+(-Math.random()*10).toFixed(1)+"s;--t:"+(7+Math.random()*6).toFixed(1)+"s;--c:"+cols[k%6]+";--s:"+(5+Math.random()*3).toFixed(1)+"px";f.appendChild(i)}sc.appendChild(f)}
  if(f)f.style.setProperty("--h",sc.clientHeight+"px");
- let n=$("snw");const ws=w0&&meta.eq.theme==="snow";if(n&&(!ws||!n.isConnected)){n.remove();n=null}
+ let n=$("snw");const ws=(w0&&meta.eq.theme==="snow")||(W().k==="mountain"&&(ev.k==="snow"||ev.k==="storm"));if(n&&(!ws||!n.isConnected)){n.remove();n=null}
  if(ws&&!n){n=document.createElement("div");n.id="snw";for(let k=0;k<30;k++){const i=document.createElement("i");i.style.cssText="left:"+(Math.random()*98).toFixed(1)+"%;--d:"+(-Math.random()*12).toFixed(1)+"s;--t:"+(6+Math.random()*7).toFixed(1)+"s;--s:"+(2+Math.random()*2.5).toFixed(1)+"px";n.appendChild(i)}sc.appendChild(n)}
  if(n)n.style.setProperty("--h",sc.clientHeight+"px")}
 let amb={e:12,w:3,q:[]},twL=[];
@@ -1671,7 +1760,7 @@ function strike(){const o=$("stm");if(o){o.classList.remove("bolt");void o.offse
  const beach=W().k==="beach";let n=twist&&twist.k==="storm"||beach?2:1,hit=0;
  // Hurricanes in the beach world target beachfront (top row) homes first.
  while(n--&&c.length){const fr=beach?c.filter(x=>x<5):[],src=fr.length?fr:c,i=src[Math.floor(Math.random()*src.length)];c.splice(c.indexOf(i),1);lots[i].dmg=true;hit++;pop(i,"⚡",1);const e=els[i];e.classList.add("shk");setTimeout(()=>e.classList.remove("shk"),700)}
- if(hit){if(fireReady())queueEmerg("fire",2.5);if(readyOf("hospital"))queueEmerg("amb",5)}toast(hit?(beach?"🌀 Hurricane! ":"⚡ Lightning! ")+hit+" house"+(hit>1?"s":"")+" damaged. Tap to repair."+(fireReady()?" 🚒 Fire crew responding: repairs 25% off.":""):(beach?"🌀 The hurricane missed your houses.":"⚡ The storm missed your houses."))}
+ if(hit){if(fireReady())queueEmerg("fire",2.5);if(readyOf("hospital"))queueEmerg("amb",5)}toast(hit?(beach?"🌀 Hurricane! ":W().k==="mountain"?"🌨️ Blizzard! ":"⚡ Lightning! ")+hit+" house"+(hit>1?"s":"")+" damaged. Tap to repair."+(fireReady()?" 🚒 Fire crew responding: repairs 25% off.":""):(beach?"🌀 The hurricane missed your houses.":"⚡ The storm missed your houses."))}
 function cosClick(id){const[cat,k]=id.split(":"),it=COS[cat][k];if(it.c>0&&!meta.own[id]){if(meta.stars<it.c)return toast("Need "+it.c+" ⭐.");meta.stars-=it.c;meta.own[id]=1;sfx.coin()}meta.eq[cat]=k;applyTheme();checkAch();for(const x of lots)x._k=null;showRw(rwFrom)}
 const UP={shield:{n:"Storm Shutters",ic:"🛡️",d:"−20% storm repair cost per tier",c:[2,4,6,9]},cash:{n:"Seed Money",ic:"💵",d:"+$100 starting cash per tier",c:[3,5,8,12]},crew:{n:"Union Crew",ic:"👷",d:"+10% build speed per tier",c:[3,5,8,12]},buyer:{n:"Patient Buyers",ic:"🤝",d:"+1s offer time per tier",c:[2,4,6,9]}};
 const ACH=[
