@@ -39,6 +39,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .traffic-car{z-index:65}
 .road-traffic-car{z-index:60}
 .traffic-car svg,.road-traffic-car svg{display:block;width:20px;height:11.25px;overflow:visible}
+.road-traffic-car.long,.road-traffic-car.long svg{width:30px}
 .lot{background:var(--lot,#73b853);border:2px dashed var(--lotbd,#488433);border-radius:10px;padding:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;height:142px;overflow:visible;user-select:none;-webkit-user-select:none;transition:transform .15s}
 .lot.purchased{background:linear-gradient(135deg,rgba(255,193,7,.18) 0 16px,var(--card) 16px);border:3px solid #d6a400;outline:2px solid #d6a400;outline-offset:-3px;box-shadow:inset 0 0 0 2px rgba(255,193,7,.16),0 0 0 1px rgba(0,0,0,.12)}
 .lot.ai-owned{background:#33261a;border:2px solid #8d6e63}
@@ -591,7 +592,7 @@ function closeSheet(){sel=null;$("sheet").innerHTML="";document.body.classList.r
 function sheet(i,conf){
   const l=lots[i];sel=i;document.body.classList.add("so");
   const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl="";let h="";
-  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const pf=permitFee(k),nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0,pe=!locked&&!capped?placeErr(k,i):"";return '<button class="opt'+(locked||capped||nofit||pe||money<S[k].cost+pf?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost)+(pf?" +📋"+fmt(pf):""))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":pe?pe:nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+". Buy the lot next to this one.":(Number.isFinite(limit)?count+"/"+limit+" built · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
+  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const pf=permitFee(k),nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0,pe=!locked&&!capped?placeErr(k,i):"";return '<button class="opt'+(locked||capped||nofit||pe||money<S[k].cost+pf?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost)+(pf?" +📋"+fmt(pf):""))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":pe?pe:nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+". Buy the lot next to this one.":(Number.isFinite(limit)?"Max "+limit+(count?" ("+count+" built)":"")+" · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
   else if(l.st==="ai_for_sale"){h=hd("Buy "+S[l.hs].n+" · Lot "+(i+1),"Asking "+fmt(l.aiP)+" · Value "+fmt(val(i)))+'<div class="opts"><button class="opt ok" data-a="buyai">🛒 Buy & Auto-Rent</button>'+cl+"</div>"}
   else if(conf){h=hd("⚠️ Demolish Lot "+(i+1)+"?","Costs $100 and clears the property.")+'<div class="opts"><button class="opt no" data-a="demo2">Confirm Demolish</button><button class="opt x" data-a="demo0">Cancel</button></div>'}
   else if(["rented","listed","ready"].includes(l.st)){
@@ -1188,11 +1189,11 @@ function initRoadTraffic(){
 function roadVehiclePose(car,x){
   const sc=$("scene"),scRect=sc.getBoundingClientRect(),rd=car.road.getBoundingClientRect();
   const originY=scRect.top+sc.clientTop;
-  return {x:x==null?car.x:x,y:rd.top-originY+rd.height/2+(car.dir===1?-8:8),a:car.dir===1?0:180};
+  return {x:x==null?car.x:x,y:rd.top-originY+rd.height/2+(car.dir===1?-8:8),a:car.dir===1?0:180,len:car.len||20};
 }
 function carDims(p){
   const rad=(p.a||0)*Math.PI/180,c=Math.abs(Math.cos(rad)),sn=Math.abs(Math.sin(rad));
-  return {w:20*c+11.25*sn,h:20*sn+11.25*c};
+  const L=p.len||20;return {w:L*c+11.25*sn,h:L*sn+11.25*c};
 }
 function overlapsCars(a,b){
   const A=carDims(a),B=carDims(b);
@@ -1450,8 +1451,8 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
 function renderRoadTraffic(){
   const sc=$("scene");if(!sc)return;
   roadTraffic.forEach(car=>{
-    if(!car.el||!car.el.isConnected){car.el=makeVehicle(car.color,"road-traffic-car");if(car.emerg){if(car.emerg!=="bus"&&car.emerg!=="cbus")car.el.className+=" emg";car.el.innerHTML=emergMarkup(car.emerg)}sc.appendChild(car.el)}
-    const p=roadVehiclePose(car);car.el.style.left=(p.x-10)+"px";car.el.style.top=(p.y-5.625)+"px";car.el.style.transform="rotate("+p.a+"deg)";
+    if(!car.el||!car.el.isConnected){car.el=makeVehicle(car.color,"road-traffic-car");if(car.emerg){if(car.emerg!=="bus"&&car.emerg!=="cbus")car.el.className+=" emg";if(car.len)car.el.classList.add("long");car.el.innerHTML=emergMarkup(car.emerg)}sc.appendChild(car.el)}
+    const p=roadVehiclePose(car);car.el.style.left=(p.x-(car.len||20)/2)+"px";car.el.style.top=(p.y-5.625)+"px";car.el.style.transform="rotate("+p.a+"deg)";
   });
 }
 function renderTraffic(){
@@ -1487,7 +1488,7 @@ const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",mark
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
   const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
-  let h=gi(money>=goal,0,"💰"+pc+"%")+gi(od,0,objShort())+gi(bonus.done,0,bonShort())+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
+  let h=lvDone?gi(1,0,"✅ All goals done"):(money>=goal?"":gi(0,0,"💰"+pc+"%"))+(od?"":gi(0,0,objShort()))+(bonus.done?"":gi(0,0,bonShort()))+(pm?gi(0,1,"⏱✘"):gi(0,0,"⏱"+left+"s"))+'<span class="sp"></span>';
   if(twist)h+='<span class="al">'+twist.ic+'</span>';
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
   if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
@@ -1648,9 +1649,10 @@ function emergMarkup(kind){
  const wh='<rect x="4" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="4" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="15" width="4" height="3" rx="1" fill="#1f2933"/>',
  hl='<rect x="30" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="30" y="11.5" width="1.3" height="2" fill="#fff7b0"/>',
  lights='<rect x="14" y="4" width="3" height="5" fill="#ff1744" class="blk"/><rect x="14" y="9" width="3" height="5" fill="#2979ff" class="blk b2"/>';
- if(kind==="cbus")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2" fill="#1e88e5" stroke="#263238" stroke-width="1.1"/><rect x="1" y="8" width="30" height="2" fill="#fff"/>'+[4,9,14,19].map(x=>'<rect x="'+x+'" y="4.4" width="3.6" height="3" fill="#bde3f5"/><rect x="'+x+'" y="10.6" width="3.6" height="3" fill="#bde3f5"/>').join("")+'<rect x="25" y="4.2" width="4.5" height="9.6" rx="1.2" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/>'+hl+'</svg>';
+ const lw='<rect x="6" y="0" width="5" height="3" rx="1" fill="#1f2933"/><rect x="6" y="15" width="5" height="3" rx="1" fill="#1f2933"/><rect x="40" y="0" width="5" height="3" rx="1" fill="#1f2933"/><rect x="40" y="15" width="5" height="3" rx="1" fill="#1f2933"/>',lh='<rect x="52" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="52" y="11.5" width="1.3" height="2" fill="#fff7b0"/>';
+ if(kind==="cbus")return '<svg viewBox="0 0 54 18" preserveAspectRatio="none" aria-hidden="true">'+lw+'<rect x="1" y="3" width="52" height="12" rx="2" fill="#1e88e5" stroke="#263238" stroke-width="1.1"/><rect x="1" y="8" width="52" height="2" fill="#fff"/>'+[4,10,16,22,28,34,40].map(x=>'<rect x="'+x+'" y="4.4" width="4" height="3" fill="#bde3f5"/><rect x="'+x+'" y="10.6" width="4" height="3" fill="#bde3f5"/>').join("")+'<rect x="47" y="4.2" width="4.5" height="9.6" rx="1.2" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/>'+lh+'</svg>';
  if(kind==="cop")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3.5" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="1" y="3" width="8" height="12" rx="3" fill="#212121"/><rect x="24" y="3" width="7" height="12" rx="3" fill="#212121"/><rect x="10" y="4.6" width="7" height="8.8" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="18.5" y="4" width="2.4" height="5" fill="#ff1744" class="blk"/><rect x="18.5" y="9" width="2.4" height="5" fill="#2979ff" class="blk b2"/>'+hl+'</svg>';
- if(kind==="bus")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#fbc02d" stroke="#263238" stroke-width="1.1"/><rect x="23" y="4.2" width="6" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 5h17M4 13h17M4 9h17" stroke="#212121" stroke-width=".9"/><rect x="1.5" y="4.5" width="1.6" height="2" fill="#e53935"/><rect x="1.5" y="11.5" width="1.6" height="2" fill="#e53935"/>'+hl+'</svg>';
+ if(kind==="bus")return '<svg viewBox="0 0 54 18" preserveAspectRatio="none" aria-hidden="true">'+lw+'<rect x="1" y="3" width="52" height="12" rx="2.5" fill="#fbc02d" stroke="#263238" stroke-width="1.1"/><path d="M3 5h41M3 13h41M3 9h41" stroke="#212121" stroke-width=".9"/><rect x="45" y="4.2" width="6" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="1.5" y="4.5" width="1.6" height="2" fill="#e53935"/><rect x="1.5" y="11.5" width="1.6" height="2" fill="#e53935"/>'+lh+'</svg>';
  if(kind==="amb")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 9h9M8.5 5.5v7" stroke="#e53935" stroke-width="2.2"/>'+lights+hl+'</svg>';
  return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#d32f2f" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 7h16M3 11h16" stroke="#eceff1" stroke-width="1.4"/>'+lights+hl+'</svg>'}
 function spawnTaxi(){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W0=sc.clientWidth||600,sp=40+Math.random()*8;
@@ -1658,7 +1660,8 @@ function spawnTaxi(){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if
 function spawnEmerg(kind,quiet){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;
  const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W=sc.clientWidth||600;
  const el=document.createElement("div");el.className="road-traffic-car"+(kind==="bus"||kind==="cbus"?"":" emg");el.setAttribute("aria-hidden","true");el.innerHTML=emergMarkup(kind);sc.appendChild(el);
- roadTraffic.push({road,dir,x:dir===1?-18:W+18,speed:kind==="bus"||kind==="cbus"?46:kind==="cop"?54:62,speedFactor:1,actualSpeed:50,color:"#fff",el,emerg:kind});
+ const long=kind==="bus"||kind==="cbus";if(long)el.classList.add("long");
+ roadTraffic.push({len:long?30:0,road,dir,x:dir===1?-26:W+26,speed:kind==="bus"||kind==="cbus"?46:kind==="cop"?54:62,speedFactor:1,actualSpeed:50,color:"#fff",el,emerg:kind});
  if(snd&&!["bus","cbus","cop"].includes(kind)){tone(780,.28,"triangle",.03,0,560);tone(560,.28,"triangle",.03,.3,780)}
  if(!quiet)toast(kind==="amb"?"🚑 Ambulance heading out!":kind==="bus"?"🚌 School bus on its route!":"🚒 Fire truck on patrol!")}
 function repairCost(i){return Math.round(Math.max(80,val(i)*.1)*(1-.2*upT("shield"))*(fireReady()?.75:1))}
