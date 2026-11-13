@@ -14,7 +14,7 @@ body.so{padding-bottom:300px}
 #app{width:100%;max-width:920px;display:flex;flex-direction:column;gap:6px}
 header{display:flex;justify-content:space-between;align-items:center;padding:0 2px}
 h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
-#lvl{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-weight:800;font-size:12px}
+#lvl{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:2px 8px;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;line-height:1.15;white-space:nowrap}#lvl small{font-size:10px;color:var(--mut);font-weight:800}
 .ribbon{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:6px 10px;gap:6px}
 .ri{display:flex;flex-direction:column;align-items:center;min-width:48px}
 .ri span{font-size:10px;color:var(--mut);text-transform:uppercase;font-weight:700}
@@ -199,10 +199,11 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 
 /* compact pinned HUD */
 .hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);display:flex;flex-direction:column;gap:3px;padding:2px 0 4px}
-.hrow{display:flex;align-items:center;gap:8px;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:4px 8px}
-.money-group{display:flex;align-items:baseline;gap:4px;flex:1;min-width:0;white-space:nowrap}
+.hrow{display:flex;align-items:center;gap:6px;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:4px 8px}
+.money-group{display:flex;flex-direction:column;align-items:flex-start;flex:1;min-width:0;white-space:nowrap;overflow:hidden;line-height:1.1}
 .money-group b{font-size:17px;color:var(--gold)}
-.money-group small{font-size:12px;color:var(--mut);font-weight:700}
+.money-group small{font-size:11px;color:var(--mut);font-weight:700}
+.ht,#lvl,.hrow .pbtn{flex-shrink:0}
 .ht{display:flex;flex-direction:column;align-items:center;line-height:1.1}
 .ht span{font-size:9px;color:var(--mut);text-transform:uppercase;font-weight:700}
 .ht b{font-size:14px}
@@ -317,7 +318,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 <div id="app">
   <div class="hud" id="hud">
     <div class="hrow">
-      <div class="money-group"><b id="money">$0</b><small>/ <span id="goal">$0</span></small></div>
+      <div class="money-group"><b id="money">$0</b><small>Goal <span id="goal">$0</span></small></div>
       <div class="ht"><span id="tl">Time</span><b id="time">0s</b></div>
       <span id="lvl">Lv 1</span>
       <button class="pbtn" id="snd" style="min-height:32px;padding:0 8px">🔊</button>
@@ -1488,14 +1489,14 @@ const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",mark
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
   const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
-  const ck=(ok,t)=>gi(ok,0,(ok?"✅":"")+t);let h=ck(money>=goal,money>=goal?"💰":"💰"+pc+"%")+ck(od,objShort().replace(/✔$/,""))+ck(!!bonus.done,bonShort().replace(/✔$/,""))+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
+  const ck=(ok,t)=>gi(ok,0,t+(ok?" ✅":""));let h=ck(money>=goal,money>=goal?"💰":"💰"+pc+"%")+ck(od,objShort().replace(/✔$/,""))+ck(!!bonus.done,bonShort().replace(/✔$/,""))+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
   if(twist)h+='<span class="al">'+twist.ic+'</span>';
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
   if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
   return h}
 function draw(){const so=$("stm");if(so)so.classList.toggle("on",ev.k==="storm"&&run);
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
-  $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";$("lvl").textContent=W().ic+" Lv "+lv+(meta&&meta.pr?" ·P"+meta.pr:"")+(meta?" · ⭐"+meta.stars:"");
+  $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";{const lh="<b>"+W().ic+" Lv "+lv+"</b><small>⭐"+(meta?meta.stars:0)+(meta&&meta.pr?" · P"+meta.pr:"")+"</small>";if($("lvl")._h!==lh){$("lvl")._h=lh;$("lvl").innerHTML=lh}}
   $("bld").textContent=(builders-busy())+"/"+builders;
   $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs&&S[l.hs].rev&&l.st==="ready"?S[l.hs].rev/3:0),0).toFixed(1)+"/s";
   const pc=Math.min(100,Math.round(money/goal*100));$("gbar").style.width=pc+"%";$("pct").textContent=pc+"%";
@@ -1716,7 +1717,7 @@ let tipT,prc=false;
 function showTip(id,t){if(!meta||meta.tips[id])return;meta.tips[id]=1;saveMeta();const e=$("tip");e.style.textAlign="center";e.style.whiteSpace="normal";e.textContent="💡 "+t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},10000)}
 $("bpr").onclick=()=>{if(meta.pr>=10)return;if(!prc){prc=true;$("bpr").textContent="⚠️ Resets this mode's levels. Tap again";return}prc=false;meta.pr++;meta.stars+=10;meta.ws={};saveMeta();store.set(PKEY,JSON.stringify({lv:1,mode}));store.del(KEY);best={};store.set(BKEY,"{}");toast("🌟 Prestige Rank "+meta.pr+"/10! Goals +12%, cash −4% and time −3% per rank.");sfx.win();updMenu()};
 function goalCard(){if(!bonus)return;const par=90+lv*10,left=Math.max(0,Math.ceil(par-elapsed));
- const ck=ok=>ok?"✅ ":"⬜ ",t=[W().ic+" World "+(worldOf(lv)+1)+": "+W().n,ck(money>=goal)+"💰 Reach "+fmt(goal)+" (now "+fmt(money)+")",ck(objective.done)+"🏗️ "+objLong(),ck(bonus.done)+bonLong(),(elapsed>par?"❌ ":lvDone?"✅ ":"⬜ ")+"⏱ Finish within "+par+"s for a star ("+(elapsed>par?"missed":left+"s left")+")"];
+ const ck=ok=>ok?" ✅":"",t=[W().ic+" World "+(worldOf(lv)+1)+": "+W().n,"💰 Reach "+fmt(goal)+" (now "+fmt(money)+")"+ck(money>=goal),"🏗️ "+objLong()+ck(objective.done),bonLong()+ck(bonus.done),"⏱ Finish within "+par+"s for a star ("+(elapsed>par?"missed":left+"s left")+")"+(elapsed>par?" ❌":ck(lvDone))];
  if(W().sea)t.push("🌊 Top-row homes are beachfront: +25% value");
  if(twist)t.push(twist.ic+" "+twist.n+": "+twist.d);if(ev.k)t.push(evText(ev.k));
  const e=$("tip");e.style.whiteSpace="pre-line";e.style.textAlign="left";e.textContent=t.join("\n");e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},8000)}
