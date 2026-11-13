@@ -122,6 +122,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .b{background:var(--card);color:var(--text);border:2px solid var(--line);border-radius:10px;min-height:48px;padding:6px;font:inherit;font-size:13px;font-weight:700}
 .b:disabled{opacity:.4}
 .b.active{border-color:var(--blue);background:rgba(41,182,246,.15);color:var(--blue)}
+#fw{position:fixed;inset:0;pointer-events:none;z-index:150;overflow:hidden}.fwp{position:absolute;width:8px;height:8px;margin:-4px;border-radius:50%;animation:fwp 1.5s cubic-bezier(.15,.7,.3,1) forwards}
+@keyframes fwp{0%{transform:translate(0,0) scale(1.2);opacity:1}75%{opacity:1}100%{transform:translate(var(--dx),calc(var(--dy) + 40px)) scale(.4);opacity:0}}
 #toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translate(-50%,-20px);background:rgba(20,30,18,.96);border:1px solid var(--gold);color:#fff;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:.25s;z-index:200;max-width:92vw;text-align:center;pointer-events:none}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 #sheet{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-width:920px;margin:0 auto;z-index:50}
@@ -183,7 +185,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes surf{to{transform:translateX(40px)}}
 .sea .boat{position:absolute;top:1px;font-size:14px;line-height:1;animation:sail 38s linear infinite}
 @keyframes sail{from{left:-24px}to{left:100%}}
-.skyl{position:relative;z-index:1;height:30px;margin:-10px -10px -4px;border-radius:11px 11px 0 0;overflow:hidden;background:linear-gradient(180deg,#8fb3d9,#cfdbe6)}
+.skyl .bbd{position:absolute;bottom:8px;width:92px;height:24px;z-index:1}.skyl .bbd b{display:flex;align-items:center;justify-content:center;height:16px;border:2px solid #37474f;border-radius:2px;font-size:7.5px;font-weight:900;white-space:nowrap;overflow:hidden;transition:opacity .3s;box-shadow:0 0 6px rgba(255,255,200,.5)}.skyl .bbd::after{content:"";position:absolute;left:20px;right:20px;bottom:0;height:8px;border-left:2px solid #37474f;border-right:2px solid #37474f}
+.skyl{position:relative;z-index:1;height:38px;margin:-10px -10px -4px;border-radius:11px 11px 0 0;overflow:hidden;background:linear-gradient(180deg,#8fb3d9,#cfdbe6)}
 .skyl .swalk{position:absolute;left:0;right:0;bottom:0;height:8px;background:#b0b7bb;border-top:2px solid #8a9296}
 .skyl .ped{position:absolute;bottom:0;font-size:10px;line-height:1;animation:pedR 24s linear infinite}.skyl .ped.l{animation-name:pedL}.skyl .ped i{display:inline-block;font-style:normal}.skyl .ped.r i{transform:scaleX(-1)}
 @keyframes pedR{from{left:-14px}to{left:100%}}@keyframes pedL{from{left:100%}to{left:-14px}}
@@ -350,6 +353,9 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 </div></div>
 
 <div class="ov" id="end" style="display:none"><div class="box" id="endbox"></div></div>
+<div class="ov" id="lc" style="display:none;background:rgba(0,0,0,.55)"><div class="box"><h2>🎉 Level Complete!</h2><div class="stars" id="lcs"></div><p id="lcd"></p><button class="mbtn" id="lcn">▶ Next Level</button><button class="mbtn line" id="lck">🏗️ Keep Building</button></div></div>
+<div class="ov" id="buy" style="display:none;background:rgba(0,0,0,.6)"><div class="box"><button class="sx" id="buyx" aria-label="Cancel">✕</button><h2 id="buyt"></h2><p id="buyd"></p><button class="mbtn" id="buyok"></button></div></div>
+<button class="mbtn" id="nxt" style="display:none;position:fixed;right:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:45;padding:0 16px;box-shadow:0 4px 14px rgba(0,0,0,.5)">✅ Next Level ▶</button>
 
 <div class="ov" id="wi" style="display:none"><div class="box">
   <h2 id="wit"></h2><p id="wid"></p>
@@ -421,7 +427,7 @@ const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market 
 const evText=k=>k==="storm"&&W().k==="beach"?"🌀 Hurricane warning! Beachfront homes are most at risk":EV[k];
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
-let lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
+let lvDone=false,doneAt=null,lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
 
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
 const landMul=()=>W().k==="city"?1.4:1;
@@ -479,7 +485,7 @@ function build(){
 }
 
 function startLevel(){
-  lv=Math.max(1,Math.min(100,lv));applyWorld();
+  lv=Math.max(1,Math.min(100,lv));applyWorld();lvDone=false;doneAt=null;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
   twist=twistFor(lv);N=lv>=4?15:10;tutOn=lv===1&&!store.get("lot_flip_tut");lots=Array.from({length:N},mkLot);closeSheet();
   const goalOrder=MILE;
   const requiredBuilding=goalOrder.filter(x=>lv>=x.lv).at(-1).k;
@@ -510,15 +516,27 @@ function maybeWorldIntro(){const w=worldOf(lv),d=WORLDS[w],key=w+(d.ready?"r":""
   paused=true;$("scene").classList.add("pz");$("wi").style.display="flex"}
 $("wigo").onclick=()=>{$("wi").style.display="none";paused=false;$("scene").classList.remove("pz");last=performance.now()};
 
+function celebrate(){lvDone=true;doneAt=elapsed;sfx.win();buzz(60);fireworks();snap();
+  setTimeout(()=>{if(!run||!lvDone)return;closeSheet();$("buy").style.display="none";const par=90+lv*10,st=1+(bonus&&bonus.done?1:0)+(doneAt<=par?1:0);
+   $("lcs").textContent="⭐".repeat(st)+"☆".repeat(3-st);$("lcd").textContent="Finished in "+Math.round(doneAt)+"s."+(bonus&&!bonus.done?" You can still finish the ⭐ bonus before moving on.":"")+" Stay to finish your builds, or head to the next level.";
+   paused=true;$("scene").classList.add("pz");$("lc").style.display="flex"},1400)}
+function fireworks(){let f=$("fw");if(!f){f=document.createElement("div");f.id="fw";document.body.appendChild(f)}
+  for(let b=0;b<8;b++)setTimeout(()=>{const x=8+Math.random()*84,y=10+Math.random()*45,h=Math.random()*360;tone(260+Math.random()*420,.25,"triangle",.04,0,90);noise(.12,.05);
+   for(let k=0;k<36;k++){const p=document.createElement("i");p.className="fwp";const a=k/36*Math.PI*2,r=80+Math.random()*70;
+    p.style.cssText="left:"+x+"vw;top:"+y+"vh;background:hsl("+(h+Math.random()*50)+",95%,62%);box-shadow:0 0 10px 2px hsl("+h+",95%,62%);--dx:"+(Math.cos(a)*r).toFixed(0)+"px;--dy:"+(Math.sin(a)*r).toFixed(0)+"px";
+    f.appendChild(p);setTimeout(()=>p.remove(),1600)}},b*300)}
+$("lcn").onclick=()=>{$("lc").style.display="none";paused=false;$("scene").classList.remove("pz");endGame(true)};
+$("lck").onclick=()=>{$("lc").style.display="none";paused=false;$("scene").classList.remove("pz");last=performance.now();$("nxt").style.display="block";toast("Keep building! Tap ✅ Next Level when you're ready.")};
+$("nxt").onclick=()=>{if(run&&lvDone&&!paused)endGame(true)};
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
-function snap(){return store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus,objective}))}
+function snap(){return store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus,objective,lvDone,doneAt}))}
 function autosave(){if(run&&!paused&&lots.length)snap()}
 function getProg(){try{return JSON.parse(store.get(PKEY))}catch(e){return null}}
 function setProg(n){const p=getProg();if(!p||n>p.lv)store.set(PKEY,JSON.stringify({lv:n,mode}))}
 function saveGame(){toast(snap()?"Game saved!":"Couldn’t save in this browser.")}
 function loadGame(){
   try{const d=JSON.parse(store.get(KEY));lv=d.lv;applyWorld();twist=twistFor(lv);money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;bonus=d.bonus;const milestones=MILE;const expected=(milestones.filter(x=>lv>=x.lv).at(-1)||{k:"ranch"}).k;objective=d.objective;if(!objective||(!objective.t&&!S[objective.k])||(objective.t==="build"&&!S[objective.k]))objective=makeObjective(lv).o;if(!objective.t){objective.t="build";objective.n=1;objective.c=0}if(!bonus.t)bonus.t="build";
-    ev={k:null,t:0,next:30};setMode(mode);build();applyTheme();lots.forEach((l,i)=>{if(l.st==="listed"&&l.offer)startBuyerArrival(i)});run=true;paused=false;last=performance.now();
+    lvDone=!!d.lvDone;doneAt=d.doneAt??null;$("nxt").style.display=lvDone?"block":"none";ev={k:null,t:0,next:30};setMode(mode);build();applyTheme();lots.forEach((l,i)=>{if(l.st==="listed"&&l.offer)startBuyerArrival(i)});run=true;paused=false;last=performance.now();
     ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();maybeWorldIntro();return true}catch(e){toast("Couldn’t load save.");return false}
 }
 let wipe=false;
@@ -555,18 +573,25 @@ function tapLot(i){
   if(!run||paused)return;if(lots[i]&&lots[i].st==="merged"&&lots[i].par!=null)return tapLot(lots[i].par);const l=lots[i],e=els[i];e.classList.add("tap");setTimeout(()=>e.classList.remove("tap"),180);sfx.tap();
   if(sellMode){if(l.st==="owned"){money+=l.land;pop(i,"+"+fmt(l.land),1);toast("Sold unbuilt lot for "+fmt(l.land));reset(l);flash()}else toast("Sell Mode only works on bought, unbuilt lots.");draw();return}
   if(l.st==="off_market")return toast("This lot has been taken off the market for now. Watch for it to return!");
-  if(l.st==="empty"){if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");money-=l.land;l.st="owned";toast("Lot bought! Tap it to build.");draw();return}
+  if(l.st==="empty"){if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");return showBuy(i)}
   if(l.st==="ai_owned")return toast("A neighbor lives here. Watch for it to go up for sale!");
   if(l.st==="demo")return toast("Demolition in progress…");if(l.st==="working"||l.st==="reno_working")return toast("Under construction…");
   if(l.st==="sold")return;
   sheet(i);
 }
 
+let buyIdx=null;
+function showBuy(i){const l=lots[i];buyIdx=i;closeSheet();$("buyt").textContent="🏷️ Buy Lot "+(i+1)+"?";
+  $("buyd").textContent="Price "+fmt(l.land)+" · You'll have "+fmt(money-l.land)+" left."+(W().sea&&i<5?" 🌊 Beachfront lot.":"");$("buyok").textContent="Buy for "+fmt(l.land);$("buy").style.display="flex"}
+$("buyx").onclick=()=>{$("buy").style.display="none";buyIdx=null};
+$("buyok").onclick=()=>{const i=buyIdx,l=lots[i];$("buy").style.display="none";buyIdx=null;if(!run||!l)return;
+  if(l.st!=="empty")return toast("Lot "+(i+1)+" is no longer for sale.");if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");
+  money-=l.land;l.st="owned";sfx.coin();toast("Lot bought! Tap it to build.");draw()};
 function closeSheet(){sel=null;$("sheet").innerHTML="";document.body.classList.remove("so")}
 function sheet(i,conf){
   const l=lots[i];sel=i;document.body.classList.add("so");
   const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl="";let h="";
-  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const pf=permitFee(k),nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0;return '<button class="opt'+(locked||capped||nofit||money<S[k].cost+pf?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost)+(pf?" +📋"+fmt(pf):""))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+". Buy the lot next to this one.":(Number.isFinite(limit)?count+"/"+limit+" built · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
+  if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const pf=permitFee(k),nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0,pe=!locked&&!capped?placeErr(k,i):"";return '<button class="opt'+(locked||capped||nofit||pe||money<S[k].cost+pf?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost)+(pf?" +📋"+fmt(pf):""))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":pe?pe:nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+". Buy the lot next to this one.":(Number.isFinite(limit)?count+"/"+limit+" built · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
   else if(l.st==="ai_for_sale"){h=hd("Buy "+S[l.hs].n+" · Lot "+(i+1),"Asking "+fmt(l.aiP)+" · Value "+fmt(val(i)))+'<div class="opts"><button class="opt ok" data-a="buyai">🛒 Buy & Auto-Rent</button>'+cl+"</div>"}
   else if(conf){h=hd("⚠️ Demolish Lot "+(i+1)+"?","Costs $100 and clears the property.")+'<div class="opts"><button class="opt no" data-a="demo2">Confirm Demolish</button><button class="opt x" data-a="demo0">Cancel</button></div>'}
   else if(["rented","listed","ready"].includes(l.st)){
@@ -600,7 +625,8 @@ function act(i,a){
   else if(a==="reject")resolveOffer(i,false);
   else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;[objective,bonus].forEach(o=>{if(o&&o.t==="buyai")o.c++});l.sp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
 }
-function startBuild(i,k){const s=S[k],l=lots[i];if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");const limit=buildingLimit(k);if(buildingCount(k)>=limit)return toast("Maximum reached: "+limit+" "+s.n+(limit===1?" allowed.":"s allowed."));if(busy()>=builders)return toast("All builders are busy!");const fee=permitFee(k);if(money<s.cost+fee)return toast("Need "+fmt(s.cost+fee)+" for a "+s.n+(fee?" ("+fmt(s.cost)+" + "+fmt(fee)+" permit)":"")+".");if(s.span){const p=spanPair(i,k);if(p<0)return toast("🧩 "+s.n+" needs "+s.span+" side-by-side lots you own"+(s.front?" on the beachfront (top row)":"")+".");for(let q=p+1;q<p+s.span;q++){lots[q].st="merged";lots[q].par=p}return startBuild2(p,k,fee)}money-=s.cost+fee;meta.st.built++;l.hs=k;l.st="working";l.permit=fee?3:0;sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast(fee?"📋 Permit filed ("+fmt(fee)+"). Building "+s.n+" once it clears…":"Building "+s.n+"…");draw()}
+function startBuild(i,k){const s=S[k],l=lots[i];if(!s||!unlocked(k))return toast("Unlocks at Level "+(s?s.unlock:1)+".");const limit=buildingLimit(k);if(buildingCount(k)>=limit)return toast("Maximum reached: "+limit+" "+s.n+(limit===1?" allowed.":"s allowed."));if(busy()>=builders)return toast("All builders are busy!");{const pe=placeErr(k,i);if(pe)return toast(pe)}const fee=permitFee(k);if(money<s.cost+fee)return toast("Need "+fmt(s.cost+fee)+" for a "+s.n+(fee?" ("+fmt(s.cost)+" + "+fmt(fee)+" permit)":"")+".");if(s.span){const p=spanPair(i,k);if(p<0)return toast("🧩 "+s.n+" needs "+s.span+" side-by-side lots you own"+(s.front?" on the beachfront (top row)":"")+".");for(let q=p+1;q<p+s.span;q++){lots[q].st="merged";lots[q].par=p}return startBuild2(p,k,fee)}money-=s.cost+fee;meta.st.built++;l.hs=k;l.st="working";l.permit=fee?3:0;sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast(fee?"📋 Permit filed ("+fmt(fee)+"). Building "+s.n+" once it clears…":"Building "+s.n+"…");draw()}
+const placeErr=(k,i)=>W().k==="beach"&&k==="civic"&&i>=5?"🌅 Lighthouses can only be built on the coast (top row).":"";
 const permitFee=k=>W().k==="city"&&S[k].cost>=800?Math.round(S[k].cost*.1):0;
 function startBuild2(i,k,fee){const s=S[k],l=lots[i];money-=s.cost+(fee||0);meta.st.built++;l.hs=k;l.st="working";l.permit=fee?3:0;sfx.build();l.p=0;l.dur=s.dur/speed;closeSheet();toast("🧩 Lots merged! Building "+s.n+"…");draw()}
 function reno(i){const l=lots[i],k=ORD.find(x=>!l.reno.includes(x));if(!k)return toast("Fully upgraded!");if(busy()>=builders)return toast("All builders are busy!");if(money<R[k].cost)return toast("Need "+fmt(R[k].cost)+" for "+R[k].n+".");money-=R[k].cost;l.st="reno_working";sfx.build();l.pend=k;l.rp=0;l.rd=R[k].dur/speed;closeSheet();toast(R[k].n+" started…");draw()}
@@ -616,7 +642,7 @@ function tick(now){
   requestAnimationFrame(tick);
   try{
   // Recover from a stuck pause (paused with no pause or world card on screen).
-  if(paused&&run&&["pz","wi"].every(x=>$(x).style.display==="none")){paused=false;$("scene").classList.remove("pz");last=now}
+  if(paused&&run&&["pz","wi","lc"].every(x=>$(x).style.display==="none")){paused=false;$("scene").classList.remove("pz");last=now}
   const dt=Math.min(.1,(now-last)/1000);last=now;
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
@@ -676,7 +702,7 @@ function tick(now){
     });
     if(bonus&&!bonus.done){if(bonus.t==="build")bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;else if(bonus.t!=="sale")updObjective(bonus);if(bonus.t==="build"||bonus.t==="sale"?bonus.c>=bonus.n:bonus.done){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
     updObjective();
-    if(money>=goal&&objective&&objective.done){run=false;endGame(true)}else if(mode==="timed"&&timeVal<=0){run=false;endGame(false)}
+    if(!lvDone&&money>=goal&&objective&&objective.done)celebrate();else if(!lvDone&&mode==="timed"&&timeVal<=0){run=false;endGame(false)}
     draw();
   }
   }catch(e){reportErr(e)}
@@ -687,10 +713,11 @@ function reportErr(e){const m=(e&&e.message||String(e)).slice(0,140),k=m+((e&&e.
 addEventListener("error",ev=>reportErr(ev.error||ev.message));
 
 function endGame(win){
+  run=false;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
   closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;win?sfx.win():sfx.lose();
   const fin=win&&lv>=100;
-  if(win){const st=1+(bonus&&bonus.done?1:0)+(elapsed<=90+lv*10?1:0);const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;if(fin&&meta.pr>=10)meta.legend=1;checkAch();store.set(BKEY,JSON.stringify(best));
-    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(elapsed)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>";
+  if(win){const fe=doneAt??elapsed,st=1+(bonus&&bonus.done?1:0)+(fe<=90+lv*10?1:0);const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;if(fin&&meta.pr>=10)meta.legend=1;checkAch();store.set(BKEY,JSON.stringify(best));
+    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(fe)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>";
     if(win&&lv%10===0&&!fin)h+='<p>🗺️ <b>'+W().ic+' '+W().n+' complete!</b> Next stop: '+W(lv+1).ic+' '+W(lv+1).n+'.</p>';
     if(fin)h+=meta.pr>=10?'<p>🏆 <b>Prestige 10 conquered. You are a Lot Flip Legend!</b> Thanks for playing every world.</p>':'<p>🌟 <b>All 10 worlds cleared!</b> Prestige from the Main Menu to start again at Rank '+(meta.pr+1)+'/10 for +10 ⭐. Each rank raises goals and trims your cash and time.</p>'}
   else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.<br>Building goal: '+(objective&&objective.done?'complete':objLong().toLowerCase())+'.</p>';
@@ -754,10 +781,11 @@ function beachBld(l,k,st,T,s){
 
 // Marina landmark, drawn 200 units wide because it spans two lots. Water faces the ocean (top).
 
+const ADS=[["🏡 LOT FLIP REALTY","#fff8e1","#1565c0"],["☕ HOT COFFEE","#4e342e","#fff"],["🚇 TAKE THE SUBWAY","#1b5e20","#fff"],["🍔 BIG BURGER","#fdd835","#b71c1c"],["📈 BUY LOW SELL HIGH","#263238","#76ff03"],["🎭 SHOW TONIGHT","#6a1b9a","#fff"],["🏙️ PENTHOUSES","#0d47a1","#fff"],["🚕 CALL A TAXI","#f5c400","#212121"]];
 const SKYLINE=(()=>{const B=[[0,14,12],[14,10,18],[24,16,9],[40,8,20],[48,18,14],[66,12,22],[78,20,11],[98,10,17],[108,16,13],[124,8,21],[132,18,10],[150,12,19],[162,16,12],[178,10,16],[188,12,10]];
  let g='<svg viewBox="0 0 200 22" preserveAspectRatio="none" width="100%" height="22" style="display:block">';
  B.forEach((b,q)=>{g+='<rect x="'+b[0]+'" y="'+(22-b[2])+'" width="'+b[1]+'" height="'+b[2]+'" fill="'+(q%2?"#607d8b":"#4e6470")+'"/>';for(let y=24-b[2];y<20;y+=4)for(let x=b[0]+2;x<b[0]+b[1]-2;x+=4)if((x*7+y*3+q)%5<2)g+='<rect x="'+x+'" y="'+y+'" width="1.4" height="1.6" fill="#ffe082"/>'});
- g+='</svg><div class="swalk"></div>';
+ g+='</svg><div class="swalk"></div>'+[["10%",0],["62%",1]].map(b=>'<div class="bbd" style="left:'+b[0]+'"><b style="background:'+ADS[b[1]][1]+';color:'+ADS[b[1]][2]+'">'+ADS[b[1]][0]+'</b></div>').join("");
  [["r",0],["l",-6],["r",-13],["l",-18],["r",-21]].forEach(p=>{g+='<span class="ped '+p[0]+'" style="animation-delay:'+p[1]+'s;animation-duration:'+(20+Math.abs(p[1]))+'s"><i>🚶</i></span>'});
  return g})();
 function marinaArt(st){
@@ -1422,7 +1450,7 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
 function renderRoadTraffic(){
   const sc=$("scene");if(!sc)return;
   roadTraffic.forEach(car=>{
-    if(!car.el||!car.el.isConnected){car.el=makeVehicle(car.color,"road-traffic-car");if(car.emerg){if(car.emerg!=="bus")car.el.className+=" emg";car.el.innerHTML=emergMarkup(car.emerg)}sc.appendChild(car.el)}
+    if(!car.el||!car.el.isConnected){car.el=makeVehicle(car.color,"road-traffic-car");if(car.emerg){if(car.emerg!=="bus"&&car.emerg!=="cbus")car.el.className+=" emg";car.el.innerHTML=emergMarkup(car.emerg)}sc.appendChild(car.el)}
     const p=roadVehiclePose(car);car.el.style.left=(p.x-10)+"px";car.el.style.top=(p.y-5.625)+"px";car.el.style.transform="rotate("+p.a+"deg)";
   });
 }
@@ -1565,6 +1593,8 @@ function ambient(dt){
  twL=twL.filter(o=>{o.a+=dt;if(o.a>=o.d||!o.el.isConnected){o.el.remove();return false}return true});
  if((!W().pal&&meta.eq.theme==="desert")||W().k==="desert"){amb.w-=dt;if(amb.w<=0){amb.w=4+Math.random()*9;if(twL.length<3)spawnWeed(sc)}}
  harbor(sc,dt);
+ if(W().k==="city"){amb.cv=(amb.cv==null?4:amb.cv)-dt;if(amb.cv<=0){amb.cv=6+Math.random()*10;if(roadTraffic.filter(c=>c.emerg).length<2)spawnEmerg(Math.random()<.55?"cbus":"cop",true)}
+  amb.ad=(amb.ad==null?5:amb.ad)-dt;if(amb.ad<=0){amb.ad=5;amb.ai=(amb.ai||0)+1;sc.querySelectorAll(".bbd b").forEach((b,q)=>{const a=ADS[(amb.ai*2+q)%ADS.length];b.style.opacity=0;setTimeout(()=>{b.textContent=a[0];b.style.background=a[1];b.style.color=a[2];b.style.opacity=1},300)})}}
  amb.b=(amb.b==null?8:amb.b)-dt;if(amb.b<=0){amb.b=22+Math.random()*20;lots.forEach((l,i)=>{if(l.hs==="bank"&&l.st==="ready"&&!traffic[i])startArmoredArrival(i)})}
  amb.q=amb.q.filter(o=>{o.t-=dt;if(o.t<=0){o.k==="taxi"?spawnTaxi():spawnEmerg(o.k);return false}return true});
  amb.e-=dt;if(amb.e<=0){amb.e=18+Math.random()*25;const k=[];
@@ -1618,17 +1648,19 @@ function emergMarkup(kind){
  const wh='<rect x="4" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="4" y="15" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="0" width="4" height="3" rx="1" fill="#1f2933"/><rect x="23" y="15" width="4" height="3" rx="1" fill="#1f2933"/>',
  hl='<rect x="30" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="30" y="11.5" width="1.3" height="2" fill="#fff7b0"/>',
  lights='<rect x="14" y="4" width="3" height="5" fill="#ff1744" class="blk"/><rect x="14" y="9" width="3" height="5" fill="#2979ff" class="blk b2"/>';
+ if(kind==="cbus")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2" fill="#1e88e5" stroke="#263238" stroke-width="1.1"/><rect x="1" y="8" width="30" height="2" fill="#fff"/>'+[4,9,14,19].map(x=>'<rect x="'+x+'" y="4.4" width="3.6" height="3" fill="#bde3f5"/><rect x="'+x+'" y="10.6" width="3.6" height="3" fill="#bde3f5"/>').join("")+'<rect x="25" y="4.2" width="4.5" height="9.6" rx="1.2" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/>'+hl+'</svg>';
+ if(kind==="cop")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3.5" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="1" y="3" width="8" height="12" rx="3" fill="#212121"/><rect x="24" y="3" width="7" height="12" rx="3" fill="#212121"/><rect x="10" y="4.6" width="7" height="8.8" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="18.5" y="4" width="2.4" height="5" fill="#ff1744" class="blk"/><rect x="18.5" y="9" width="2.4" height="5" fill="#2979ff" class="blk b2"/>'+hl+'</svg>';
  if(kind==="bus")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#fbc02d" stroke="#263238" stroke-width="1.1"/><rect x="23" y="4.2" width="6" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 5h17M4 13h17M4 9h17" stroke="#212121" stroke-width=".9"/><rect x="1.5" y="4.5" width="1.6" height="2" fill="#e53935"/><rect x="1.5" y="11.5" width="1.6" height="2" fill="#e53935"/>'+hl+'</svg>';
  if(kind==="amb")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 9h9M8.5 5.5v7" stroke="#e53935" stroke-width="2.2"/>'+lights+hl+'</svg>';
  return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#d32f2f" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 7h16M3 11h16" stroke="#eceff1" stroke-width="1.4"/>'+lights+hl+'</svg>'}
 function spawnTaxi(){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W0=sc.clientWidth||600,sp=40+Math.random()*8;
  const el=makeVehicle("#f5c400","road-traffic-car");sc.appendChild(el);roadTraffic.push({road,dir,x:dir===1?-18:W0+18,speed:sp,speedFactor:1,actualSpeed:sp,color:"#f5c400",el,tmp:true})}
-function spawnEmerg(kind){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;
+function spawnEmerg(kind,quiet){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;
  const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W=sc.clientWidth||600;
- const el=document.createElement("div");el.className="road-traffic-car"+(kind==="bus"?"":" emg");el.setAttribute("aria-hidden","true");el.innerHTML=emergMarkup(kind);sc.appendChild(el);
- roadTraffic.push({road,dir,x:dir===1?-18:W+18,speed:kind==="bus"?48:62,speedFactor:1,actualSpeed:kind==="bus"?48:62,color:"#fff",el,emerg:kind});
- if(snd&&kind!=="bus"){tone(780,.28,"triangle",.03,0,560);tone(560,.28,"triangle",.03,.3,780)}
- toast(kind==="amb"?"🚑 Ambulance heading out!":kind==="bus"?"🚌 School bus on its route!":"🚒 Fire truck on patrol!")}
+ const el=document.createElement("div");el.className="road-traffic-car"+(kind==="bus"||kind==="cbus"?"":" emg");el.setAttribute("aria-hidden","true");el.innerHTML=emergMarkup(kind);sc.appendChild(el);
+ roadTraffic.push({road,dir,x:dir===1?-18:W+18,speed:kind==="bus"||kind==="cbus"?46:kind==="cop"?54:62,speedFactor:1,actualSpeed:50,color:"#fff",el,emerg:kind});
+ if(snd&&!["bus","cbus","cop"].includes(kind)){tone(780,.28,"triangle",.03,0,560);tone(560,.28,"triangle",.03,.3,780)}
+ if(!quiet)toast(kind==="amb"?"🚑 Ambulance heading out!":kind==="bus"?"🚌 School bus on its route!":"🚒 Fire truck on patrol!")}
 function repairCost(i){return Math.round(Math.max(80,val(i)*.1)*(1-.2*upT("shield"))*(fireReady()?.75:1))}
 function strike(){const o=$("stm");if(o){o.classList.remove("bolt");void o.offsetWidth;o.classList.add("bolt")}sfx.rumble();buzz(60);
  const c=lots.map((l,i)=>i).filter(i=>{const l=lots[i];return l.st==="rented"&&l.hs&&S[l.hs].cat==="h"&&!l.dmg});
