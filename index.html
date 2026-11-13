@@ -123,6 +123,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .b{background:var(--card);color:var(--text);border:2px solid var(--line);border-radius:10px;min-height:48px;padding:6px;font:inherit;font-size:13px;font-weight:700}
 .b:disabled{opacity:.4}
 .b.active{border-color:var(--blue);background:rgba(41,182,246,.15);color:var(--blue)}
+.rock{position:absolute;z-index:75;font-size:18px;line-height:1;pointer-events:none;transition:transform .95s cubic-bezier(.5,0,.9,.6)}
+.deer{position:absolute;z-index:66;font-size:13px;line-height:1;pointer-events:none;transition:top 3.4s linear}
 #fw{position:fixed;inset:0;pointer-events:none;z-index:150;overflow:hidden}.fwp{position:absolute;width:8px;height:8px;margin:-4px;border-radius:50%;animation:fwp 1.5s cubic-bezier(.15,.7,.3,1) forwards}
 @keyframes fwp{0%{transform:translate(0,0) scale(1.2);opacity:1}75%{opacity:1}100%{transform:translate(var(--dx),calc(var(--dy) + 40px)) scale(.4);opacity:0}}
 #toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translate(-50%,-20px);background:rgba(20,30,18,.96);border:1px solid var(--gold);color:#fff;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:.25s;z-index:200;max-width:92vw;text-align:center;pointer-events:none}
@@ -194,6 +196,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @media(prefers-reduced-motion:reduce){.skyl .ped{animation:none}}
 .mtn{position:relative;z-index:1;height:34px;margin:-10px -10px -4px;border-radius:11px 11px 0 0;overflow:hidden;background:linear-gradient(180deg,#90caf9,#e3f2fd)}
 .mtn .gond{position:absolute;width:9px;height:7px;background:#e53935;border:1px solid #37474f;border-radius:2px;animation:gond 26s linear infinite}.mtn .gond::before{content:"";position:absolute;left:3px;top:-5px;width:1px;height:4px;background:#37474f}
+.mtn .eagle{position:absolute;top:1px;font-size:10px;line-height:1;animation:soar 34s linear infinite}.mtn .eagle i{display:inline-block;font-style:normal;transform:scaleX(-1)}
+@keyframes soar{0%{left:-14px;margin-top:0}25%{margin-top:4px}50%{margin-top:0}75%{margin-top:5px}100%{left:100%;margin-top:0}}
 @keyframes gond{from{left:-12px;top:11px}to{left:100%;top:19px}}
 @media(prefers-reduced-motion:reduce){.mtn .gond{animation:none}}
 .chan{position:absolute;z-index:3;pointer-events:none;background:repeating-linear-gradient(180deg,transparent 0 7px,rgba(255,255,255,.35) 7px 8px),linear-gradient(180deg,#7fd3f5,#29a3e6 60%);border-left:3px solid #a1887f;border-right:3px solid #a1887f}
@@ -414,7 +418,7 @@ const WORLDS=[
  m:["🏘️ New homes: Brownstone, Townhouse and Penthouse Tower","🏙️ City makeovers: Apartments → High-Rise, Park → City Plaza, Pool → Rooftop Pool, Civic Center → City Hall, Realty → Downtown Realty","💰 Pricier land: lots cost about 40% more, but homes rent for 20% more","📋 Zoning permits: anything costing $800+ needs a 10% permit fee and a short permit wait before work starts","🚕 Rush Hour: taxis flood the streets, businesses earn double, and buyers arrive slower","🚇 Level 22: Subway Station (+20% to its neighbors) · ☕ Level 26: Coffee Shop","🏙️ Landmark at Level 27: the Skyscraper (2 lots, any row). Level 29 asks you to build one"]},
 {k:"mountain",n:"Mountain",ic:"🏔️",ready:1,d:"Ski-season rentals, forest lots and mountain views.",pal:{v:"#5f8f5a",bd:"#3f6b3b",l:"#7fa877",lb:"#4c7a47",g:"#6d9a64"},lm:{k:"skiresort",lv:39},
  homes:{ranch:["Log Cabin","🪵"],colonial:["Chalet","🏠"],mansion:["Ski Lodge Estate","🏔️"],apartment:["Ski Condos","🏨"],park:["Hiking Trailhead","🥾"],pool:["Hot Springs","♨️"],civic:["Ranger Station","🌲"],school:["Mountain Schoolhouse","🔔"],gas:["Trading Post","🏪"]},
- m:["🏘️ New homes: Log Cabin, Chalet and Ski Lodge Estate","🏔️ Mountain makeovers: Apartments → Ski Condos, Park → Hiking Trailhead, Pool → Hot Springs, Civic Center → Ranger Station, School → Mountain Schoolhouse, Gas Station → Trading Post","🌲 Forest lots: some lots are covered in trees. They're 25% cheaper, but you pay to clear them before building","🏞️ Mountain views: homes in the top row are worth +20%","❄️ Snow Season: homes rent +40% and ski businesses earn double","🌨️ Blizzards replace storms: they can damage houses and slow down traffic","🎿 Level 33: Ski Rental Shop","🚡 Landmark at Level 37: the Ski Resort (2 lots). Level 39 asks you to build one"]},
+ m:["🏘️ New homes: Log Cabin, Chalet and Ski Lodge Estate","🏔️ Mountain makeovers: Apartments → Ski Condos, Park → Hiking Trailhead, Pool → Hot Springs, Civic Center → Ranger Station, School → Mountain Schoolhouse, Gas Station → Trading Post","🌲 Forest lots: some lots are covered in trees. They're 25% cheaper, but you pay to clear them before building","🏞️ Mountain views: homes in the top row are worth +20%","❄️ Snow Season: homes rent +40% and ski businesses earn double","🌨️ Blizzards replace storms: they can damage houses and slow down traffic","❄️ Snow piles up during Snow Season and blizzards, then slowly melts","🪨 Rockslides: falling rocks can damage homes, especially in the top row","🎿 Level 33: Ski Rental Shop","🚡 Landmark at Level 37: the Ski Resort (2 lots). Level 39 asks you to build one"]},
 {k:"themepark",n:"Theme Park",ic:"🎢",d:"Tourists everywhere: hotels and rentals near the park gates earn big.",pal:{v:"#7cc26a",bd:"#4f9a40",l:"#a8dc8f",lb:"#5aa748",g:"#8fd07a"}},
 {k:"desert",n:"Desert",ic:"🌵",d:"Cheap land, but water and utilities come first.",pal:{v:"#d9b77a",bd:"#b8935a",l:"#efd9a8",lb:"#b8935a",g:"#d6b176"}},
 {k:"lake",n:"Lakeside",ic:"🛶",d:"Waterfront cabins and weekend renters.",pal:{v:"#4e9a6b",bd:"#2f7550",l:"#6fb889",lb:"#3d8a5c",g:"#5ea878"}},
@@ -433,7 +437,7 @@ const unlocked=k=>!!S[k]&&lv>=(S[k].unlock||1)&&inWorld(k);
 const availableBuildings=()=>Object.keys(S).filter(unlocked);
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
 const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
-const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses",party:"🎉 Block party at the park! Nearby rents +60%",market:"🧺 Farmers market at the Civic Center! Its income doubles",game:"🏟️ Game Day at the Sports Complex! Its income doubles",parade:"🎺 School parade! Buyer offers +20%",season:"☀️ Tourist season! Rents +40% for 15s",rushhr:"🚕 Rush hour! Businesses earn double, buyers arrive slower",snow:"❄️ Snow season! Homes rent +40%, ski businesses earn double"};
+const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses",party:"🎉 Block party at the park! Nearby rents +60%",market:"🧺 Farmers market at the Civic Center! Its income doubles",game:"🏟️ Game Day at the Sports Complex! Its income doubles",parade:"🎺 School parade! Buyer offers +20%",season:"☀️ Tourist season! Rents +40% for 15s",rushhr:"🚕 Rush hour! Businesses earn double, buyers arrive slower",snow:"❄️ Snow season! Homes rent +40%, ski businesses earn double",rocks:"🪨 Rockslide! Falling rocks may damage homes near the mountain"};
 const evText=k=>k==="storm"&&W().k==="beach"?"🌀 Hurricane warning! Beachfront homes are most at risk":k==="storm"&&W().k==="mountain"?"🌨️ Blizzard incoming! Snow may damage houses and slow traffic":EV[k];
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
@@ -498,7 +502,7 @@ function build(){
 }
 
 function startLevel(){
-  lv=Math.max(1,Math.min(100,lv));applyWorld();lvDone=false;doneAt=null;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
+  lv=Math.max(1,Math.min(100,lv));applyWorld();if(typeof amb!=="undefined")amb.sn=0;lvDone=false;doneAt=null;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
   twist=twistFor(lv);N=lv>=4?15:10;tutOn=lv===1&&!store.get("lot_flip_tut");lots=Array.from({length:N},mkLot);closeSheet();
   const goalOrder=MILE;
   const requiredBuilding=goalOrder.filter(x=>lv>=x.lv).at(-1).k;
@@ -662,8 +666,8 @@ function tick(now){
   const dt=Math.min(.1,(now-last)/1000);last=now;
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
-    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"||ev.k==="game"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?(W().k==="mountain"?"☀️ The blizzard has cleared.":"☀️ The storm has passed."):ev.k==="snow"?"🌤️ Snow season is over.":"Market is back to normal.");ev.k=null;fxLayers()}}
-    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
+    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="rocks"&&!ev.hit&&ev.t<=12.5){ev.hit=true;rockslide()}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"||ev.k==="game"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?(W().k==="mountain"?"☀️ The blizzard has cleared.":"☀️ The storm has passed."):ev.k==="snow"?"🌤️ Snow season is over.":ev.k==="rocks"?"🪨 The rockslide has settled.":"Market is back to normal.");ev.k=null;fxLayers()}}
+    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
       if(visitorBusiness(l)){
@@ -891,9 +895,9 @@ function cityOnly(l,k,st,T,s){
 const PINE=(x,y,s)=>'<g transform="translate('+x+' '+y+') scale('+s+')"><rect x="-1.2" y="0" width="2.4" height="5" fill="#5d4037"/><polygon points="0,-17 -7,-5 7,-5" fill="#2e7d32"/><polygon points="0,-12 -8.5,2 8.5,2" fill="#388e3c"/><polygon points="0,-17 -2.6,-12.5 2.6,-12.5" fill="#fafafa"/></g>';
 const MTN=(()=>{let g='<svg viewBox="0 0 200 30" preserveAspectRatio="none" width="100%" height="34" style="display:block"><polygon points="0,30 0,18 18,8 34,16 52,3 72,17 90,6 110,18 128,2 150,16 170,7 200,18 200,30" fill="#78909c"/>';
  [[18,8],[52,3],[90,6],[128,2],[170,7]].forEach(([x,y])=>{g+='<polygon points="'+(x-5)+','+(y+3.2)+' '+x+','+y+' '+(x+5)+','+(y+3.2)+' '+(x+2)+','+(y+2.4)+' '+x+','+(y+3.6)+' '+(x-2)+','+(y+2.4)+'" fill="#fafafa"/>'});
- g+='<polygon points="0,30 0,24 30,20 60,25 100,19 140,24 170,20 200,24 200,30" fill="#558b2f"/>';
+ g+='<polygon points="0,30 0,24 30,20 60,25 100,19 140,24 170,20 200,24 200,30" style="fill:var(--hill,#558b2f)"/>';
  for(let x=4;x<200;x+=9)g+='<polygon points="'+x+','+(29-(x%3))+' '+(x+3)+','+(21-(x%4))+' '+(x+6)+','+(29-(x%3))+'" fill="#2e7d32"/>';
- return g+'<path d="M0 6L200 13" stroke="#37474f" stroke-width=".5"/></svg><span class="gond"></span><span class="gond" style="animation-delay:-13s"></span>'})();
+ return g+'<path d="M0 6L200 13" stroke="#37474f" stroke-width=".5"/></svg><span class="gond"></span><span class="gond" style="animation-delay:-13s"></span><span class="eagle"><i>🦅</i></span>'})();
 function forestLot(p){const t=[[18,40,1],[34,30,.9],[50,42,1.1],[66,28,.9],[82,40,1],[26,52,.8],[74,52,.8]],keep=Math.ceil(t.length*(1-p));
  let s='<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".15"/><rect x="5" y="46" width="90" height="13" rx="5" fill="#5aa23e"/>';
  t.slice(0,keep).forEach(a=>{s+=p>0?'<g class="shk">'+PINE(a[0],a[1],a[2])+'</g>':PINE(a[0],a[1],a[2])});
@@ -1071,7 +1075,7 @@ function drivewayArt(i,parked,l){
 }
 function art(l,i){
   let main=houseArt(l,i);if(l.forest&&!l.hs){if(l.st==="empty"||l.st==="off_market")main=PINE(14,46,1)+PINE(86,46,1)+PINE(24,30,.8)+PINE(78,30,.8)+main;else if(l.st==="owned")main=forestLot(0);else if(l.st==="clearing")main=forestLot(l.cp)}
-  main=main.replace(/#5aa23e/g,(W().pal||COS.theme[meta.eq.theme]).g);
+  main=main.replace(/fill="#5aa23e"/g,'style="fill:var(--gnd)"').replace(/#5aa23e/g,(W().pal||COS.theme[meta.eq.theme]).g);
   // Vacant lots stay clear. Add pavement only when a building exists or construction is underway.
   const hasBuilding=!!l.hs&&l.st!=="sold";
   const parked=hasBuilding&&!['working','reno_working','demo','sold','listed','ai_for_sale'].includes(l.st)&&!traffic[i];
@@ -1544,7 +1548,7 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
 function renderRoadTraffic(){
   const sc=$("scene");if(!sc)return;
   roadTraffic.forEach(car=>{
-    if(!car.el||!car.el.isConnected){car.el=makeVehicle(car.color,"road-traffic-car");if(car.emerg){if(car.emerg!=="bus"&&car.emerg!=="cbus")car.el.className+=" emg";if(car.len)car.el.classList.add("long");car.el.innerHTML=emergMarkup(car.emerg)}sc.appendChild(car.el)}
+    if(!car.el||!car.el.isConnected){car.el=makeVehicle(car.color,"road-traffic-car");if(car.emerg){if(!QV.includes(car.emerg))car.el.className+=" emg";if(car.len)car.el.classList.add("long");car.el.innerHTML=emergMarkup(car.emerg)}sc.appendChild(car.el)}
     const p=roadVehiclePose(car);car.el.style.left=(p.x-(car.len||20)/2)+"px";car.el.style.top=(p.y-5.625)+"px";car.el.style.transform="rotate("+p.a+"deg)";
   });
 }
@@ -1577,7 +1581,7 @@ function renderTraffic(){
   renderRoadTraffic();
 }
 
-const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",market:"🧺",parade:"🎺",game:"🏟️",season:"☀️",rushhr:"🚕",snow:"❄️"};
+const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",market:"🧺",parade:"🎺",game:"🏟️",season:"☀️",rushhr:"🚕",snow:"❄️",rocks:"🪨"};
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
   const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
@@ -1665,7 +1669,11 @@ roof:{brick:{n:"Brick Red",v:"#a8483a",c:0},slate:{n:"Slate Blue",v:"#4f6d8f",c:
 car:{std:{n:"Classic Colors",c:0},taxi:{n:"All Taxis",v:"#f5c400",c:4},night:{n:"Midnight",v:"#2b2f3a",c:4}}};
 const COSL={theme:"🎨 Scene (Suburbs world)",roof:"🏠 Roofs",car:"🚗 Cars"};
 const carSkin=c=>meta&&COS.car[meta.eq.car].v||c;
-function applyTheme(){if(!meta)return;const t=W().pal||COS.theme[meta.eq.theme],sc=$("scene");sc.style.background=t.v;sc.style.borderColor=t.bd;sc.style.setProperty("--lot",t.l);sc.style.setProperty("--lotbd",t.lb);fxLayers()}
+function applyTheme(){if(!meta)return;amb.snA=-1;applySnow();fxLayers()}
+// Blend the scene toward snow. Ground snow is a soft blue-gray so white snowcaps and roofs still stand out.
+const mixHex=(a,b,t)=>{const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),A=p(a),B=p(b);return"#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("")};
+function applySnow(){const t=W().pal||COS.theme[meta.eq.theme],sc=$("scene"),n=W().k==="mountain"?(amb.sn||0):0;if(Math.abs(n-(amb.snA??-1))<.008)return;amb.snA=n;
+ sc.style.background=mixHex(t.v,"#d3dde6",n);sc.style.borderColor=mixHex(t.bd,"#9fb0bd",n);sc.style.setProperty("--lot",mixHex(t.l,"#e6edf3",n));sc.style.setProperty("--lotbd",mixHex(t.lb,"#a9bac6",n));sc.style.setProperty("--gnd",mixHex(t.g,"#d9e3eb",n));sc.style.setProperty("--hill",mixHex("#558b2f","#dfe7ee",n*.9))}
 function fxLayers(){const sc=$("scene");if(!sc||!meta)return;
  let o=$("stm");if(!o||!o.isConnected){o=document.createElement("div");o.id="stm";o.innerHTML='<i class="rain"></i><i class="rain r2"></i><i class="flash"></i>';sc.appendChild(o)}
  const w0=!W().pal;
@@ -1687,6 +1695,9 @@ function ambient(dt){
  twL=twL.filter(o=>{o.a+=dt;if(o.a>=o.d||!o.el.isConnected){o.el.remove();return false}return true});
  if((!W().pal&&meta.eq.theme==="desert")||W().k==="desert"){amb.w-=dt;if(amb.w<=0){amb.w=4+Math.random()*9;if(twL.length<3)spawnWeed(sc)}}
  harbor(sc,dt);
+ if(W().k==="mountain"){const tg=ev.k==="storm"?1:ev.k==="snow"?.85:0,cur=amb.sn||0;amb.sn=tg>cur?Math.min(tg,cur+dt*(ev.k==="storm"?.12:.05)):Math.max(0,cur-dt*.012);applySnow();
+  amb.mv=(amb.mv==null?5:amb.mv)-dt;if(amb.mv<=0){amb.mv=7+Math.random()*9;if(roadTraffic.filter(c=>c.emerg).length<2){const snowy=ev.k==="snow"||ev.k==="storm"||(amb.sn||0)>.3;spawnEmerg(snowy&&Math.random()<.5?"plow":Math.random()<.55?"ranger":"logtruck",true)}}
+  amb.dr=(amb.dr==null?12:amb.dr)-dt;if(amb.dr<=0){amb.dr=18+Math.random()*20;spawnDeer(sc)}}
  if(W().k==="city"){amb.cv=(amb.cv==null?4:amb.cv)-dt;if(amb.cv<=0){amb.cv=6+Math.random()*10;if(roadTraffic.filter(c=>c.emerg).length<2)spawnEmerg(Math.random()<.55?"cbus":"cop",true)}
   amb.ad=(amb.ad==null?5:amb.ad)-dt;if(amb.ad<=0){amb.ad=5;amb.ai=(amb.ai||0)+1;sc.querySelectorAll(".bbd b").forEach((b,q)=>{const a=ADS[(amb.ai*2+q)%ADS.length];b.style.opacity=0;setTimeout(()=>{b.textContent=a[0];b.style.background=a[1];b.style.color=a[2];b.style.opacity=1},300)})}}
  amb.b=(amb.b==null?8:amb.b)-dt;if(amb.b<=0){amb.b=22+Math.random()*20;lots.forEach((l,i)=>{if(l.hs==="bank"&&l.st==="ready"&&!traffic[i])startArmoredArrival(i)})}
@@ -1744,18 +1755,22 @@ function emergMarkup(kind){
  lights='<rect x="14" y="4" width="3" height="5" fill="#ff1744" class="blk"/><rect x="14" y="9" width="3" height="5" fill="#2979ff" class="blk b2"/>';
  const lw='<rect x="6" y="0" width="5" height="3" rx="1" fill="#1f2933"/><rect x="6" y="15" width="5" height="3" rx="1" fill="#1f2933"/><rect x="40" y="0" width="5" height="3" rx="1" fill="#1f2933"/><rect x="40" y="15" width="5" height="3" rx="1" fill="#1f2933"/>',lh='<rect x="52" y="4.5" width="1.3" height="2" fill="#fff7b0"/><rect x="52" y="11.5" width="1.3" height="2" fill="#fff7b0"/>';
  if(kind==="cbus")return '<svg viewBox="0 0 54 18" preserveAspectRatio="none" aria-hidden="true">'+lw+'<rect x="1" y="3" width="52" height="12" rx="2" fill="#1e88e5" stroke="#263238" stroke-width="1.1"/><rect x="1" y="8" width="52" height="2" fill="#fff"/>'+[4,10,16,22,28,34,40].map(x=>'<rect x="'+x+'" y="4.4" width="4" height="3" fill="#bde3f5"/><rect x="'+x+'" y="10.6" width="4" height="3" fill="#bde3f5"/>').join("")+'<rect x="47" y="4.2" width="4.5" height="9.6" rx="1.2" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/>'+lh+'</svg>';
+ if(kind==="logtruck")return '<svg viewBox="0 0 54 18" preserveAspectRatio="none" aria-hidden="true">'+lw+'<rect x="1" y="3" width="38" height="12" rx="1.5" fill="#455a64" stroke="#263238" stroke-width="1.1"/><rect x="2" y="4" width="36" height="3" rx="1.5" fill="#8d6e63"/><rect x="2" y="7.6" width="36" height="3" rx="1.5" fill="#a1887f"/><rect x="2" y="11.2" width="36" height="3" rx="1.5" fill="#8d6e63"/><circle cx="3" cy="5.5" r="1.3" fill="#d7ccc8"/><circle cx="3" cy="9.1" r="1.3" fill="#d7ccc8"/><circle cx="3" cy="12.7" r="1.3" fill="#d7ccc8"/><rect x="40" y="3.5" width="13" height="11" rx="2.5" fill="#c62828" stroke="#263238" stroke-width="1.1"/><rect x="47" y="4.7" width="4.5" height="8.6" rx="1" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/>'+lh+'</svg>';
+ if(kind==="ranger")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#2e7d32" stroke="#263238" stroke-width="1.1"/><rect x="2.5" y="4.5" width="13" height="9" rx="1" fill="#1b5e20" stroke="#a5d6a7" stroke-width=".5"/><rect x="17.5" y="5" width="2" height="8" fill="#ffb300"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/>'+hl+'</svg>';
+ if(kind==="plow")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="2" y="3" width="24" height="12" rx="2" fill="#fb8c00" stroke="#263238" stroke-width="1.1"/><rect x="17" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="10" y="6" width="3" height="6" fill="#ffeb3b" class="blk"/><path d="M27.5 1L31 4V14L27.5 17" stroke="#fdd835" stroke-width="2.4" fill="none" stroke-linejoin="round"/></svg>';
  if(kind==="cop")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3.5" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="1" y="3" width="8" height="12" rx="3" fill="#212121"/><rect x="24" y="3" width="7" height="12" rx="3" fill="#212121"/><rect x="10" y="4.6" width="7" height="8.8" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="18.5" y="4" width="2.4" height="5" fill="#ff1744" class="blk"/><rect x="18.5" y="9" width="2.4" height="5" fill="#2979ff" class="blk b2"/>'+hl+'</svg>';
  if(kind==="bus")return '<svg viewBox="0 0 54 18" preserveAspectRatio="none" aria-hidden="true">'+lw+'<rect x="1" y="3" width="52" height="12" rx="2.5" fill="#fbc02d" stroke="#263238" stroke-width="1.1"/><path d="M3 5h41M3 13h41M3 9h41" stroke="#212121" stroke-width=".9"/><rect x="45" y="4.2" width="6" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="1.5" y="4.5" width="1.6" height="2" fill="#e53935"/><rect x="1.5" y="11.5" width="1.6" height="2" fill="#e53935"/>'+lh+'</svg>';
  if(kind==="amb")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 9h9M8.5 5.5v7" stroke="#e53935" stroke-width="2.2"/>'+lights+hl+'</svg>';
  return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#d32f2f" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 7h16M3 11h16" stroke="#eceff1" stroke-width="1.4"/>'+lights+hl+'</svg>'}
 function spawnTaxi(){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W0=sc.clientWidth||600,sp=40+Math.random()*8;
  const el=makeVehicle("#f5c400","road-traffic-car");sc.appendChild(el);roadTraffic.push({road,dir,x:dir===1?-18:W0+18,speed:sp,speedFactor:1,actualSpeed:sp,color:"#f5c400",el,tmp:true})}
+const QV=["bus","cbus","ranger","plow","logtruck"];
 function spawnEmerg(kind,quiet){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;
  const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W=sc.clientWidth||600;
- const el=document.createElement("div");el.className="road-traffic-car"+(kind==="bus"||kind==="cbus"?"":" emg");el.setAttribute("aria-hidden","true");el.innerHTML=emergMarkup(kind);sc.appendChild(el);
- const long=kind==="bus"||kind==="cbus";if(long)el.classList.add("long");
- roadTraffic.push({len:long?30:0,road,dir,x:dir===1?-26:W+26,speed:kind==="bus"||kind==="cbus"?46:kind==="cop"?54:62,speedFactor:1,actualSpeed:50,color:"#fff",el,emerg:kind});
- if(snd&&!["bus","cbus","cop"].includes(kind)){tone(780,.28,"triangle",.03,0,560);tone(560,.28,"triangle",.03,.3,780)}
+ const el=document.createElement("div");el.className="road-traffic-car"+(QV.includes(kind)?"":" emg");el.setAttribute("aria-hidden","true");el.innerHTML=emergMarkup(kind);sc.appendChild(el);
+ const long=kind==="bus"||kind==="cbus"||kind==="logtruck";if(long)el.classList.add("long");
+ roadTraffic.push({len:long?30:0,road,dir,x:dir===1?-26:W+26,speed:{bus:46,cbus:46,cop:54,ranger:50,plow:34,logtruck:40}[kind]||62,speedFactor:1,actualSpeed:50,color:"#fff",el,emerg:kind});
+ if(snd&&!QV.includes(kind)&&kind!=="cop"){tone(780,.28,"triangle",.03,0,560);tone(560,.28,"triangle",.03,.3,780)}
  if(!quiet)toast(kind==="amb"?"🚑 Ambulance heading out!":kind==="bus"?"🚌 School bus on its route!":"🚒 Fire truck on patrol!")}
 function repairCost(i){return Math.round(Math.max(80,val(i)*.1)*(1-.2*upT("shield"))*(fireReady()?.75:1))}
 function strike(){const o=$("stm");if(o){o.classList.remove("bolt");void o.offsetWidth;o.classList.add("bolt")}sfx.rumble();buzz(60);
@@ -1764,6 +1779,18 @@ function strike(){const o=$("stm");if(o){o.classList.remove("bolt");void o.offse
  // Hurricanes in the beach world target beachfront (top row) homes first.
  while(n--&&c.length){const fr=beach?c.filter(x=>x<5):[],src=fr.length?fr:c,i=src[Math.floor(Math.random()*src.length)];c.splice(c.indexOf(i),1);lots[i].dmg=true;hit++;pop(i,"⚡",1);const e=els[i];e.classList.add("shk");setTimeout(()=>e.classList.remove("shk"),700)}
  if(hit){if(fireReady())queueEmerg("fire",2.5);if(readyOf("hospital"))queueEmerg("amb",5)}toast(hit?(beach?"🌀 Hurricane! ":W().k==="mountain"?"🌨️ Blizzard! ":"⚡ Lightning! ")+hit+" house"+(hit>1?"s":"")+" damaged. Tap to repair."+(fireReady()?" 🚒 Fire crew responding: repairs 25% off.":""):(beach?"🌀 The hurricane missed your houses.":"⚡ The storm missed your houses."))}
+function spawnDeer(sc){const rd=[...sc.querySelectorAll(".road")],r=rd[Math.floor(Math.random()*rd.length)];if(!r)return;const S0=sc.getBoundingClientRect(),R0=r.getBoundingClientRect(),oy=S0.top+sc.clientTop;
+ const d=document.createElement("div");d.className="deer";d.textContent="🦌";d.style.left=(R0.left-S0.left+R0.width*(.1+Math.random()*.8)).toFixed(0)+"px";d.style.top=(R0.top-oy-16)+"px";sc.appendChild(d);void d.offsetWidth;d.style.top=(R0.bottom-oy+2)+"px";setTimeout(()=>d.remove(),3600)}
+function rockslide(){const c=lots.map((l,i)=>i).filter(i=>{const l=lots[i];return l.st==="rented"&&l.hs&&S[l.hs].cat==="h"&&!l.dmg}),fr=c.filter(i=>i<5),src=fr.length?fr:c;
+ const t=[];for(let k=0;k<(Math.random()<.4?2:1)&&src.length;k++)t.push(src.splice(Math.floor(Math.random()*src.length),1)[0]);if(!t.length)t.push(-1);
+ sfx.rumble();t.forEach((i,q)=>setTimeout(()=>dropRock(i,q===t.length-1),q*700))}
+function dropRock(i,last){if(!run)return;const sc=$("scene"),e=i>=0?els[i]:els[Math.floor(Math.random()*Math.min(5,els.length))];if(!e||!e.isConnected)return;
+ const S0=sc.getBoundingClientRect(),L=e.getBoundingClientRect(),x=L.left-S0.left-sc.clientLeft+L.width/2-10,y=L.top-S0.top-sc.clientTop+L.height*.35;
+ const r=document.createElement("div");r.className="rock";r.textContent="🪨";r.style.left=x+"px";r.style.top="-24px";sc.appendChild(r);void r.offsetWidth;
+ r.style.transform="translateY("+(y+24)+"px) rotate(540deg)";
+ setTimeout(()=>{r.remove();sfx.crash();buzz(50);e.classList.add("shk");setTimeout(()=>e.classList.remove("shk"),700);
+  if(i>=0&&lots[i].st==="rented"){lots[i].dmg=true;pop(i,"🪨",1);if(fireReady())queueEmerg("fire",1.5);toast("🪨 Falling rocks damaged Lot "+(i+1)+"! Tap it to repair.")}
+  else if(last&&i<0)toast("🪨 Rocks tumbled down but missed your homes.")},950)}
 function cosClick(id){const[cat,k]=id.split(":"),it=COS[cat][k];if(it.c>0&&!meta.own[id]){if(meta.stars<it.c)return toast("Need "+it.c+" ⭐.");meta.stars-=it.c;meta.own[id]=1;sfx.coin()}meta.eq[cat]=k;applyTheme();checkAch();for(const x of lots)x._k=null;showRw(rwFrom)}
 const UP={shield:{n:"Storm Shutters",ic:"🛡️",d:"−20% storm repair cost per tier",c:[2,4,6,9]},cash:{n:"Seed Money",ic:"💵",d:"+$100 starting cash per tier",c:[3,5,8,12]},crew:{n:"Union Crew",ic:"👷",d:"+10% build speed per tier",c:[3,5,8,12]},buyer:{n:"Patient Buyers",ic:"🤝",d:"+1s offer time per tier",c:[2,4,6,9]}};
 const ACH=[
