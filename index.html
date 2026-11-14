@@ -1573,7 +1573,7 @@ function followingTargetFactor({road,dir,x,laneY,baseSpeed,roadSelf=null,traffic
   }
   for(const key of Object.keys(traffic)){
     const i=+key;if(trafficSelf!=null&&i===trafficSelf)continue;
-    const tr=traffic[i];if(!tr||tr.kind==="parked")continue;
+    const tr=traffic[i];if(!tr||tr.kind==="parked"||(tr.kind==="arrive"&&tr.t<=0))continue;
     const g=trafficGeometry(i);if(!g||g.road!==road)continue;
     const info=laneStateForTraffic(i,tr,g,tr.t);if(!info)continue;
     consider(info.x,info.y,info.dir,info.speed,false);
@@ -1592,7 +1592,7 @@ function safeSpecialProgress(i,tr,g,currentT,desiredT,currentPose){
     }
     for(const otherKey of Object.keys(traffic)){
       if(+otherKey===i)continue;
-      const ot=traffic[otherKey];if(!ot||ot.kind==="parked")continue;
+      const ot=traffic[otherKey];if(!ot||ot.kind==="parked"||(ot.kind==="arrive"&&ot.t<=0))continue;
       const og=trafficGeometry(+otherKey);if(!og||og.road!==g.road)continue;
       if(!safeVehicleStep(currentPose,nextPose,trafficPose(ot,og,ot.t)))return false;
     }
@@ -1615,7 +1615,7 @@ function safeRoadProgress(car,currentX,desiredX,currentPose,wrapped){
       if(!safeVehicleStep(currentPose,next,roadVehiclePose(otherCar)))return false;
     }
     for(const key of Object.keys(traffic)){
-      const i=+key,tr=traffic[i];if(!tr||tr.kind==="parked")continue;
+      const i=+key,tr=traffic[i];if(!tr||tr.kind==="parked"||(tr.kind==="arrive"&&tr.t<=0))continue;
       const info=specialPose(i,tr);if(!info||info.road!==car.road)continue;
       if(!safeVehicleStep(currentPose,next,info.pose))return false;
     }
@@ -1699,7 +1699,7 @@ function departureLaneBlocked(i,tr,g,dt){
   // Also yield to active driveway cars whose turn/arrival currently occupies the road mouth.
   for(const otherKey of Object.keys(traffic)){
     if(+otherKey===i)continue;
-    const ot=traffic[otherKey];if(!ot||ot.kind==="parked")continue;
+    const ot=traffic[otherKey];if(!ot||ot.kind==="parked"||(ot.kind==="arrive"&&ot.t<=0))continue;
     const og=trafficGeometry(+otherKey);if(!og||og.road!==g.road)continue;
     const pose=trafficPose(ot,og,ot.t);
     if(Math.abs(pose.x-mergeX)<clearance&&Math.abs(pose.y-g.roadY)<28)return true;
@@ -1710,11 +1710,18 @@ function departureLaneBlocked(i,tr,g,dt){
   tr.exitCommitted=true;tr.speedFactor=.12;tr.actualSpeed=0;
   return false;
 }
+function entryClear(i,tr,g){const m=trafficRoute(g,tr.dir,"arrive"),sx=m.startX,ly=m.laneY;
+  for(const c of roadTraffic){if(c.road!==g.road)continue;const p=roadVehiclePose(c);if(Math.abs(p.y-ly)<7&&Math.abs(p.x-sx)<46)return false}
+  for(const k of Object.keys(traffic)){if(+k===i)continue;const ot=traffic[k];if(!ot||ot.kind==="parked")continue;const og=trafficGeometry(+k);if(!og||og.road!==g.road)continue;
+   if(ot.kind==="arrive"&&ot.t<=0){if(+k<i&&ot.dir===tr.dir)return false;continue}
+   const p=trafficPose(ot,og,ot.t);if(Math.abs(p.y-ly)<7&&Math.abs(p.x-sx)<46)return false}
+  return true}
 function updateTraffic(dt){
   const keys=Object.keys(traffic);
   keys.forEach(key=>{
     const i=+key,tr=traffic[i];if(!tr||tr.kind==="parked")return;
     const g=trafficGeometry(i);if(!g)return;
+    if(tr.kind==="arrive"&&tr.t<=0&&!entryClear(i,tr,g)){tr.hold=(tr.hold||0)+dt;if(tr.hold<12)return}
     const curT=tr.t,curPose=trafficPose(tr,g,curT);
     const route=trafficRoute(g,tr.dir,(tr.kind==="arrive"||tr.kind==="retreat")?"arrive":"depart");
     const drivewayEnd=route.driveway/route.total*tr.dur;
@@ -1726,7 +1733,7 @@ function updateTraffic(dt){
         const nextT=Math.min(drivewayEnd,tr.t+dt);
         tr.t=nextT;tr.actualSpeed=carDistance(curPose,trafficPose(tr,g,nextT))/Math.max(dt,.001);return;
       }
-      if(departureLaneBlocked(i,tr,g,dt)){tr.t=Math.min(tr.t,drivewayEnd);tr.actualSpeed=0;return;}
+      if(departureLaneBlocked(i,tr,g,dt)){tr.cw=(tr.cw||0)+dt;if(tr.cw<6){tr.t=Math.min(tr.t,drivewayEnd);tr.actualSpeed=0;return;}tr.exitCommitted=true;tr.ghost=2;tr.speedFactor=1}
     }
 
     const laneInfo=laneStateForTraffic(i,tr,g,tr.t);
@@ -1739,7 +1746,9 @@ function updateTraffic(dt){
     // slow before they catch a vehicle still completing its turn.
     const factor=setSpeedFactor(tr,targetFactor,dt);
     const desiredT=Math.min(tr.dur,tr.t+dt*factor);
-    const safeT=safeSpecialProgress(i,tr,g,tr.t,desiredT,curPose);
+    if(tr.ghost>0)tr.ghost-=dt;
+    const safeT=tr.ghost>0?Math.min(tr.dur,tr.t+dt):safeSpecialProgress(i,tr,g,tr.t,desiredT,curPose);
+    if(safeT-curT<1e-6){tr.stall=(tr.stall||0)+dt;if(tr.stall>6){tr.ghost=1.6;tr.stall=0;tr.speedFactor=1}}else tr.stall=0;
     tr.t=safeT;
     const finalPose=trafficPose(tr,g,tr.t);
     tr.actualSpeed=carDistance(curPose,finalPose)/Math.max(dt,.001);
@@ -1759,13 +1768,15 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
     const currentX=car.x,current=roadVehiclePose(car,currentX),edge=width+18;
     let targetFactor=followingTargetFactor({road:car.road,dir:car.dir,x:current.x,laneY:current.y,
       baseSpeed:car.speed,roadSelf:car});
+    if(car.ghost>0){car.ghost-=dt;targetFactor=1}
     const factor=setSpeedFactor(car,targetFactor,dt);
     const slow=W().k==="mountain"&&(ev.k==="snow"||ev.k==="storm")?.6:1;let nx=currentX+car.dir*car.speed*factor*dt*slow,wrapped=false;
     if(car.dir===1&&nx>edge){nx=-18;wrapped=true}
     else if(car.dir===-1&&nx< -18){nx=edge;wrapped=true}
-    if(wrapped&&(car.emerg||car.tmp)){car.done=true;car.x=nx;return}nx=safeRoadProgress(car,currentX,nx,current,wrapped);
+    if(wrapped&&(car.emerg||car.tmp)){car.done=true;car.x=nx;return}if(!(car.ghost>0))nx=safeRoadProgress(car,currentX,nx,current,wrapped);
     const waitingAtEdge=wrapped&&nx===(car.dir===1?edge:-18);
     const actualDelta=waitingAtEdge?0:(wrapped?car.speed*factor*dt:Math.abs(nx-currentX));
+    if(actualDelta<.01){car.stall=(car.stall||0)+dt;if(car.stall>6){car.ghost=1.6;car.stall=0;car.speedFactor=1}}else car.stall=0;
     car.actualSpeed=actualDelta/Math.max(dt,.001);
     car.x=nx;
   });
@@ -1991,11 +2002,12 @@ function emergMarkup(kind){
  if(kind==="bus")return '<svg viewBox="0 0 54 18" preserveAspectRatio="none" aria-hidden="true">'+lw+'<rect x="1" y="3" width="52" height="12" rx="2.5" fill="#fbc02d" stroke="#263238" stroke-width="1.1"/><path d="M3 5h41M3 13h41M3 9h41" stroke="#212121" stroke-width=".9"/><rect x="45" y="4.2" width="6" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="1.5" y="4.5" width="1.6" height="2" fill="#e53935"/><rect x="1.5" y="11.5" width="1.6" height="2" fill="#e53935"/>'+lh+'</svg>';
  if(kind==="amb")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 9h9M8.5 5.5v7" stroke="#e53935" stroke-width="2.2"/>'+lights+hl+'</svg>';
  return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#d32f2f" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 7h16M3 11h16" stroke="#eceff1" stroke-width="1.4"/>'+lights+hl+'</svg>'}
+const spawnClear=(road,dir,x)=>!roadTraffic.some(c=>c.road===road&&c.dir===dir&&Math.abs(c.x-x)<60);
 function spawnTaxi(){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W0=sc.clientWidth||600,sp=40+Math.random()*8;
- const el=makeVehicle("#f5c400","road-traffic-car");sc.appendChild(el);roadTraffic.push({road,dir,x:dir===1?-18:W0+18,speed:sp,speedFactor:1,actualSpeed:sp,color:"#f5c400",el,tmp:true})}
+ if(!spawnClear(road,dir,dir===1?-18:W0+18))return;const el=makeVehicle("#f5c400","road-traffic-car");sc.appendChild(el);roadTraffic.push({road,dir,x:dir===1?-18:W0+18,speed:sp,speedFactor:1,actualSpeed:sp,color:"#f5c400",el,tmp:true})}
 const QV=["bus","cbus","ranger","plow","logtruck","tram","tour","icecream"];
 function spawnEmerg(kind,quiet){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;
- const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W=sc.clientWidth||600;
+ const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W=sc.clientWidth||600;if(!spawnClear(road,dir,dir===1?-26:W+26))return;
  const el=document.createElement("div");el.className="road-traffic-car"+(QV.includes(kind)?"":" emg");el.setAttribute("aria-hidden","true");el.innerHTML=emergMarkup(kind);sc.appendChild(el);
  const long=["bus","cbus","logtruck","tram","tour"].includes(kind);if(long)el.classList.add("long");
  roadTraffic.push({len:long?30:0,road,dir,x:dir===1?-26:W+26,speed:{bus:46,cbus:46,cop:54,ranger:50,plow:34,logtruck:40,tram:34,tour:44,icecream:42}[kind]||62,speedFactor:1,actualSpeed:50,color:"#fff",el,emerg:kind});
