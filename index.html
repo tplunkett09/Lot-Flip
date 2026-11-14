@@ -78,7 +78,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot.business-parking .bb{z-index:70}
 .lot.business-parking.to-bottom .bb{top:3px;bottom:auto}
 .lot.business-parking.to-top .bb{top:auto;bottom:3px}
-.ab{right:3px;background:#d84315;font-size:9px}
+.ab{right:3px;background:#d84315;font-size:9px}.ab.rent{background:#43a047}
 .pop{position:absolute;top:6px;right:6px;font-weight:800;color:#fff;background:var(--acc);border-radius:10px;padding:1px 6px;font-size:11px;animation:popa 1.1s ease-out forwards;pointer-events:none;z-index:40}
 .pop.big{font-size:14px;background:var(--gold);color:#000}
 @keyframes popa{to{transform:translateY(-26px);opacity:0}}
@@ -1147,7 +1147,7 @@ function tpStay(l,k,st,T,s){const rr=l.reno.includes("roof"),on=st==="rented";
      +'<rect x="70" y="15" width="18" height="5" rx="1" fill="#263238"/><text class="'+(on?"blk":"")+'" x="79" y="18.8" font-size="3.3" font-weight="900" text-anchor="middle" fill="#76ff03">VACANCY</text><path d="M79 20v4" stroke="#37474f"/>'
      +'<rect x="88" y="38" width="4" height="8" fill="#e3f2fd" stroke="#1e88e5" stroke-width=".5"/>';
     return s}
-  if(k==="colonial"){const b=l.paint==="#e8d8c3"?"#fff3e0":l.paint,r=rr?"#ff7043":"#c62828";
+  if(k==="colonial"){const b=l.paint==="#e8d8c3"?"#fff3e0":l.paint,r=rr?"#ff7043":"#4fa8e0";
     s+='<rect x="16" y="10" width="68" height="36" fill="'+b+'" '+T+'/><rect x="14" y="7" width="72" height="4" fill="'+r+'" '+T+'/><path d="M16 28h68" stroke="#bcaaa4" stroke-width="1.2"/>'
      +'<rect x="35" y="-1" width="30" height="8" rx="1" fill="'+r+'" stroke="#3e2723"/><text x="50" y="5" font-size="6" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="1.5">HOTEL</text>'
      +[20,32,44,56,68].map(x=>'<rect x="'+x+'" y="13" width="9" height="10" fill="#bde3f5" stroke="#3e2723" stroke-width=".6"/><rect x="'+(x-1)+'" y="23" width="11" height="1.6" fill="#fff" stroke="#8d6e63" stroke-width=".4"/>').join("")
@@ -1158,12 +1158,15 @@ function tpStay(l,k,st,T,s){const rr=l.reno.includes("roof"),on=st==="rented";
     return s}
   const b=l.paint==="#e8d8c3"?"#fffde7":l.paint,r=rr?"#ff7043":"#00897b";
   s+='<rect x="30" y="-4" width="40" height="50" fill="'+b+'" '+T+'/><rect x="28" y="-7" width="44" height="4" fill="'+r+'" '+T+'/><rect x="38" y="-13" width="24" height="6" rx="1" fill="'+r+'" stroke="#3e2723"/><text x="50" y="-8.6" font-size="4.4" font-weight="900" text-anchor="middle" fill="#fff59d" letter-spacing="1">RESORT</text>';
-  [-1,14,29].forEach((y,f)=>{[33,43,53,63].forEach(x=>{s+='<rect x="'+x+'" y="'+y+'" width="6" height="8" fill="#bde3f5" stroke="#3e2723" stroke-width=".5"/>'});if(f<2)s+='<rect x="30" y="'+(y+9)+'" width="40" height="1.8" fill="#4dd0e1" stroke="#00838f" stroke-width=".4"/>'});
+  [-1,14,29].forEach((y,f)=>{(f===2?[33,63]:[33,43,53,63]).forEach(x=>{s+='<rect x="'+x+'" y="'+y+'" width="6" height="8" fill="#bde3f5" stroke="#3e2723" stroke-width=".5"/>'});if(f<2)s+='<rect x="30" y="'+(y+9)+'" width="40" height="1.8" fill="#4dd0e1" stroke="#00838f" stroke-width=".4"/>'});
   s+='<rect x="44" y="36" width="12" height="10" fill="#b2ebf2" stroke="#3e2723"/><path d="M50 36v10" stroke="#3e2723" stroke-width=".6"/><path d="M41 36h18l-2-3h-14z" fill="'+r+'"/>'
    +'<rect x="3" y="36" width="25" height="12" rx="3" fill="#29b6f6" stroke="#0277bd" stroke-width="1.2"/><path d="M6 41q3-2 6 0t6 0t6 0" stroke="#e1f5fe" fill="none" stroke-width="1"/><path d="M8 36V28" stroke="#5d4037"/><path d="M2 29q6-6 12 0z" fill="#ff7043"/>'
-   +'<ellipse cx="86" cy="45" rx="11" ry="4" fill="#b0bec5" stroke="#546e7a"/><ellipse cx="86" cy="44.4" rx="8.4" ry="2.8" fill="#4fc3f7"/><rect x="84.6" y="36" width="2.8" height="8" fill="#eceff1" stroke="#90a4ae" stroke-width=".4"/><path class="spray" d="M86 36v-6M86 32q-5 0-6 6M86 32q5 0 6 6" stroke="#e1f5fe" stroke-width="1.2" fill="none"/>'
-   +PALM(24,34,.55)+PALM(78,32,.55);
-  if(on){[[43,-1],[63,14],[33,14],[53,29]].forEach((w,q)=>{s+='<rect class="lit" x="'+w[0]+'" y="'+w[1]+'" width="6" height="8" fill="#ffe082" style="animation-duration:'+(4+q)+'s;animation-delay:'+(-q*1.4)+'s"/>'});s+='<g class="bob"><circle cx="14" cy="42" r="1.8" fill="#ffcc80"/></g>'}
+   +'<ellipse cx="86" cy="46" rx="11.5" ry="3.6" fill="#cfd8dc" stroke="#78909c" stroke-width=".8"/><ellipse cx="86" cy="45.2" rx="9.4" ry="2.6" fill="#4fc3f7"/><path d="M79 45.4q3 .8 6 0t6 0" stroke="#e1f5fe" stroke-width=".6" fill="none"/>'
+   +'<rect x="85" y="34.5" width="2" height="10.5" fill="#eceff1" stroke="#90a4ae" stroke-width=".4"/><ellipse cx="86" cy="35" rx="5.6" ry="1.7" fill="#cfd8dc" stroke="#78909c" stroke-width=".6"/><ellipse cx="86" cy="34.6" rx="4.4" ry="1" fill="#4fc3f7"/>'
+   +'<rect x="85.5" y="28.6" width="1" height="6" fill="#eceff1" stroke="#90a4ae" stroke-width=".3"/><ellipse cx="86" cy="29" rx="2.8" ry=".9" fill="#cfd8dc" stroke="#78909c" stroke-width=".5"/>'
+   +'<g class="spray" stroke="#b3e5fc" stroke-width=".7" fill="none"><path d="M80.6 35.4Q79.6 40 79.2 44.6M82 35.8Q81.4 40 81 44.8M91.4 35.4Q92.4 40 92.8 44.6M90 35.8Q90.6 40 91 44.8M83.4 29.2Q82.8 32 82.4 34.4M88.6 29.2Q89.2 32 89.6 34.4M86 28.6V24"/></g><circle class="spray" cx="85" cy="23.6" r=".6" fill="#e1f5fe"/><circle class="spray" cx="87" cy="24.4" r=".6" fill="#e1f5fe"/>'
+   +[31,70].map(x=>'<rect x="'+(x-2)+'" y="42.4" width="4" height="3.6" fill="#a1887f" stroke="#5d4037" stroke-width=".5"/><circle cx="'+x+'" cy="40" r="2.6" fill="#43a047"/><circle cx="'+x+'" cy="36.4" r="2" fill="#4caf50"/><circle cx="'+x+'" cy="33.4" r="1.4" fill="#66bb6a"/><circle cx="'+(x-1)+'" cy="39.4" r=".7" fill="#ec407a"/><circle cx="'+(x+1.1)+'" cy="36.4" r=".7" fill="#fdd835"/>').join("");
+  if(on){[[43,-1],[63,14],[33,14],[63,29]].forEach((w,q)=>{s+='<rect class="lit" x="'+w[0]+'" y="'+w[1]+'" width="6" height="8" fill="#ffe082" style="animation-duration:'+(4+q)+'s;animation-delay:'+(-q*1.4)+'s"/>'});s+='<g class="bob"><circle cx="14" cy="42" r="1.8" fill="#ffcc80"/></g>'}
   return s}
 function tpBld3(l,k,st,T,s){const on=st==="ready";
   if(k==="realestate"){s+='<rect x="4" y="34" width="92" height="12" fill="#bcaaa4" '+T+'/>';for(let x=8;x<96;x+=5)s+='<path d="M'+x+' 34v12" stroke="#8d6e63" stroke-width=".6"/>';
@@ -1269,7 +1272,6 @@ function houseArt(l,i){
   }
   if(st==="listed"||st==="ai_for_sale")s+='<g transform="translate(18,5) scale(1.25)"><path d="M18 18v26M18 20h14" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/><rect x="18" y="22" width="28" height="18" rx="2" fill="#fff" stroke="#1565c0" stroke-width="1.5"/><rect x="18" y="22" width="28" height="6" fill="#1565c0"/><text x="32" y="26.5" font-size="4" font-weight="900" text-anchor="middle" fill="#fff">REALTY</text><text x="32" y="34" font-size="5" font-weight="900" text-anchor="middle" fill="#d32f2f">FOR SALE</text></g>';
   if(l.dmg&&st==="rented")s+='<polygon points="30,16 54,9 66,19 42,27" fill="#1e88e5" stroke="#0d47a1" opacity=".9"/><path d="M34 18l8 5M46 13l9 6" stroke="#fff" opacity=".5"/><circle class="smk" cx="58" cy="16" r="3" fill="#555"/><circle class="smk s2" cx="48" cy="18" r="3" fill="#555"/><g class="scaf"><circle cx="50" cy="12" r="10" fill="#e53935" stroke="#fff" stroke-width="1.5"/><text x="50" y="18" font-size="15" font-weight="900" text-anchor="middle" fill="#fff">!</text></g>';
-  if(st==="rented")s+='<rect x="2" y="32" width="24" height="10" rx="2" fill="#4caf50"/><text x="14" y="39" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">RENT</text>';
   if(st==="sold")s+='<g class="stamp"><g transform="rotate(-12 50 32)"><rect x="12" y="23" width="76" height="18" rx="3" fill="#e53935" stroke="#fff" stroke-width="1.5"/><text x="50" y="37" font-size="13" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="2">SOLD</text></g></g>';
   return s;
 }
@@ -1841,7 +1843,7 @@ function draw(){const so=$("stm");if(so){so.classList.toggle("on",ev.k==="storm"
     const mine=["owned","working","reno_working","demo","ready","rented","listed","clearing"].includes(l.st);
     e.classList.toggle("purchased",mine);e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
-    const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
+    const ab=e.querySelector(".ab"),rb=l.st==="rented"&&!l.dmg;ab.style.display=ai||rb?"block":"none";ab.textContent=ai?(l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR"):"RENT";ab.classList.toggle("rent",!ai&&rb);
     const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),l.forest?1:0,l.st==="clearing"?Math.round(l.cp*6):0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
     let lb="",pb=0;const sn=l.hs?(SHORT[S[l.hs].n]||S[l.hs].n.replace(/^(Beach|City|Mountain|Ski|Hiking|Log|Hot) /,"").split(" ")[0]):"";
