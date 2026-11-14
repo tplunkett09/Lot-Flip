@@ -78,7 +78,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot.business-parking .bb{z-index:70}
 .lot.business-parking.to-bottom .bb{top:3px;bottom:auto}
 .lot.business-parking.to-top .bb{top:auto;bottom:3px}
-.ab{right:3px;background:#d84315;font-size:9px}.ab.rent{background:#43a047}
+.ab{right:3px;background:#d84315;font-size:9px}
 .pop{position:absolute;top:6px;right:6px;font-weight:800;color:#fff;background:var(--acc);border-radius:10px;padding:1px 6px;font-size:11px;animation:popa 1.1s ease-out forwards;pointer-events:none;z-index:40}
 .pop.big{font-size:14px;background:var(--gold);color:#000}
 @keyframes popa{to{transform:translateY(-26px);opacity:0}}
@@ -1843,7 +1843,7 @@ function draw(){const so=$("stm");if(so){so.classList.toggle("on",ev.k==="storm"
     const mine=["owned","working","reno_working","demo","ready","rented","listed","clearing"].includes(l.st);
     e.classList.toggle("purchased",mine);e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
-    const ab=e.querySelector(".ab"),rb=l.st==="rented"&&!l.dmg;ab.style.display=ai||rb?"block":"none";ab.textContent=ai?(l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR"):"RENT";ab.classList.toggle("rent",!ai&&rb);
+    const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
     const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),l.forest?1:0,l.st==="clearing"?Math.round(l.cp*6):0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
     let lb="",pb=0;const sn=l.hs?(SHORT[S[l.hs].n]||S[l.hs].n.replace(/^(Beach|City|Mountain|Ski|Hiking|Log|Hot) /,"").split(" ")[0]):"";
