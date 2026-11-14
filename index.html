@@ -71,13 +71,13 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes pi{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
 .act{width:86%;background:rgba(0,0,0,.48);border-radius:4px;padding:2px 1px;font-size:8px;font-weight:800;text-align:center;color:#fff;line-height:1.05;margin-bottom:5px}
 .act.ai{background:#ff6f00}
+.lot.to-bottom .act{order:-1;margin:0 0 2px}.lot.to-bottom .pb{order:2}
+.act .bp{font-style:normal;display:block;width:fit-content;margin:1px auto 0;background:#ab47bc;color:#fff;border-radius:3px;padding:0 3px;white-space:nowrap}
 .pb{width:100%;height:5px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden}
 .pb i{display:block;height:100%;background:var(--gold);width:0}
 .bb,.ab{position:absolute;top:3px;font-size:10px;font-weight:800;padding:1px 4px;border-radius:4px;color:#fff;z-index:5;pointer-events:none;display:none}
 .bb{left:3px;background:rgba(171,71,188,.95)}
 .lot.business-parking .bb{z-index:70}
-.lot.business-parking.to-bottom .bb{top:3px;bottom:auto}
-.lot.business-parking.to-top .bb{top:auto;bottom:3px}
 .ab{right:3px;background:#d84315;font-size:9px}
 .pop{position:absolute;top:6px;right:6px;font-weight:800;color:#fff;background:var(--acc);border-radius:10px;padding:1px 6px;font-size:11px;animation:popa 1.1s ease-out forwards;pointer-events:none;z-index:40}
 .pop.big{font-size:14px;background:var(--gold);color:#000}
@@ -1842,7 +1842,7 @@ function draw(){const so=$("stm");if(so){so.classList.toggle("on",ev.k==="storm"
     e.classList.toggle("business-parking",hasBuilding&&hasBusinessParking(l));
     const mine=["owned","working","reno_working","demo","ready","rented","listed","clearing"].includes(l.st);
     e.classList.toggle("purchased",mine);e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
-    const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display=bp>0?"block":"none";bb.textContent="+"+bp+"%";
+    const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display="none";
     const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";
     const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),l.forest?1:0,l.st==="clearing"?Math.round(l.cp*6):0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
@@ -1853,7 +1853,7 @@ function draw(){const so=$("stm");if(so){so.classList.toggle("on",ev.k==="storm"
     else if(l.st==="listed")lb=l.offer?"💰 "+fmt(l.offer.price):"On market";else if(l.st==="ai_owned")lb=sn;
     else if(l.st==="ai_for_sale")lb="Buy "+fmt(l.aiP);else lb="Sold ✔";
     if(l.offer)pb=l.offer.ttl/l.offer.max;
-    const a=e.querySelector(".act");a.textContent=lb;a.style.display=l.st==="empty"?"none":"";a.classList.toggle("ai",l.st==="ai_for_sale");a.classList.toggle("dmgl",!!l.dmg);e.classList.toggle("dmg",!!l.dmg);
+    const a=e.querySelector(".act"),em=l.st==="empty",ah=(em?"":lb)+(bp>0?'<i class="bp">+'+bp+"%</i>":"");if(a._h!==ah){a._h=ah;a.innerHTML=ah}a.style.display=em&&!(bp>0)?"none":"";a.classList.toggle("ai",l.st==="ai_for_sale");a.classList.toggle("dmgl",!!l.dmg);e.classList.toggle("dmg",!!l.dmg);
     const bi=e.querySelector(".pb i");bi.style.width=pb*100+"%";bi.style.background=l.offer?"var(--blue)":"var(--gold)";
     e.classList.toggle("offer",!!l.offer);e.classList.toggle("hot",false);
   });
