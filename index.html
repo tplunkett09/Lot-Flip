@@ -184,6 +184,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 #stm .ash.a1{left:-60px;top:-60px;width:calc(100% + 120px);height:calc(100% + 60px);background-image:radial-gradient(circle 2.4px at 8px 10px,rgba(70,70,70,.9) 60%,transparent),radial-gradient(circle 2px at 30px 34px,rgba(110,110,110,.85) 60%,transparent),radial-gradient(circle 2.6px at 46px 18px,rgba(60,60,60,.8) 60%,transparent),radial-gradient(circle 2.2px at 20px 50px,rgba(255,112,67,.85) 60%,transparent);background-size:58px 60px;animation:ashf 3.2s linear infinite}
 #stm .ash.a2{left:-60px;top:-44px;width:calc(100% + 120px);height:calc(100% + 44px);background-image:radial-gradient(circle 1.8px at 12px 6px,rgba(140,140,140,.85) 60%,transparent),radial-gradient(circle 2.8px at 34px 28px,rgba(80,80,80,.75) 60%,transparent),radial-gradient(circle 1.6px at 24px 38px,rgba(255,152,0,.7) 60%,transparent);background-size:44px 44px;animation:ashf2 2.2s linear infinite;opacity:.8}
 #stm.windy.ashy .leaf{display:none}
+#scene.quake{animation:quake .9s linear}@keyframes quake{0%,100%{transform:translate(0,0)}8%{transform:translate(-5px,2px)}16%{transform:translate(5px,-2px)}24%{transform:translate(-4px,-3px)}32%{transform:translate(4px,3px)}40%{transform:translate(-4px,1px)}50%{transform:translate(3px,-2px)}60%{transform:translate(-3px,2px)}70%{transform:translate(2px,-1px)}80%{transform:translate(-2px,1px)}90%{transform:translate(1px,0)}}
 @keyframes ashf{to{transform:translate3d(58px,60px,0)}}@keyframes ashf2{to{transform:translate3d(44px,44px,0)}}#stm.snowy .rain{display:none}
 #stm .rain{position:absolute;left:-30%;right:-30%;top:-90px;bottom:-90px;opacity:.75;background:repeating-linear-gradient(90deg,transparent 0 11px,rgba(200,222,255,.85) 11px 12px);-webkit-mask-image:repeating-linear-gradient(180deg,#000 0 16px,transparent 16px 44px);mask-image:repeating-linear-gradient(180deg,#000 0 16px,transparent 16px 44px);animation:rain .4s linear infinite}
 #stm .r2{opacity:.45;background:repeating-linear-gradient(90deg,transparent 0 16px,rgba(200,222,255,.8) 16px 17px);-webkit-mask-image:repeating-linear-gradient(180deg,#000 0 10px,transparent 10px 36px);mask-image:repeating-linear-gradient(180deg,#000 0 10px,transparent 10px 36px);animation-duration:.3s}
@@ -759,7 +760,7 @@ function tick(now){
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
     if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="rocks"&&!ev.hit&&ev.t<=12.5){ev.hit=true;rockslide()}if(ev.k==="volcano"&&!ev.hit&&ev.t<=10){ev.hit=true;ashfall()}if(ev.k==="fireworks"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=1.1;sceneBurst()}}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"||ev.k==="game"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?(W().k==="mountain"?"☀️ The blizzard has cleared.":W().k==="desert"?"☀️ The sandstorm has passed.":W().k==="lake"?"🌤️ The floodwater is going down.":W().k==="tropical"?"🌤️ The tropical storm has passed.":"☀️ The storm has passed."):ev.k==="snow"?"🌤️ Snow season is over.":ev.k==="rocks"?"🪨 The rockslide has settled.":ev.k==="peak"?"Peak season is over.":ev.k==="heat"?"🌤️ The heat wave has broken.":ev.k==="summer"?"Summer weekend is over.":ev.k==="cruise"?"🛳️ The cruise ship has sailed.":ev.k==="luau"?"🌺 The luau is over.":ev.k==="volcano"?"🌋 The volcano has calmed down.":ev.k==="heritage"?"🎭 The Heritage Festival has wrapped up.":ev.k==="tours"?"The walking tours are done.":ev.k==="inspect"?"🔍 The inspector has left.":ev.k==="fishing"?"🏆 The fishing tournament is over.":ev.k==="mosquito"?"The mosquitoes are gone!":ev.k==="roadtrip"?"Road trip season is over.":ev.k==="offseason"?"🎟️ The tourists are back!":ev.k==="expansion"?"🚧 Park expansion complete.":ev.k==="fireworks"?"🎆 What a show!":"Market is back to normal.");ev.k=null;fxLayers()}}
-    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");if(W().k==="themepark")pool.push("peak","peak","offseason","expansion","fireworks");if(W().k==="desert")pool.push("heat","roadtrip","roadtrip");if(W().k==="tropical")pool.push("cruise","cruise","luau","volcano");if(W().k==="historic")pool.push("heritage","tours","tours","inspect");if(W().k==="lake")pool.push("summer","summer","fishing","mosquito");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
+    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");if(W().k==="themepark")pool.push("peak","peak","offseason","expansion","fireworks");if(W().k==="desert")pool.push("heat","roadtrip","roadtrip");if(W().k==="tropical")pool.push("cruise","cruise","luau","volcano");if(W().k==="historic")pool.push("heritage","tours","tours","inspect");if(W().k==="lake")pool.push("summer","summer","fishing","mosquito");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="volcano"){quake();sfx.rumble()}if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
       if(visitorBusiness(l)){
@@ -2227,7 +2228,12 @@ function departureLaneBlocked(i,tr,g,dt){
     let nx=car.x+car.dir*car.speed*dt;
     if(car.dir===1&&nx>maxX)nx=minX+((nx-maxX)%span);
     else if(car.dir===-1&&nx<minX)nx=maxX-((minX-nx)%span);
-    if(Math.min(Math.abs(car.x-mergeX),Math.abs(nx-mergeX))<clearance)return true;
+    // Departures always join the near-side lane, so only that lane matters: cars coming up
+    // behind the merge need the full clearance, cars already past it only a short gap.
+    if(car.dir!==tr.dir)continue;
+    const back=Math.max((mergeX-car.x)*tr.dir,(mergeX-nx)*tr.dir),ahead=Math.min((car.x-mergeX)*tr.dir,(nx-mergeX)*tr.dir);
+    if(back>-((car.len||20)/2+14)&&back<clearance)return true;
+    if(ahead>=0&&ahead<(car.len||20)/2+24)return true;
   }
 
   // Also yield to active driveway cars whose turn/arrival currently occupies the road mouth.
@@ -2250,10 +2256,14 @@ function entryClear(i,tr,g){const m=trafficRoute(g,tr.dir,"arrive"),sx=m.startX,
    if(ot.kind==="arrive"&&ot.t<=0){if(+k<i&&ot.dir===tr.dir)return false;continue}
    const p=trafficPose(ot,og,ot.t);if(Math.abs(p.y-ly)<7&&Math.abs(p.x-sx)<46)return false}
   return true}
+function fadeVeh(el,mid){if(!el||!el.isConnected){mid();return}el.style.transition="opacity .35s";el.style.opacity="0";setTimeout(()=>{mid();if(el.isConnected)el.style.opacity="1"},380)}
+function vanishTr(i,tr){if(tr.vanishing)return;tr.vanishing=1;fadeVeh(tr.el,()=>{if(traffic[i]!==tr)return;tr.vanishing=0;tr.stall=0;tr.cw=0;
+  if(tr.kind==="arrive"){tr.t=tr.dur;tr.actualSpeed=0;if(tr.leaveAfterArrival){const g=trafficGeometry(i);if(g)beginTrafficDeparture(i,tr,g);else finishTraffic(i,tr)}else{tr.kind="parked";if(tr.visitor)tr.parkUntil=tr.stay||(8+Math.random()*18)}}
+  else finishTraffic(i,tr)})}
 function updateTraffic(dt){
   const keys=Object.keys(traffic);
   keys.forEach(key=>{
-    const i=+key,tr=traffic[i];if(!tr||tr.kind==="parked")return;
+    const i=+key,tr=traffic[i];if(!tr||tr.kind==="parked"||tr.vanishing)return;
     const g=trafficGeometry(i);if(!g)return;
     if(tr.kind==="arrive"&&tr.t<=0&&!entryClear(i,tr,g)){tr.hold=(tr.hold||0)+dt;if(tr.hold<12)return}
     const curT=tr.t,curPose=trafficPose(tr,g,curT);
@@ -2267,7 +2277,7 @@ function updateTraffic(dt){
         const nextT=Math.min(drivewayEnd,tr.t+dt);
         tr.t=nextT;tr.actualSpeed=carDistance(curPose,trafficPose(tr,g,nextT))/Math.max(dt,.001);return;
       }
-      if(departureLaneBlocked(i,tr,g,dt)){tr.cw=(tr.cw||0)+dt;if(tr.cw<6){tr.t=Math.min(tr.t,drivewayEnd);tr.actualSpeed=0;return;}tr.exitCommitted=true;tr.ghost=2;tr.speedFactor=1}
+      if(departureLaneBlocked(i,tr,g,dt)){tr.cw=(tr.cw||0)+dt;if(tr.cw<9){tr.t=Math.min(tr.t,drivewayEnd);tr.actualSpeed=0;return;}vanishTr(i,tr);return}
     }
 
     const laneInfo=laneStateForTraffic(i,tr,g,tr.t);
@@ -2282,7 +2292,7 @@ function updateTraffic(dt){
     const desiredT=Math.min(tr.dur,tr.t+dt*factor);
     if(tr.ghost>0)tr.ghost-=dt;
     const safeT=tr.ghost>0?Math.min(tr.dur,tr.t+dt):safeSpecialProgress(i,tr,g,tr.t,desiredT,curPose);
-    if(safeT-curT<1e-6){tr.stall=(tr.stall||0)+dt;if(tr.stall>6){tr.ghost=1.6;tr.stall=0;tr.speedFactor=1}}else tr.stall=0;
+    if(safeT-curT<1e-6){tr.stall=(tr.stall||0)+dt;if(tr.stall>6){tr.stall=0;vanishTr(i,tr);return}}else tr.stall=0;
     tr.t=safeT;
     const finalPose=trafficPose(tr,g,tr.t);
     tr.actualSpeed=carDistance(curPose,finalPose)/Math.max(dt,.001);
@@ -2302,6 +2312,10 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
     const currentX=car.x,current=roadVehiclePose(car,currentX),edge=width+18;
     let targetFactor=followingTargetFactor({road:car.road,dir:car.dir,x:current.x,laneY:current.y,
       baseSpeed:car.speed,roadSelf:car});
+    // Let a car that has waited at the curb pull out: approaching cars stop just short of the merge zone.
+    if(!(car.ghost>0))for(const k of Object.keys(traffic)){const tr=traffic[k];if(!tr||tr.exitCommitted||!["depart","leave"].includes(tr.kind)||(tr.cw||0)<1.2)continue;
+      const g=trafficGeometry(+k);if(!g||g.road!==car.road)continue;const rt=trafficRoute(g,tr.dir,"depart"),clr=40+rt.turn+10,d=((g.x+tr.dir*20)-current.x)*car.dir-(car.len||20)/2;
+      if(d>clr-4&&d<clr+36){targetFactor=0;break}}
     if(car.ghost>0){car.ghost-=dt;targetFactor=1}
     const factor=setSpeedFactor(car,targetFactor,dt);
     const slow=(W().k==="mountain"&&(ev.k==="snow"||ev.k==="storm"))||(W().k==="desert"&&ev.k==="storm")?.6:1;let nx=currentX+car.dir*car.speed*factor*dt*slow,wrapped=false;
@@ -2310,7 +2324,7 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
     if(wrapped&&(car.emerg||car.tmp)){car.done=true;car.x=nx;return}if(!(car.ghost>0))nx=safeRoadProgress(car,currentX,nx,current,wrapped);
     const waitingAtEdge=wrapped&&nx===(car.dir===1?edge:-18);
     const actualDelta=waitingAtEdge?0:(wrapped?car.speed*factor*dt:Math.abs(nx-currentX));
-    if(actualDelta<.01){car.stall=(car.stall||0)+dt;if(car.stall>6){car.ghost=1.6;car.stall=0;car.speedFactor=1}}else car.stall=0;
+    if(actualDelta<.01){car.stall=(car.stall||0)+dt;if(car.stall>6){car.stall=0;if(!car.hop){car.hop=1;fadeVeh(car.el,()=>{car.hop=0;car.speedFactor=1;if(car.emerg||car.tmp){car.done=true;return}car.x=car.dir===1?-18:width+18})}}}else car.stall=0;
     car.actualSpeed=actualDelta/Math.max(dt,.001);
     car.x=nx;
   });
@@ -2550,7 +2564,7 @@ function emergMarkup(kind){
  if(kind==="bus")return '<svg viewBox="0 0 54 18" preserveAspectRatio="none" aria-hidden="true">'+lw+'<rect x="1" y="3" width="52" height="12" rx="2.5" fill="#fbc02d" stroke="#263238" stroke-width="1.1"/><path d="M3 5h41M3 13h41M3 9h41" stroke="#212121" stroke-width=".9"/><rect x="45" y="4.2" width="6" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="1.5" y="4.5" width="1.6" height="2" fill="#e53935"/><rect x="1.5" y="11.5" width="1.6" height="2" fill="#e53935"/>'+lh+'</svg>';
  if(kind==="amb")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 9h9M8.5 5.5v7" stroke="#e53935" stroke-width="2.2"/>'+lights+hl+'</svg>';
  return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#d32f2f" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 7h16M3 11h16" stroke="#eceff1" stroke-width="1.4"/>'+lights+hl+'</svg>'}
-const spawnClear=(road,dir,x)=>!roadTraffic.some(c=>c.road===road&&c.dir===dir&&Math.abs(c.x-x)<60);
+const spawnClear=(road,dir,x)=>!roadTraffic.some(c=>c.road===road&&c.dir===dir&&Math.abs(c.x-x)<60)&&!Object.keys(traffic).some(k=>{const tr=traffic[k];if(!tr||tr.kind!=="arrive"||tr.dir!==dir)return false;const g=trafficGeometry(+k);if(!g||g.road!==road)return false;const p=trafficPose(tr,g,tr.t);return Math.abs(p.x-x)<70});
 function spawnTaxi(){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W0=sc.clientWidth||600,sp=40+Math.random()*8;
  if(!spawnClear(road,dir,dir===1?-18:W0+18))return;const el=makeVehicle("#f5c400","road-traffic-car");sc.appendChild(el);roadTraffic.push({road,dir,x:dir===1?-18:W0+18,speed:sp,speedFactor:1,actualSpeed:sp,color:"#f5c400",el,tmp:true})}
 const QV=["bus","cbus","ranger","plow","logtruck","tram","tour","icecream","rv","jeep","freight","boattow","canoesuv","guide","trolley","carriage","modelt","golfcart","shuttle","scooter"];
@@ -2572,7 +2586,8 @@ function spawnDeer(sc){const rd=[...sc.querySelectorAll(".road")],r=rd[Math.floo
  const d=document.createElement("div");d.className="deer";d.textContent="🦌";d.style.left=(R0.left-S0.left+R0.width*(.1+Math.random()*.8)).toFixed(0)+"px";d.style.top=(R0.top-oy-16)+"px";sc.appendChild(d);void d.offsetWidth;d.style.top=(R0.bottom-oy+2)+"px";setTimeout(()=>d.remove(),3600)}
 function sceneBurst(){const sc=$("scene");if(!sc)return;const W0=sc.clientWidth,x=W0*(.1+Math.random()*.8),y=10+Math.random()*60,h=Math.random()*360;tone(300+Math.random()*300,.2,"triangle",.03,0,100);
  for(let k=0;k<22;k++){const p=document.createElement("i");p.className="fwp";p.style.zIndex=90;const a=k/22*Math.PI*2,r=30+Math.random()*30;p.style.cssText+=";left:"+x+"px;top:"+y+"px;background:hsl("+(h+Math.random()*50)+",95%,62%);box-shadow:0 0 8px hsl("+h+",95%,62%);--dx:"+(Math.cos(a)*r).toFixed(0)+"px;--dy:"+(Math.sin(a)*r).toFixed(0)+"px";sc.appendChild(p);setTimeout(()=>p.remove(),1500)}}
-function ashfall(){const c=lots.map((l,i)=>i).filter(i=>{const l=lots[i];return l.st==="rented"&&l.hs&&S[l.hs].cat==="h"&&!l.dmg});sfx.rumble();buzz(40);
+function quake(){const sc=$("scene");if(!sc)return;sc.classList.remove("quake");void sc.offsetWidth;sc.classList.add("quake");buzz(120);setTimeout(()=>sc.classList.remove("quake"),950)}
+function ashfall(){quake();const c=lots.map((l,i)=>i).filter(i=>{const l=lots[i];return l.st==="rented"&&l.hs&&S[l.hs].cat==="h"&&!l.dmg});sfx.rumble();buzz(40);
  if(!c.length||Math.random()<.35)return toast("🌋 The ash blew out to sea. No damage!");const i=c[Math.floor(Math.random()*c.length)];lots[i].dmg=true;pop(i,"🌋",1);const e=els[i];if(e){e.classList.add("shk");setTimeout(()=>e.classList.remove("shk"),700)}
  toast("🌋 Falling ash damaged the "+S[lots[i].hs].n+" on Lot "+(i+1)+". Tap to repair.");draw()}
 function rockslide(){const c=lots.map((l,i)=>i).filter(i=>{const l=lots[i];return l.st==="rented"&&l.hs&&S[l.hs].cat==="h"&&!l.dmg}),fr=c.filter(i=>i<5),src=fr.length?fr:c;
