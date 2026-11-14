@@ -457,7 +457,7 @@ const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="d
 const clearFee=()=>Math.round(90+lv*2);
 // Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
 const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina","coffee","skishop","souvenir"].includes(l.hs));
-const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&!S[l.hs].tall&&(S[l.hs].cat==="i"||l.hs==="apartment"));
+const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&!S[l.hs].tall);
 // Multi-lot landmarks: the left lot is the parent; the lots to its right become "merged" parts.
 function spanPair(i,k){const n=S[k].span||1;for(let p=i-(n-1);p<=i;p++){if(p<0||Math.floor(p/5)!==Math.floor((p+n-1)/5))continue;if(S[k].front&&(p+n-1)>=5)continue;if(S[k].mid&&Math.floor(p/5)!==1)continue;let ok=true;for(let q=p;q<p+n;q++)if(!lots[q]||lots[q].st!=="owned"||lots[q].forest)ok=false;if(ok)return p}return -1}
 function unmerge(i){lots.forEach(x=>{if(x.st==="merged"&&x.par===i){x.st="owned";x.par=null}})}
@@ -689,7 +689,7 @@ function tick(now){
             visitor.secondParked=true;
             visitor.secondSide=-(visitor.side||1);
             visitor.secondArriveT=0;
-            visitor.secondArriveDur=2.4;
+            {const g=trafficGeometry(i);visitor.secondArriveDur=g?trafficDuration({...g,parkX:g.x+visitor.secondSide*12},visitor.dir,"arrive"):2.4;}
           }
           if(visitor.secondParked&&visitor.secondArriveT<visitor.secondArriveDur){
             visitor.secondArriveT=Math.min(visitor.secondArriveDur,visitor.secondArriveT+dt);
@@ -1803,15 +1803,8 @@ function renderTraffic(){
     }
     if(tr.visitor&&tr.secondParked){
       if(!tr.secondEl||!tr.secondEl.isConnected){tr.secondColor="#2878bd";tr.secondEl=makeVehicle(tr.secondColor,"traffic-car");sc.appendChild(tr.secondEl)}
-      const progress=clamp01((tr.secondArriveT||0)/(tr.secondArriveDur||1));
-      const entryY=g.roadY+g.towardLot*28;
-      const lateral=easeTraffic(clamp01((progress-.72)/.28));
-      const x=g.x+(g.x+(tr.secondSide||1)*12-g.x)*lateral;
-      const y=entryY+(g.parkY-entryY)*easeTraffic(progress);
-      const approachA=tr.dir===1?(g.towardLot*90):(180-g.towardLot*90);
-      const parkedA=tr.dir===1?0:180;
-      const angle=approachA+angleDelta(approachA,parkedA)*lateral;
-      tr.secondEl.style.left=(x-10)+"px";tr.secondEl.style.top=(y-5.625)+"px";tr.secondEl.style.transform="rotate("+angle+"deg)";
+      const p2=trafficPose({kind:"arrive",t:Math.min(tr.secondArriveT||0,tr.secondArriveDur||1),dur:tr.secondArriveDur||1,dir:tr.dir},{...g,parkX:g.x+(tr.secondSide||1)*12});
+      tr.secondEl.style.left=(p2.x-10)+"px";tr.secondEl.style.top=(p2.y-5.625)+"px";tr.secondEl.style.transform="rotate("+p2.a+"deg)";
     }else if(tr.secondEl){tr.secondEl.remove();tr.secondEl=null}
   });
   renderRoadTraffic();
