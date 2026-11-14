@@ -212,7 +212,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @media(prefers-reduced-motion:reduce){.skyl .ped{animation:none}}
 .trp{position:relative;z-index:1;height:40px;margin:-10px -10px -4px;border-radius:11px 11px 0 0;overflow:hidden;background:linear-gradient(180deg,#4fc3f7,#b3e5fc 45%,#0aa1c9 46%,#1cc5d8);border-bottom:4px solid #fff3c4}
 .trp .tp{position:absolute;line-height:0}.trp .cat{top:12px;animation:lkR 40s linear infinite}.trp .dol{left:38%;top:22px;opacity:0;animation:dolj 6s ease-in-out infinite}.trp .dol.d2{left:66%;top:26px;animation-delay:-3s;animation-duration:8s}
-.trp .ship{top:1px;left:20%;transform:translateX(115vw);will-change:transform}.trp .ship svg{animation:bob 3s ease-in-out infinite alternate}.trp .ship.in{transform:translateX(0);transition:transform 6s cubic-bezier(.2,.7,.3,1)}.trp .ship.out{transform:translateX(-95vw);transition:transform 7s cubic-bezier(.6,0,.9,.6)}
+.trp .ship{top:1px;left:20%;transform:translateX(115vw);will-change:transform}.trp .ship svg{animation:bob 3s ease-in-out infinite alternate}.trp .ship.in{transform:translateX(0);transition:transform 14s cubic-bezier(.25,.55,.35,1)}.trp .ship.out{transform:translateX(-95vw);transition:transform 14s cubic-bezier(.55,0,.8,.5)}
 .trp .vash{display:none}.trp.erupt .vash{display:inline}.trp.erupt .vsm{animation-duration:1s}
 .trp .wv1{position:absolute;left:-40px;right:0;bottom:1px;height:6px;background:radial-gradient(circle at 10px 6px,transparent 6px,rgba(255,255,255,.75) 6.5px 8px,transparent 8.5px) 0 0/20px 6px repeat-x;animation:surf 3s linear infinite}
 .sway{animation:sway 3s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}@keyframes sway{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
@@ -507,7 +507,7 @@ const unlocked=k=>!!S[k]&&lv>=(S[k].unlock||1)&&inWorld(k);
 const availableBuildings=()=>Object.keys(S).filter(unlocked);
 const R={paint:{n:"Fresh Paint",cost:150,vb:120,dur:4},roof:{n:"Modern Roof",cost:300,vb:280,dur:7},luxury:{n:"Luxury Interior",cost:500,vb:500,dur:10}};
 const ORD=["paint","roof","luxury"],PAINT=["#aed581","#81d4fa","#ffcc80","#ce93d8","#ffab91","#fff59d"];
-const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses",party:"🎉 Block party at the park! Nearby rents +60%",market:"🧺 Farmers market at the Civic Center! Its income doubles",game:"🏟️ Game Day at the Sports Complex! Its income doubles",parade:"🎺 School parade! Buyer offers +20%",season:"☀️ Tourist season! Rents +40% for 15s",rushhr:"🚕 Rush hour! Businesses earn double, buyers arrive slower",snow:"❄️ Snow season! Homes rent +40%, ski businesses earn double",rocks:"🪨 Rockslide! Falling rocks may damage homes near the mountain",peak:"☀️ Peak season! Rents +50%, attractions earn double",heat:"🔥 Heat wave! Rents −20%, but homes next to an Oasis or pool earn +20%",cruise:"🛳️ Cruise Ship Day! Rents +30%, the Tiki Bar and Island Market earn double",luau:"🔥 Luau Night! Homes next to the Luau Grounds or Palm Garden earn +40% rent",volcano:"🌋 Volcano rumble! Tourists flock in (offers +20%), but falling ash may damage a home",heritage:"🎭 Heritage Festival! Buyer offers +20%, the Antique Shop earns double",tours:"🚶 Walking tours! Rents +30%, Main Street Shops earn double",inspect:"🔍 Preservation inspection! Restored homes earn +30% rent, others −10%",summer:"☀️ Summer weekend! Rents +40%, Boat Rentals earn double",fishing:"🎣 Fishing tournament! Buyer offers +20%, Fuel & Bait earns double",mosquito:"🦟 Mosquito season. Rents −15%, except next to a Picnic Grove",roadtrip:"🚗 Road trip season! Rents +30%, the Diner and gas stops earn double",offseason:"🍂 Off-season. Rents −30% for a while, a good time to renovate",expansion:"🚧 Park expansion! Top-row home values +30% for 15s",fireworks:"🎆 Fireworks show! Buyer offers +20%"};
+const EV={boom:"📈 Market boom! Buyer offers +25% for 15s",crash:"📉 Market dip! Buyer offers −20% for 15s",rent:"💸 Rent surge! Rents +50% for 15s",storm:"⛈️ Storm rolling in! Lightning may damage houses",party:"🎉 Block party at the park! Nearby rents +60%",market:"🧺 Farmers market at the Civic Center! Its income doubles",game:"🏟️ Game Day at the Sports Complex! Its income doubles",parade:"🎺 School parade! Buyer offers +20%",season:"☀️ Tourist season! Rents +40% for 15s",rushhr:"🚕 Rush hour! Businesses earn double, buyers arrive slower",snow:"❄️ Snow season! Homes rent +40%, ski businesses earn double",rocks:"🪨 Rockslide! Falling rocks may damage homes near the mountain",peak:"☀️ Peak season! Rents +50%, attractions earn double",heat:"🔥 Heat wave! Rents −20%, but homes next to an Oasis or pool earn +20%",cruisein:"🛳️ A cruise ship is on the horizon! Tourists arrive when it docks",cruise:"🛳️ Cruise Ship Day! Rents +30%, the Tiki Bar and Island Market earn double",luau:"🔥 Luau Night! Homes next to the Luau Grounds or Palm Garden earn +40% rent",volcano:"🌋 Volcano rumble! Tourists flock in (offers +20%), but falling ash may damage a home",heritage:"🎭 Heritage Festival! Buyer offers +20%, the Antique Shop earns double",tours:"🚶 Walking tours! Rents +30%, Main Street Shops earn double",inspect:"🔍 Preservation inspection! Restored homes earn +30% rent, others −10%",summer:"☀️ Summer weekend! Rents +40%, Boat Rentals earn double",fishing:"🎣 Fishing tournament! Buyer offers +20%, Fuel & Bait earns double",mosquito:"🦟 Mosquito season. Rents −15%, except next to a Picnic Grove",roadtrip:"🚗 Road trip season! Rents +30%, the Diner and gas stops earn double",offseason:"🍂 Off-season. Rents −30% for a while, a good time to renovate",expansion:"🚧 Park expansion! Top-row home values +30% for 15s",fireworks:"🎆 Fireworks show! Buyer offers +20%"};
 const evText=k=>k==="storm"&&W().k==="beach"?"🌀 Hurricane warning! Beachfront homes are most at risk":k==="storm"&&W().k==="mountain"?"🌨️ Blizzard incoming! Snow may damage houses and slow traffic":k==="storm"&&W().k==="desert"?"🌪️ Sandstorm incoming! Dust may damage houses and slows traffic":k==="storm"&&W().k==="tropical"?"🌀 Tropical storm! Beachfront homes are most at risk":k==="storm"&&W().k==="lake"?"🌊 Spring flood! The lake is rising. Lakefront homes are most at risk":EV[k];
 /* ===== Dev mode: open with ?dev=1 (or tap the menu title 7 times) to unlock every level. ?dev=0 turns it off. ===== */
 let DEV=false;try{const q=new URLSearchParams(location.search).get("dev");if(q==="1")localStorage.setItem("lot_flip_dev","1");if(q==="0")localStorage.removeItem("lot_flip_dev");DEV=localStorage.getItem("lot_flip_dev")==="1"}catch(e){}
@@ -759,22 +759,34 @@ function tick(now){
   const dt=Math.min(.1,(now-last)/1000);last=now;
   if(run&&!paused){
     elapsed+=dt;if(mode==="timed")timeVal-=dt;asv-=dt;if(asv<=0){asv=5;autosave()}
-    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="rocks"&&!ev.hit&&ev.t<=12.5){ev.hit=true;rockslide()}if(ev.k==="volcano"&&!ev.hit&&ev.t<=10){ev.hit=true;ashfall()}if(ev.k==="fireworks"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=1.1;sceneBurst()}}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"||ev.k==="game"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?(W().k==="mountain"?"☀️ The blizzard has cleared.":W().k==="desert"?"☀️ The sandstorm has passed.":W().k==="lake"?"🌤️ The floodwater is going down.":W().k==="tropical"?"🌤️ The tropical storm has passed.":"☀️ The storm has passed."):ev.k==="snow"?"🌤️ Snow season is over.":ev.k==="rocks"?"🪨 The rockslide has settled.":ev.k==="peak"?"Peak season is over.":ev.k==="heat"?"🌤️ The heat wave has broken.":ev.k==="summer"?"Summer weekend is over.":ev.k==="cruise"?"🛳️ The cruise ship has sailed.":ev.k==="luau"?"🌺 The luau is over.":ev.k==="volcano"?"🌋 The volcano has calmed down.":ev.k==="heritage"?"🎭 The Heritage Festival has wrapped up.":ev.k==="tours"?"The walking tours are done.":ev.k==="inspect"?"🔍 The inspector has left.":ev.k==="fishing"?"🏆 The fishing tournament is over.":ev.k==="mosquito"?"The mosquitoes are gone!":ev.k==="roadtrip"?"Road trip season is over.":ev.k==="offseason"?"🎟️ The tourists are back!":ev.k==="expansion"?"🚧 Park expansion complete.":ev.k==="fireworks"?"🎆 What a show!":"Market is back to normal.");ev.k=null;fxLayers()}}
-    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");if(W().k==="themepark")pool.push("peak","peak","offseason","expansion","fireworks");if(W().k==="desert")pool.push("heat","roadtrip","roadtrip");if(W().k==="tropical")pool.push("cruise","cruise","luau","volcano");if(W().k==="historic")pool.push("heritage","tours","tours","inspect");if(W().k==="lake")pool.push("summer","summer","fishing","mosquito");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(W().k==="tropical"&&!ev.v&&ev.n===1)ev.k="volcano";if(ev.k==="volcano")ev.v=true;if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="volcano"){quake();sfx.rumble()}if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
+    if(ev.k){ev.t-=dt;if(ev.k==="storm"&&!ev.hit&&ev.t<=5){ev.hit=true;strike()}if(ev.k==="rocks"&&!ev.hit&&ev.t<=12.5){ev.hit=true;rockslide()}if(ev.k==="volcano"&&!ev.hit&&ev.t<=10){ev.hit=true;ashfall()}if(ev.k==="cruisein"&&ev.t<=0){ev.k="cruise";ev.t=18;toast(evText("cruise"));sfx.coin&&sfx.coin();fxLayers()}if(ev.k==="fireworks"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=1.1;sceneBurst()}}if(ev.k==="party"||ev.k==="market"||ev.k==="parade"||ev.k==="game"){ev.fx=(ev.fx||0)-dt;if(ev.fx<=0){ev.fx=.7;festFx()}}if(ev.t<=0){toast(ev.k==="storm"?(W().k==="mountain"?"☀️ The blizzard has cleared.":W().k==="desert"?"☀️ The sandstorm has passed.":W().k==="lake"?"🌤️ The floodwater is going down.":W().k==="tropical"?"🌤️ The tropical storm has passed.":"☀️ The storm has passed."):ev.k==="snow"?"🌤️ Snow season is over.":ev.k==="rocks"?"🪨 The rockslide has settled.":ev.k==="peak"?"Peak season is over.":ev.k==="heat"?"🌤️ The heat wave has broken.":ev.k==="summer"?"Summer weekend is over.":ev.k==="cruise"?"🛳️ The cruise ship has sailed.":ev.k==="luau"?"🌺 The luau is over.":ev.k==="volcano"?"🌋 The volcano has calmed down.":ev.k==="heritage"?"🎭 The Heritage Festival has wrapped up.":ev.k==="tours"?"The walking tours are done.":ev.k==="inspect"?"🔍 The inspector has left.":ev.k==="fishing"?"🏆 The fishing tournament is over.":ev.k==="mosquito"?"The mosquitoes are gone!":ev.k==="roadtrip"?"Road trip season is over.":ev.k==="offseason"?"🎟️ The tourists are back!":ev.k==="expansion"?"🚧 Park expansion complete.":ev.k==="fireworks"?"🎆 What a show!":"Market is back to normal.");ev.k=null;fxLayers()}}
+    else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");if(W().k==="themepark")pool.push("peak","peak","offseason","expansion","fireworks");if(W().k==="desert")pool.push("heat","roadtrip","roadtrip");if(W().k==="tropical")pool.push("cruise","cruise","luau","volcano");if(W().k==="historic")pool.push("heritage","tours","tours","inspect");if(W().k==="lake")pool.push("summer","summer","fishing","mosquito");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(W().k==="tropical"&&!ev.v&&ev.n===1)ev.k="volcano";if(ev.k==="cruise")ev.k="cruisein";if(ev.k==="volcano")ev.v=true;if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:ev.k==="cruisein"?14:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="volcano"){quake();sfx.rumble()}if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
       if(visitorBusiness(l)){
         const visitor=traffic[i];
         if(visitor&&visitor.visitor&&visitor.kind==="parked"){
           visitor.parkUntil=(visitor.parkUntil==null?10+Math.random()*12:visitor.parkUntil)-dt;
-          if(visitor.parkUntil<=5&&!visitor.secondParked&&!visitor.armor){
+          if(visitor.parkUntil<=5&&!visitor.secondParked&&!visitor.armor&&!visitor.noSecond){
             visitor.secondParked=true;
             visitor.secondSide=-(visitor.side||1);
             visitor.secondArriveT=0;
             {const g=trafficGeometry(i);visitor.secondArriveDur=g?trafficDuration({...g,parkX:g.x+visitor.secondSide*12},visitor.dir,"arrive"):2.4;}
           }
           if(visitor.secondParked&&visitor.secondArriveT<visitor.secondArriveDur){
-            visitor.secondArriveT=Math.min(visitor.secondArriveDur,visitor.secondArriveT+dt);
+            const g=trafficGeometry(i);
+            if(g){const g2={...g,parkX:g.x+visitor.secondSide*12},ps={kind:"arrive",dur:visitor.secondArriveDur,dir:visitor.dir},cur=visitor.secondArriveT,curP=trafficPose({...ps,t:cur},g2);
+              const ok=t=>{const np=trafficPose({...ps,t},g2);
+                for(const c of roadTraffic){if(c.road===g.road&&!safeVehicleStep(curP,np,roadVehiclePose(c)))return false}
+                for(const k of Object.keys(traffic)){const ot=traffic[k];if(!ot||ot.kind==="parked"||(ot.kind==="arrive"&&ot.t<=0))continue;const og=trafficGeometry(+k);if(!og||og.road!==g.road)continue;if(!safeVehicleStep(curP,np,trafficPose(ot,og,ot.t)))return false}
+                for(const o of activeSeconds(visitor)){if(o.road===g.road&&!safeVehicleStep(curP,np,o.pose))return false}
+                return true};
+              let nt=Math.min(visitor.secondArriveDur,cur+dt);
+              if(cur<=0&&!ok(nt)){visitor.secondHold=(visitor.secondHold||0)+dt;if(visitor.secondHold>8){visitor.secondParked=false;visitor.noSecond=true;visitor.secondHold=0}}
+              else{if(!ok(nt)){let lo=cur,hi=nt;for(let n=0;n<8;n++){const m=(lo+hi)/2;if(ok(m))lo=m;else hi=m}nt=lo}
+                if(nt-cur<1e-6){visitor.secondStall=(visitor.secondStall||0)+dt;if(visitor.secondStall>6){visitor.secondStall=0;const se=visitor.secondEl;fadeVeh(se,()=>{visitor.secondArriveT=visitor.secondArriveDur})}}else visitor.secondStall=0;
+                visitor.secondArriveT=nt}
+            }else visitor.secondArriveT=visitor.secondArriveDur;
           }
           if(visitor.parkUntil<=0&&visitor.secondParked&&visitor.secondArriveT>=visitor.secondArriveDur){
             beginTrafficDeparture(i,visitor,trafficGeometry(i));
@@ -2118,6 +2130,7 @@ function followingTargetFactor({road,dir,x,laneY,baseSpeed,roadSelf=null,traffic
     const info=laneStateForTraffic(i,tr,g,tr.t);if(!info)continue;
     consider(info.x,info.y,info.dir,info.speed,false);
   }
+  for(const o of activeSeconds()){if(o.road===road)consider(o.pose.x,o.pose.y,o.dir,30,false)}
   if(!nearest)return 1;
   // Follow the lead car's speed and close only the excess gap. At short gaps, gradually coast/brake.
   const desiredSpeed=nearest.speed+Math.max(0,nearest.gap-32)*.52;
@@ -2136,6 +2149,7 @@ function safeSpecialProgress(i,tr,g,currentT,desiredT,currentPose){
       const og=trafficGeometry(+otherKey);if(!og||og.road!==g.road)continue;
       if(!safeVehicleStep(currentPose,nextPose,trafficPose(ot,og,ot.t)))return false;
     }
+    for(const o of activeSeconds(tr)){if(o.road===g.road&&!safeVehicleStep(currentPose,nextPose,o.pose))return false}
     return true;
   };
   if(safeAt(desiredT))return desiredT;
@@ -2146,6 +2160,9 @@ function safeSpecialProgress(i,tr,g,currentT,desiredT,currentPose){
   }
   return lo;
 }
+// A second visitor driving in to the spare bay is a real vehicle too: everything else must avoid it.
+function secondPose(i,tr,t){const g=trafficGeometry(i);if(!g)return null;const g2={...g,parkX:g.x+(tr.secondSide||1)*12};return {pose:trafficPose({kind:"arrive",t:t==null?tr.secondArriveT:t,dur:tr.secondArriveDur||1,dir:tr.dir},g2),road:g.road,dir:tr.dir}}
+function activeSeconds(skip){const out=[];for(const k of Object.keys(traffic)){const tr=traffic[k];if(!tr||tr===skip||!tr.secondParked||!(tr.secondArriveT>0)||tr.secondArriveT>=tr.secondArriveDur)continue;const sp=secondPose(+k,tr);if(sp)out.push(sp)}return out}
 function safeRoadProgress(car,currentX,desiredX,currentPose,wrapped){
   const sc=$("scene");
   const safeAt=x=>{
@@ -2159,6 +2176,7 @@ function safeRoadProgress(car,currentX,desiredX,currentPose,wrapped){
       const info=specialPose(i,tr);if(!info||info.road!==car.road)continue;
       if(!safeVehicleStep(currentPose,next,info.pose))return false;
     }
+    for(const o of activeSeconds()){if(o.road===car.road&&!safeVehicleStep(currentPose,next,o.pose))return false}
     return true;
   };
   if(safeAt(desiredX))return desiredX;
@@ -2249,6 +2267,7 @@ function departureLaneBlocked(i,tr,g,dt){
     const pose=trafficPose(ot,og,ot.t);
     if(Math.abs(pose.x-mergeX)<clearance&&Math.abs(pose.y-g.roadY)<28)return true;
   }
+  for(const o of activeSeconds(tr)){if(o.road===g.road&&Math.abs(o.pose.x-mergeX)<clearance&&Math.abs(o.pose.y-g.roadY)<28)return true}
 
   // A safe gap is available. Commit to completing the driveway exit and turn instead of
   // re-checking mid-turn, which could leave the car sideways and lock up that lane.
@@ -2260,6 +2279,7 @@ function entryClear(i,tr,g){const m=trafficRoute(g,tr.dir,"arrive"),sx=m.startX,
   for(const k of Object.keys(traffic)){if(+k===i)continue;const ot=traffic[k];if(!ot||ot.kind==="parked")continue;const og=trafficGeometry(+k);if(!og||og.road!==g.road)continue;
    if(ot.kind==="arrive"&&ot.t<=0){if(+k<i&&ot.dir===tr.dir)return false;continue}
    const p=trafficPose(ot,og,ot.t);if(Math.abs(p.y-ly)<7&&Math.abs(p.x-sx)<46)return false}
+  for(const o of activeSeconds(tr)){if(o.road===g.road&&Math.abs(o.pose.y-ly)<7&&Math.abs(o.pose.x-sx)<46)return false}
   return true}
 function fadeVeh(el,mid){if(!el||!el.isConnected){mid();return}el.style.transition="opacity .35s";el.style.opacity="0";setTimeout(()=>{mid();if(el.isConnected)el.style.opacity="1"},380)}
 function vanishTr(i,tr){if(tr.vanishing)return;tr.vanishing=1;fadeVeh(tr.el,()=>{if(traffic[i]!==tr)return;tr.vanishing=0;tr.stall=0;tr.cw=0;
@@ -2363,7 +2383,7 @@ function renderTraffic(){
   renderRoadTraffic();
 }
 
-const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",market:"🧺",parade:"🎺",game:"🏟️",season:"☀️",rushhr:"🚕",snow:"❄️",rocks:"🪨",peak:"☀️",heat:"🔥",cruise:"🛳️",luau:"🔥",volcano:"🌋",heritage:"🎭",tours:"🚶",inspect:"🔍",summer:"☀️",fishing:"🎣",mosquito:"🦟",roadtrip:"🚗",offseason:"🍂",expansion:"🚧",fireworks:"🎆"};
+const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",market:"🧺",parade:"🎺",game:"🏟️",season:"☀️",rushhr:"🚕",snow:"❄️",rocks:"🪨",peak:"☀️",heat:"🔥",cruisein:"🛳️",cruise:"🛳️",luau:"🔥",volcano:"🌋",heritage:"🎭",tours:"🚶",inspect:"🔍",summer:"☀️",fishing:"🎣",mosquito:"🦟",roadtrip:"🚗",offseason:"🍂",expansion:"🚧",fireworks:"🎆"};
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
   const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
@@ -2372,7 +2392,7 @@ function chips(){if(!bonus)return"";
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
   if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":ev.k==="storm"&&W().k==="mountain"?"🌨️":ev.k==="storm"&&W().k==="desert"?"🌪️":ev.k==="storm"&&W().k==="tropical"?"🌀":ev.k==="storm"&&W().k==="lake"?"🌊":EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
   return h}
-function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classList.toggle("flood",ev.k==="storm")}const so=$("stm");if(so){so.classList.toggle("on",(ev.k==="storm"||ev.k==="volcano")&&run);so.classList.toggle("ashy",ev.k==="volcano");so.classList.toggle("snowy",W().k==="mountain");so.classList.toggle("dusty",W().k==="desert");so.classList.toggle("windy",W().k==="tropical")}{const tp=document.querySelector("#scene .trp");if(tp){const sh=tp.querySelector(".ship");if(sh){if(ev.k==="cruise"&&!sh.classList.contains("in")){sh.classList.remove("out");void sh.offsetWidth;sh.classList.add("in")}else if(ev.k!=="cruise"&&sh.classList.contains("in")){sh.classList.remove("in");sh.classList.add("out");clearTimeout(sh._t);sh._t=setTimeout(()=>sh.classList.remove("out"),7200)}}tp.classList.toggle("cruise",ev.k==="cruise");tp.classList.toggle("erupt",ev.k==="volcano")}}
+function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classList.toggle("flood",ev.k==="storm")}const so=$("stm");if(so){so.classList.toggle("on",(ev.k==="storm"||ev.k==="volcano")&&run);so.classList.toggle("ashy",ev.k==="volcano");so.classList.toggle("snowy",W().k==="mountain");so.classList.toggle("dusty",W().k==="desert");so.classList.toggle("windy",W().k==="tropical")}{const tp=document.querySelector("#scene .trp");if(tp){const sh=tp.querySelector(".ship");if(sh){if((ev.k==="cruise"||ev.k==="cruisein")&&!sh.classList.contains("in")){sh.classList.remove("out");void sh.offsetWidth;sh.classList.add("in")}else if(ev.k!=="cruise"&&ev.k!=="cruisein"&&sh.classList.contains("in")){sh.classList.remove("in");sh.classList.add("out");clearTimeout(sh._t);sh._t=setTimeout(()=>sh.classList.remove("out"),14200)}}tp.classList.toggle("cruise",ev.k==="cruise");tp.classList.toggle("erupt",ev.k==="volcano")}}
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
   $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";{const lh="<b>"+W().ic+" Lv "+lv+"</b><small>⭐"+(meta?meta.stars:0)+(meta&&meta.pr?" · P"+meta.pr:"")+"</small>";if($("lvl")._h!==lh){$("lvl")._h=lh;$("lvl").innerHTML=lh}}
   $("bld").textContent=(builders-busy())+"/"+builders;
@@ -2569,7 +2589,7 @@ function emergMarkup(kind){
  if(kind==="bus")return '<svg viewBox="0 0 54 18" preserveAspectRatio="none" aria-hidden="true">'+lw+'<rect x="1" y="3" width="52" height="12" rx="2.5" fill="#fbc02d" stroke="#263238" stroke-width="1.1"/><path d="M3 5h41M3 13h41M3 9h41" stroke="#212121" stroke-width=".9"/><rect x="45" y="4.2" width="6" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><rect x="1.5" y="4.5" width="1.6" height="2" fill="#e53935"/><rect x="1.5" y="11.5" width="1.6" height="2" fill="#e53935"/>'+lh+'</svg>';
  if(kind==="amb")return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="3" fill="#fff" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M4 9h9M8.5 5.5v7" stroke="#e53935" stroke-width="2.2"/>'+lights+hl+'</svg>';
  return '<svg viewBox="0 0 32 18" aria-hidden="true">'+wh+'<rect x="1" y="3" width="30" height="12" rx="2.5" fill="#d32f2f" stroke="#263238" stroke-width="1.1"/><rect x="21" y="4.2" width="7" height="9.6" rx="1.5" fill="#bde3f5" stroke="#38505a" stroke-width=".6"/><path d="M3 7h16M3 11h16" stroke="#eceff1" stroke-width="1.4"/>'+lights+hl+'</svg>'}
-const spawnClear=(road,dir,x)=>!roadTraffic.some(c=>c.road===road&&c.dir===dir&&Math.abs(c.x-x)<60)&&!Object.keys(traffic).some(k=>{const tr=traffic[k];if(!tr||tr.kind!=="arrive"||tr.dir!==dir)return false;const g=trafficGeometry(+k);if(!g||g.road!==road)return false;const p=trafficPose(tr,g,tr.t);return Math.abs(p.x-x)<70});
+const spawnClear=(road,dir,x)=>!roadTraffic.some(c=>c.road===road&&c.dir===dir&&Math.abs(c.x-x)<60)&&!Object.keys(traffic).some(k=>{const tr=traffic[k];if(!tr||tr.kind!=="arrive"||tr.dir!==dir)return false;const g=trafficGeometry(+k);if(!g||g.road!==road)return false;const p=trafficPose(tr,g,tr.t);return Math.abs(p.x-x)<70})&&!activeSeconds().some(o=>o.road===road&&o.dir===dir&&Math.abs(o.pose.x-x)<70);
 function spawnTaxi(){const sc=$("scene"),rd=[...sc.querySelectorAll(".road")];if(!rd.length)return;const road=rd[Math.floor(Math.random()*rd.length)],dir=Math.random()<.5?1:-1,W0=sc.clientWidth||600,sp=40+Math.random()*8;
  if(!spawnClear(road,dir,dir===1?-18:W0+18))return;const el=makeVehicle("#f5c400","road-traffic-car");sc.appendChild(el);roadTraffic.push({road,dir,x:dir===1?-18:W0+18,speed:sp,speedFactor:1,actualSpeed:sp,color:"#f5c400",el,tmp:true})}
 const QV=["bus","cbus","ranger","plow","logtruck","tram","tour","icecream","rv","jeep","freight","boattow","canoesuv","guide","trolley","carriage","modelt","golfcart","shuttle","scooter"];
