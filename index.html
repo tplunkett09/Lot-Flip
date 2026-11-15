@@ -531,7 +531,7 @@ const WORLDS=[
  m:["🏘️ New homes: Smart Pod, Sky Home and Floating Mansion. Smart homes rent for 15% more","🚀 Future makeovers: Apartments → Garden Tower, Park → Hologram Park, Pool → Sky Pool, Civic Center → Smart Hall, School → Robotics Academy, Hospital → MedBay, Gas Station → Charging Station, Shopping Center → Neo Mall, Sports Complex → Drone Arena","⚡ Power grid: a Charging Station, the Spaceport, or a home with a Solar Roof (its 2nd upgrade) powers itself and the lots touching it. Businesses without power (🔌) earn 25% less","🎪 Tech Expo: buyer offers +25%, Robot Café earns double · 🚀 Rocket Launch (with a Spaceport): rents +40% · 🌑 Blackout: businesses without power earn nothing","⛈️ Storms become electrical storms","🤖 Level 93: Robot Café","🚀 Grand finale landmark at Level 97: the Spaceport (2 lots). Level 99 asks you to build one, and Level 100 is the final level"]}];
 const worldOf=l=>Math.max(0,Math.min(9,Math.floor((l-1)/10)));
 const W=l=>WORLDS[worldOf(l==null?lv:l)];
-function applyWorld(){const w=W();R.roof.n=w.k==="future"?"Solar Roof":"Modern Roof";Object.keys(S).forEach(k=>{const o=w.homes&&w.homes[k];S[k].n=o?o[0]:HN0[k].n;S[k].ic=o?o[1]:HN0[k].ic})}
+function applyWorld(){const w=W();{const tp=w.k==="themepark",P=S.pool;P.span=tp?2:0;P.tall=tp?1:0;P.cost=tp?1400:900;P.val=tp?1600:700;P.dur=tp?10:6;P.boost=tp?.15:.1;P.rb=tp?.35:.25;P.d=tp?"Big attraction · needs 2 side-by-side lots · +15% value, +35% rent nearby":"+10% value, +25% rent nearby"}R.roof.n=w.k==="future"?"Solar Roof":"Modern Roof";Object.keys(S).forEach(k=>{const o=w.homes&&w.homes[k];S[k].n=o?o[0]:HN0[k].n;S[k].ic=o?o[1]:HN0[k].ic})}
 const BUILDING_LIMITS={robocafe:1,spaceport:1,tiki:1,seaplane:1,antique:1,depot:1,boatrent:1,campground:1,diner:1,solar:1,souvenir:1,ferris:1,coaster:1,skishop:1,skiresort:1,surf:1,marina:1,subway:1,coffee:1,skyscraper:1,realestate:1,gas:2,sports:1,airport:1,park:3,apartment:3,pool:2,civic:1,school:1,hospital:1,shopping:1,fire:1,bank:1};
 const MILE=Object.keys(S).filter(k=>!["colonial","mansion"].includes(k)&&!S[k].span&&!S[k].needs).map(k=>({lv:S[k].unlock,k})).sort((a,b)=>a.lv-b.lv);
 const buildingCount=k=>lots.filter(l=>l&&l.hs===k&&!['sold','ai_owned','ai_for_sale'].includes(l.st)).length;
@@ -568,7 +568,16 @@ function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clear
 const pwrSrc=j=>{const l=lots[j];if(l&&l.st==="merged"&&l.par!=null&&l.par!==j)return pwrSrc(l.par);if(!l||!l.hs||!done(l))return false;return l.hs==="gas"||l.hs==="spaceport"||S[l.hs].cat==="h"&&l.reno.includes("roof")};
 function powered(i){if(W().k!=="future")return true;const l=lots[i];if(l&&l.st==="merged"&&l.par!=null)i=l.par;return pwrSrc(i)||adj(i).some(pwrSrc)||(lots[i]&&lots[i].hs&&S[lots[i].hs].span?adj(i+1).some(pwrSrc):false)}
 const pwrMul=i=>W().k!=="future"?1:ev.k==="storm"?0:powered(i)?1:ev.k==="blackout"?0:.75;
-function adj(i){const a=[],c=i%5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);if(i>=5)a.push(i-5);if(i+5<lots.length)a.push(i+5);return a}
+function adj0(i){const a=[],c=i%5;if(c>0)a.push(i-1);if(c<4)a.push(i+1);if(i>=5)a.push(i-5);if(i+5<lots.length)a.push(i+5);return a}
+// Multi-lot buildings: a merged lot counts as its parent, and the parent touches the neighbors of all its lots.
+function adj(i){const src=[i];lots.forEach((x,q)=>{if(x&&x.st==="merged"&&x.par===i)src.push(q)});if(src.length===1&&!lots.some(x=>x&&x.st==="merged"))return adj0(i);
+  const out=[];src.forEach(j=>adj0(j).forEach(n=>{if(src.includes(n))return;const L=lots[n],m=L&&L.st==="merged"&&L.par!=null?L.par:n;if(m!==i&&!out.includes(m))out.push(m)}));return out}
+// Saved games: a multi-lot building without its merged lots claims the free lot beside it, or is refunded.
+function fixSpans(){lots.forEach((l,i)=>{if(!l.hs||!S[l.hs]||!S[l.hs].span||l.st==="merged"||l.st==="sold"||l.st.startsWith("ai"))return;const n=S[l.hs].span;
+  let ok=true;for(let q=i+1;q<i+n;q++)if(!(lots[q]&&lots[q].st==="merged"&&lots[q].par===i))ok=false;if(ok)return;
+  let can=Math.floor(i/5)===Math.floor((i+n-1)/5);for(let q=i+1;q<i+n&&can;q++){const L=lots[q];if(!L||L.hs||!["empty","owned"].includes(L.st)||(L.st==="merged"&&L.par!==i))can=false}
+  if(can){for(let q=i+1;q<i+n;q++){lots[q].st="merged";lots[q].par=i;lots[q].forest=false}}
+  else{const cs=S[l.hs].cost,nm=S[l.hs].n;money+=cs;reset(l);l.st="owned";setTimeout(()=>toast("🧩 The "+nm+" now needs "+n+" side-by-side lots, so it was refunded ("+fmt(cs)+")."),1500)}})}
 const civicB=()=>lots.reduce((b,l)=>b+(l.hs&&done(l)?(S[l.hs].globalBoost||0):0),0);
 function nBoost(i){
   const l=lots[i];let b=civicB();
@@ -682,7 +691,7 @@ function getProg(){try{return JSON.parse(store.get(PKEY))}catch(e){return null}}
 function setProg(n){const p=getProg();if(!p||n>p.lv)store.set(PKEY,JSON.stringify({lv:n,mode}))}
 function saveGame(){toast(snap()?"Game saved!":"Couldn’t save in this browser.")}
 function loadGame(){
-  try{const d=JSON.parse(store.get(KEY));lv=d.lv;applyWorld();twist=twistFor(lv);money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;bonus=d.bonus;const milestones=MILE;const expected=(milestones.filter(x=>lv>=x.lv).at(-1)||{k:"ranch"}).k;objective=d.objective;if(!objective||(!objective.t&&!S[objective.k])||(objective.t==="build"&&!S[objective.k]))objective=makeObjective(lv).o;if(!objective.t){objective.t="build";objective.n=1;objective.c=0}if(!bonus.t)bonus.t="build";
+  try{const d=JSON.parse(store.get(KEY));lv=d.lv;applyWorld();twist=twistFor(lv);money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;fixSpans();bonus=d.bonus;const milestones=MILE;const expected=(milestones.filter(x=>lv>=x.lv).at(-1)||{k:"ranch"}).k;objective=d.objective;if(!objective||(!objective.t&&!S[objective.k])||(objective.t==="build"&&!S[objective.k]))objective=makeObjective(lv).o;if(!objective.t){objective.t="build";objective.n=1;objective.c=0}if(!bonus.t)bonus.t="build";
     lvDone=!!d.lvDone;doneAt=d.doneAt??null;$("nxt").style.display=lvDone?"block":"none";ev={k:null,t:0,next:30};setMode(mode);build();applyTheme();lots.forEach((l,i)=>{if(l.st==="listed"&&l.offer)startBuyerArrival(i)});run=true;paused=false;last=performance.now();
     ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();maybeWorldIntro();return true}catch(e){toast("Couldn’t load save.");return false}
 }
@@ -1227,7 +1236,7 @@ function tpOnly(l,k,st,T,s){
   P.forEach(p=>{s+='<path d="M'+p[0]+' '+(p[1]+2)+'V82" stroke="#a1887f" stroke-width="1.6"/>'});
   for(let q=0;q<P.length-1;q++){const a=P[q],b=P[q+1];s+='<path d="M'+a[0]+' '+(a[1]+8)+'L'+b[0]+' '+(b[1]+8)+'" stroke="#bcaaa4" stroke-width=".8"/>'}
   s+='<path d="'+tr+'" stroke="#c62828" stroke-width="3" fill="none" stroke-linejoin="round"/><path d="'+tr+'" stroke="#ffcdd2" stroke-width=".8" fill="none" stroke-dasharray="2 3"/>'
-   +'<rect x="8" y="64" width="40" height="18" fill="#fff8e1" '+T+'/><polygon points="4,65 28,54 52,65" fill="#7e57c2" '+T+'/><rect x="12" y="56" width="32" height="7" rx="1" fill="#c62828" stroke="#fff" stroke-width=".6" transform="translate(0 -14)"/><text x="28" y="47.6" font-size="4.8" font-weight="900" text-anchor="middle" fill="#fff">THUNDER RUN</text><rect x="22" y="70" width="12" height="12" fill="#5d4037"/>';
+   +'<rect x="8" y="64" width="40" height="18" fill="#fff8e1" '+T+'/><polygon points="4,65 28,54 52,65" fill="#7e57c2" '+T+'/><path d="M10 64V50M46 64V50" stroke="#5d4037" stroke-width="1.2"/><rect x="4" y="38" width="50" height="12" rx="2" fill="#c62828" stroke="#fff" stroke-width="1"/><text x="29" y="46.4" font-size="6.2" font-weight="900" text-anchor="middle" fill="#fff59d" letter-spacing=".2">THUNDER RUN</text><rect x="22" y="70" width="12" height="12" fill="#5d4037"/>';
   if(st==="ready"){[0,-.25,-.5].forEach(d=>{s+='<g><rect x="-4" y="-5" width="8" height="5" rx="1.5" fill="#1e88e5" stroke="#0d47a1" stroke-width=".6"/><circle cx="-1.5" cy="-6" r="1.2" fill="#ffcc80"/><circle cx="1.5" cy="-6" r="1.2" fill="#ffcc80"/><animateMotion dur="7s" repeatCount="indefinite" rotate="auto" begin="'+d+'s" path="'+tr+'"/></g>'});
     s+=PERS("#e53935","wk1",-2,24)+PERS("#1565c0","wk2",-7,24)+PERS("#43a047","wk1",-11,24)}
   return s}
@@ -1305,6 +1314,35 @@ function tpOnly2(l,k,st,T,s){if(k!=="souvenir")return tpOnly(l,k,st,T,s);
    +'<g transform="translate(90 40)"><circle cx="0" cy="0" r="3.4" fill="#a1887f"/><circle cx="0" cy="-4.4" r="2.4" fill="#a1887f"/><circle cx="-1.8" cy="-6.4" r="1" fill="#8d6e63"/><circle cx="1.8" cy="-6.4" r="1" fill="#8d6e63"/><circle cx="0" cy="-3.8" r=".8" fill="#5d4037"/></g>';
   return s}
 
+// Theme Park Water Park: two lots wide, full lot height
+function tpWaterPark(l,st,T,s){const on=st==="ready";
+  s='<ellipse cx="100" cy="87" rx="96" ry="3" fill="#000" opacity=".18"/><rect x="3" y="44" width="194" height="44" rx="5" fill="#ffe0b2" stroke="#ffb74d" stroke-width="1.2"/>'
+   // entrance building with scalloped roof and big sign
+   +'<rect x="14" y="33" width="62" height="17" fill="#e1f5fe" '+T+'/><path d="M10 34Q17 27 24 34Q31 27 38 34Q45 27 52 34Q59 27 66 34Q73 27 80 34Z" fill="#0288d1" '+T+'/>'
+   +'<path d="M39 50V42a6 6 0 0 1 12 0v8z" fill="#01579b" stroke="#3e2723" stroke-width=".8"/>'+[18,58].map(x=>'<rect x="'+x+'" y="37" width="14" height="8" fill="#b3e5fc" stroke="#3e2723" stroke-width=".7"/><path d="M'+x+' 37h14l-1 3h-12z" fill="#ff7043"/>').join("")
+   +'<text x="25" y="48.8" font-size="3.4" font-weight="900" text-anchor="middle" fill="#0277bd">TICKETS</text><text x="65" y="48.8" font-size="3.4" font-weight="900" text-anchor="middle" fill="#0277bd">LOCKERS</text>'
+   +'<rect x="12" y="18" width="66" height="13" rx="3" fill="#0277bd" stroke="#fff" stroke-width="1.2"/><text x="45" y="27.8" font-size="8.6" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="1">WATER PARK</text><path d="M24 31v2.4M66 31v2.4" stroke="#455a64" stroke-width="1.4"/>'
+   +'<path d="M14 24q2-2.4 4 0t4 0M70 24q2-2.4 4 0t4 0" stroke="#80deea" stroke-width="1.2" fill="none"/>'
+   // wave pool with a beach entry
+   +'<path d="M8 60Q8 52 18 52H90Q98 52 98 60V79Q98 86 90 86H18Q8 86 8 79Z" fill="#29b6f6" stroke="#0277bd" stroke-width="1.4"/><path d="M10 58Q10 54 18 54H28V84H18Q10 84 10 78Z" fill="#81d4fa"/>'
+   +'<g>'+[60,67,74,81].map(y=>'<path d="M30 '+y+'q4-2.6 8 0t8 0t8 0t8 0t8 0t8 0t8 0" stroke="#e1f5fe" stroke-width="1.2" fill="none"/>').join("")+(on?'<animateTransform attributeName="transform" type="translate" values="0 0;-4 0;0 0" dur="2.4s" repeatCount="indefinite"/>':'')+'</g>'
+   +'<text x="62" y="58.4" font-size="3.6" font-weight="900" text-anchor="middle" fill="#fff" opacity=".9">WAVE POOL</text>'
+   // kiddie splash pad with a mushroom fountain
+   +'<circle cx="111" cy="72" r="9" fill="#80deea" stroke="#0097a7" stroke-width="1"/><path d="M111 76v-6" stroke="#fff" stroke-width="1.6"/><path d="M104.6 70a6.4 4.4 0 0 1 12.8 0z" fill="#ec407a" stroke="#ad1457" stroke-width=".6"/><circle cx="108.6" cy="67.6" r=".9" fill="#fff"/><circle cx="113" cy="66.8" r=".9" fill="#fff"/>'
+   // slide tower, three slides and the splash pool
+   +'<ellipse cx="172" cy="76" rx="22" ry="9" fill="#29b6f6" stroke="#0277bd" stroke-width="1.2"/><path d="M156 76q4-2 8 0t8 0t8 0t8 0" stroke="#e1f5fe" stroke-width="1" fill="none"/>'
+   +'<path d="M125 82V14M141 82V14M125 30h16M125 46h16M125 62h16M125 30l16 16M141 46l-16 16M125 62l16 16" stroke="#78909c" stroke-width="1.4"/><rect x="121" y="10" width="24" height="5" fill="#fafafa" '+T+'/><polygon points="119,10 133,1 147,10" fill="#ff7043" '+T+'/>';
+  const SL=[["#e53935","M143 13Q176 14 168 30Q160 44 182 52Q194 58 180 72"],["#fdd835","M122 14Q100 22 108 38Q116 50 140 56Q158 62 162 74"],["#1e88e5","M144 12L192 64Q194 68 188 72"]];
+  SL.forEach(q=>{s+='<path d="'+q[1]+'" stroke="#37474f" stroke-width="6.4" fill="none" stroke-linecap="round"/><path d="'+q[1]+'" stroke="'+q[0]+'" stroke-width="4.6" fill="none" stroke-linecap="round"/><path d="'+q[1]+'" stroke="#fff" stroke-width=".7" fill="none" opacity=".6" stroke-dasharray="2 3"/>'});
+   // deck details: palms, umbrellas and loungers
+  s+=PALM(5,52,.5)+PALM(100,52,.5)+PALM(196,52,.45)
+   +[[84,48,"#e53935"],[148,48,"#8e24aa"]].map(u=>'<path d="M'+u[0]+' '+u[1]+'v6" stroke="#5d4037" stroke-width=".8"/><path d="M'+(u[0]-5)+' '+u[1]+'q5-5 10 0z" fill="'+u[2]+'"/><rect x="'+(u[0]+3)+'" y="'+(u[1]+3)+'" width="8" height="2.4" rx="1" fill="#fff" stroke="#bdbdbd" stroke-width=".4"/>').join("");
+  if(on){SL.forEach((q,k)=>{[0,1].forEach(z=>{s+='<g><circle r="2" fill="#ffcc80" stroke="#8d6e63" stroke-width=".4"/><circle cy="1.6" r="2.4" fill="none" stroke="'+["#ff7043","#43a047","#ec407a"][k]+'" stroke-width="1"/><animateMotion dur="'+(2.4+k*.5)+'s" begin="-'+(z*1.4+k*.7).toFixed(1)+'s" repeatCount="indefinite" path="'+q[1]+'"/></g>'})});
+    s+='<circle class="smk" cx="180" cy="72" r="3" fill="#fff"/><circle class="smk s2" cx="162" cy="74" r="3" fill="#fff"/><circle class="smk" cx="188" cy="72" r="2.4" fill="#fff"/>'
+     +'<path class="spray" d="M111 66v-6M111 64q-5 0-7 6M111 64q5 0 7 6" stroke="#e1f5fe" stroke-width="1" fill="none"/>'
+     +[[40,64,0],[58,72,-.7],[76,62,-1.3],[50,80,-.4],[20,70,-1]].map(b=>'<g class="bob" style="animation-delay:'+b[2]+'s"><circle cx="'+b[0]+'" cy="'+b[1]+'" r="2.1" fill="#ffcc80"/><circle cx="'+b[0]+'" cy="'+(b[1]+1.8)+'" r="3" fill="none" stroke="#ff7043" stroke-width="1.1"/></g>').join("")
+     +PERS("#e53935","wk1",-2,0)+PERS("#1565c0","wk2",-7,0)+PERS("#43a047","wk1",-11,0)}
+  return s}
 // Theme Park stays (Motel, Hotel, Resort) and the Boardwalk / Outdoor Venue
 function tpStay(l,k,st,T,s){const rr=l.reno.includes("roof"),on=st==="rented";
   if(k==="ranch"){const b=l.paint==="#e8d8c3"?"#ffccbc":l.paint,r=rr?"#ff7043":"#26a69a";
@@ -1910,7 +1948,7 @@ const WART={
  desert:{ranch:(l,st,T,s)=>dsHome(l,"ranch",st,T,s),colonial:(l,st,T,s)=>dsHome(l,"colonial",st,T,s),mansion:(l,st,T,s)=>dsHome(l,"mansion",st,T,s),
   apartment:(l,st,T,s)=>dsBld(l,"apartment",st,T,s),park:(l,st,T,s)=>dsBld(l,"park",st,T,s),pool:(l,st,T,s)=>dsBld(l,"pool",st,T,s),civic:(l,st,T,s)=>dsBld(l,"civic",st,T,s),school:(l,st,T,s)=>dsBld(l,"school",st,T,s),hospital:(l,st,T,s)=>dsBld(l,"hospital",st,T,s),gas:(l,st,T,s)=>dsBld(l,"gas",st,T,s),shopping:(l,st,T,s)=>dsBld(l,"shopping",st,T,s)},
  themepark:{ranch:(l,st,T,s)=>tpStay(l,"ranch",st,T,s),colonial:(l,st,T,s)=>tpStay(l,"colonial",st,T,s),mansion:(l,st,T,s)=>tpStay(l,"mansion",st,T,s),realestate:(l,st,T,s)=>tpBld3(l,"realestate",st,T,s),
-  apartment:(l,st,T,s)=>tpBld2(l,"apartment",st,T,s),park:(l,st,T,s)=>tpBld2(l,"park",st,T,s),pool:(l,st,T,s)=>tpBld2(l,"pool",st,T,s),civic:(l,st,T,s)=>tpBld2(l,"civic",st,T,s),school:(l,st,T,s)=>tpBld3(l,"school",st,T,s),gas:(l,st,T,s)=>tpBld2(l,"gas",st,T,s),hospital:(l,st,T,s)=>tpBld2(l,"hospital",st,T,s)},
+  apartment:(l,st,T,s)=>tpBld2(l,"apartment",st,T,s),park:(l,st,T,s)=>tpBld2(l,"park",st,T,s),pool:(l,st,T,s)=>tpWaterPark(l,st,T,s),civic:(l,st,T,s)=>tpBld2(l,"civic",st,T,s),school:(l,st,T,s)=>tpBld3(l,"school",st,T,s),gas:(l,st,T,s)=>tpBld2(l,"gas",st,T,s),hospital:(l,st,T,s)=>tpBld2(l,"hospital",st,T,s)},
  mountain:{ranch:(l,st,T,s)=>mtnHome(l,"ranch",st,T,s),colonial:(l,st,T,s)=>mtnHome(l,"colonial",st,T,s),mansion:(l,st,T,s)=>mtnHome(l,"mansion",st,T,s),
   apartment:(l,st,T,s)=>mtnBld(l,"apartment",st,T,s),park:(l,st,T,s)=>mtnBld(l,"park",st,T,s),pool:(l,st,T,s)=>mtnBld(l,"pool",st,T,s),civic:(l,st,T,s)=>mtnBld(l,"civic",st,T,s),school:(l,st,T,s)=>mtnBld(l,"school",st,T,s),gas:(l,st,T,s)=>mtnBld(l,"gas",st,T,s)},
  city:{ranch:(l,st,T,s)=>cityHome(l,"ranch",st,T,s),colonial:(l,st,T,s)=>cityHome(l,"colonial",st,T,s),mansion:(l,st,T,s)=>cityHome(l,"mansion",st,T,s),
