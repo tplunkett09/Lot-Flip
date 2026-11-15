@@ -76,6 +76,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot.has-parking.business-parking.to-top::after{top:-12px;height:15px}
 .lot .ownership-frame{display:none;position:absolute;inset:-1px;border:3px solid #d6a400;border-radius:10px;z-index:8;pointer-events:none}
 .lot.purchased.business-parking .ownership-frame{display:block}
+.lot.has-parking.business-parking::after{z-index:9}.lot.business-parking .pb{z-index:10}
 .lot .act,.lot .pb{position:relative;z-index:3}
 .pi{animation:pi .5s}
 @keyframes pi{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
@@ -556,7 +557,7 @@ const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,marketWait:18+Math.random(
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo"||l.st==="clearing").length;
 const clearFee=()=>W().k==="historic"?Math.round(300+lv*3):Math.round(90+lv*2);
 // Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
-const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina","coffee","skishop","souvenir","diner","boatrent","antique","tiki","robocafe"].includes(l.hs));
+const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&l.hs&&S[l.hs]&&!S[l.hs].tall&&!S[l.hs].nopark&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina","coffee","skishop","souvenir","diner","boatrent","antique","tiki","robocafe"].includes(l.hs));
 // Homes get a compact two-car pad instead of a wide business lot.
 const isHomePad=l=>!!(l&&l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall);
 const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&!S[l.hs].tall&&!S[l.hs].nopark&&!isHomePad(l));
@@ -812,6 +813,11 @@ function tick(now){
     else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");if(W().k==="themepark")pool.push("peak","peak","offseason","expansion","fireworks");if(W().k==="desert")pool.push("heat","roadtrip","roadtrip");if(W().k==="future"){pool.push("expo","expo","blackout");if(readyOf("spaceport"))pool.push("launch","launch")}if(W().k==="tropical")pool.push("cruise","cruise","luau","volcano");if(W().k==="historic")pool.push("heritage","tours","tours","inspect");if(W().k==="lake")pool.push("summer","summer","fishing","mosquito");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(W().k==="tropical"&&!ev.v&&ev.n===1)ev.k="volcano";if(ev.k==="cruise")ev.k="cruisein";if(ev.k==="volcano")ev.v=true;if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:ev.k==="cruisein"?14:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="volcano"){quake();sfx.rumble()}if(ev.k==="launch"){setTimeout(()=>{quake();sfx.rumble()},1800)}if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
+      {const tr=traffic[i];if(tr&&tr.kind==="parked"&&!tr.truck&&tr.leaveIn==null){
+        const home=l.hs&&S[l.hs]&&S[l.hs].cat==="h",belongs=tr.resident?(home&&["rented","ai_owned","reno_working","ready"].includes(l.st)):tr.visitor?visitorBusiness(l):(l.st==="listed"&&!!l.offer);
+        if(!belongs){tr.orph=(tr.orph||0)+dt;if(tr.orph>2)tr.leaveIn=0}else tr.orph=0;
+        // Theme Park stays: guests check out after a while and new guests pull in
+        if(belongs&&tr.resident&&W().k==="themepark"&&l.st==="rented"){tr.stayT=(tr.stayT==null?14+Math.random()*16:tr.stayT)-dt;if(tr.stayT<=0)tr.leaveIn=0}}}
       {const tr=traffic[i];if(tr&&tr.kind==="parked"&&tr.leaveIn!=null){tr.leaveIn-=dt;if(tr.leaveIn<=0){tr.leaveIn=null;beginTrafficDeparture(i,tr,trafficGeometry(i))}}}
       // Rented homes and neighbor homes: the resident drives in and stays parked until the home is listed.
       if(l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall&&(l.st==="rented"||l.st==="ai_owned")&&!traffic[i]){l.resW=(l.resW==null?.6+Math.random()*1.8:l.resW)-dt;if(l.resW<=0){l.resW=null;startResidentArrival(i)}}
