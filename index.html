@@ -99,6 +99,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .bpg{left:-5px;min-width:28px;height:26px;padding:0 2px;background:#ab47bc;border:2px solid #fff;color:#fff;font-size:8.5px;letter-spacing:-.4px}
 .ckg{right:-5px;width:24px;height:24px;background:#00e676;border:2px solid #fff;color:#fff;font-size:16px;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,.4)}
 .lot.hasbp .bpg,.lot.chal .ckg{display:flex}
+.lot.to-top .bpg,.lot.to-top .ckg{top:auto;bottom:-13px}
 .act .bp{font-style:normal;display:block;width:fit-content;margin:1px auto 0;background:#ab47bc;color:#fff;border-radius:3px;padding:0 3px;white-space:nowrap}
 .pb{width:100%;height:5px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden}
 .pb i{display:block;height:100%;background:var(--gold);width:0}
@@ -189,7 +190,11 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .box{max-height:94vh;overflow-y:auto}
 .lot.dmg{border-color:#e53935!important;outline-color:#e53935!important;animation:dmg 1s infinite}
 @keyframes dmg{50%{box-shadow:0 0 14px 4px rgba(229,57,53,.95)}}
-.act.dmgl{background:#e53935;font-size:10px}
+.act,.act.ai,.act.dmgl{width:94%;background:none;padding:0;border-radius:0;font-size:9.5px;font-weight:900;letter-spacing:.2px;color:#fff;line-height:1.05;text-align:center;
+ text-shadow:-1px -1px 0 #1b1b1b,1px -1px 0 #1b1b1b,-1px 1px 0 #1b1b1b,1px 1px 0 #1b1b1b,0 -1px 0 #1b1b1b,0 1px 0 #1b1b1b,-1px 0 0 #1b1b1b,1px 0 0 #1b1b1b,0 2px 3px rgba(0,0,0,.6)}
+.act .nm{display:block}
+.act .ls{display:inline-block;font-style:normal;font-size:8px;font-weight:900;margin-top:2px;padding:1px 5px;border-radius:7px;background:rgba(20,20,20,.72);border:1px solid rgba(255,255,255,.55);text-shadow:none;white-space:nowrap}
+.act .ls.rp{background:#e53935}.act .ls.buy{background:#ff6f00}.act .ls.mk{background:#1565c0}.act .ls.ok{background:#2e7d32}.act .ls.go{background:#f9a825;color:#3e2723}
 #snw{position:absolute;inset:0;z-index:70;pointer-events:none;overflow:hidden;border-radius:11px}
 #snw i{position:absolute;top:0;width:var(--s);height:var(--s);background:#fff;border-radius:50%;box-shadow:0 0 2px 1px rgba(90,120,150,.75);animation:snow var(--t) linear var(--d) infinite;will-change:transform}
 @keyframes snow{0%{transform:translate3d(0,-8px,0)}33%{transform:translate3d(8px,calc(var(--h)*.33),0)}66%{transform:translate3d(-6px,calc(var(--h)*.66),0)}100%{transform:translate3d(2px,var(--h),0)}}
@@ -2713,14 +2718,17 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";ab.classList.toggle("nb",l.st!=="ai_for_sale");
     const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),l.forest?1:0,l.st==="clearing"?Math.round(l.cp*6):0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
-    let lb="",pb=0;const sn=l.hs?(SHORT[S[l.hs].n]||S[l.hs].n.replace(/^(Beach|City|Mountain|Ski|Hiking|Log|Hot) /,"").split(" ")[0]):"";
-    if(l.st==="empty")lb="Buy "+fmt(l.land);else if(l.st==="off_market")lb="Off market";else if(l.st==="owned")lb=sellMode?"Sell lot":l.forest?(HIS()?"🔨 Restore":DRY()?"💧 Drill well":"🌲 Clear trees"):"Build here";else if(l.st==="clearing"){lb=HIS()?"🔨 Restoring…":DRY()?"💧 Drilling…":"🪓 Clearing…";pb=l.cp}
-    else if(l.st==="working"){lb=l.permit>0?(W().k==="tropical"?"🚢 Shipping…":"📋 Permit…"):sn+"…";pb=l.p}else if(l.st==="reno_working"){lb="Upgrading…";pb=l.rp}else if(l.st==="demo"){lb="Demolishing…";pb=l.dp}
-    else if(l.st==="ready")lb=sn+(W().k==="future"&&S[l.hs].cat==="i"&&!powered(i)?" 🔌":"");else if(l.st==="rented")lb=l.dmg?"⚡ REPAIR "+fmt(repairCost(i)):"";
-    else if(l.st==="listed")lb=l.offer?"💰 "+fmt(l.offer.price):"On market";else if(l.st==="ai_owned")lb=sn;
-    else if(l.st==="ai_for_sale")lb="Buy "+fmt(l.aiP);else lb="Sold ✔";
+    let lb="",pb=0;const nm=l.hs&&S[l.hs]&&l.st!=="sold"?S[l.hs].n:"",tag=(t,c)=>'<i class="ls'+(c?" "+c:"")+'">'+t+"</i>";let st="";
+    if(l.st==="off_market")st=tag("Off market");else if(l.st==="owned")st=tag(sellMode?"Sell lot":l.forest?(HIS()?"🔨 Restore":DRY()?"💧 Drill well":"🌲 Clear trees"):"Build here");else if(l.st==="clearing"){st=tag(HIS()?"🔨 Restoring…":DRY()?"💧 Drilling…":"🪓 Clearing…");pb=l.cp}
+    else if(l.st==="working"){st=tag(l.permit>0?(W().k==="tropical"?"🚢 Shipping…":"📋 Permit…"):"🔨 Building…");pb=l.p}else if(l.st==="reno_working"){st=tag("Upgrading…");pb=l.rp}else if(l.st==="demo"){st=tag("Demolishing…","rp");pb=l.dp}
+    else if(l.st==="ready"){if(W().k==="future"&&S[l.hs].cat==="i"&&!powered(i))st=tag("🔌 No power","rp")}else if(l.st==="rented"){if(l.dmg)st=tag("⚡ Repair "+fmt(repairCost(i)),"rp")}
+    else if(l.st==="listed")st=l.offer?tag("💰 "+fmt(l.offer.price),"go"):tag("On market","mk");
+    else if(l.st==="ai_for_sale")st=tag("Buy "+fmt(l.aiP),"buy");else if(l.st==="sold")st=tag("Sold ✔","ok");
+    lb=(nm?'<b class="nm">'+nm.replace(/-/g,"\u2011")+"</b>":"")+st;
     if(l.offer)pb=l.offer.ttl/l.offer.max;
-    const a=e.querySelector(".act"),em=l.st==="empty",ah=em?"":lb;if(a._h!==ah){a._h=ah;a.innerHTML=ah}a.style.display=ah?"":"none";
+    const a=e.querySelector(".act"),em=l.st==="empty",ah=em?"":lb;if(a._h!==ah||a._w!==e.offsetWidth){a._h=ah;a._w=e.offsetWidth;a.innerHTML=ah;
+      // shrink the name just enough that its longest word fits on one line
+      const lw=nm?Math.max(...nm.split(" ").map(w=>w.length)):0,av=e.offsetWidth*.9-4;a.style.fontSize=lw?Math.max(6.5,Math.min(9.5,av/(lw*.68))).toFixed(1)+"px":""}a.style.display=ah?"":"none";
     {const sb=bp>0&&!ai,bt="+"+bp+"%",bg=e.querySelector(".bpg");e.classList.toggle("hasbp",sb);if(sb&&bg._t!==bt){bg._t=bt;bg.textContent=bt}e.classList.toggle("chal",inChallenge(l,i))}a.classList.toggle("ai",l.st==="ai_for_sale");a.classList.toggle("dmgl",!!l.dmg);e.classList.toggle("dmg",!!l.dmg);
     const bi=e.querySelector(".pb i");bi.style.width=pb*100+"%";bi.style.background=l.offer?"var(--blue)":"var(--gold)";
     e.classList.toggle("offer",!!l.offer);e.classList.toggle("hot",false);
