@@ -94,7 +94,11 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes pi{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
 .act{width:86%;background:rgba(0,0,0,.48);border-radius:4px;padding:2px 1px;font-size:8px;font-weight:800;text-align:center;color:#fff;line-height:1.05;margin-bottom:5px}
 .act.ai{background:#ff6f00}
-.lot.to-bottom .act{position:absolute;top:4px;left:7%;margin:0;z-index:4}.lot.to-bottom .act .bp{display:inline-block;margin:0 0 0 3px}
+.lot.to-bottom .act{position:absolute;top:15px;left:7%;margin:0;z-index:4}.lot.to-bottom .act .bp{display:inline-block;margin:0 0 0 3px}
+.bpg,.ckg{position:absolute;top:-13px;z-index:71;display:none;align-items:center;justify-content:center;border-radius:50%;pointer-events:none;font-style:normal;font-weight:900;box-sizing:border-box;box-shadow:0 1px 3px rgba(0,0,0,.55)}
+.bpg{left:-5px;min-width:28px;height:26px;padding:0 2px;background:#ab47bc;border:2px solid #fff;color:#fff;font-size:8.5px;letter-spacing:-.4px}
+.ckg{right:-5px;width:24px;height:24px;background:#00e676;border:2px solid #fff;color:#fff;font-size:16px;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,.4)}
+.lot.hasbp .bpg,.lot.chal .ckg{display:flex}
 .act .bp{font-style:normal;display:block;width:fit-content;margin:1px auto 0;background:#ab47bc;color:#fff;border-radius:3px;padding:0 3px;white-space:nowrap}
 .pb{width:100%;height:5px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden}
 .pb i{display:block;height:100%;background:var(--gold);width:0}
@@ -630,7 +634,7 @@ function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_wor
 
 function build(){
   const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];if(typeof amb!=="undefined")amb.q=[];
-  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="otk"><span></span></div><div class="spk"><i class="dc"></i><b class="pc"></b></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
+  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="otk"><span></span></div><i class="bpg"></i><i class="ckg">✓</i><div class="spk"><i class="dc"></i><b class="pc"></b></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
   const rd=document.createElement("div");rd.className="road";
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div>';
   if(W().k==="future"){const s=document.createElement("div");s.className="fut";s.innerHTML=FUT;sc.append(s)}
@@ -928,7 +932,8 @@ function endGame(win){
 }
 
 const WN=(x,y,w,h)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="1" fill="#bde3f5" stroke="#3e2723"/><path d="M'+(x+w/2)+" "+y+"v"+h+"M"+x+" "+(y+h/2)+"h"+w+'" stroke="#3e2723" stroke-width=".7"/>';
-const STAR=(cx,cy)=>'<polygon points="'+[...Array(10)].map((_,k)=>{const a=-Math.PI/2+k*Math.PI/5,r=k%2?2:5;return (cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1)}).join(" ")+'" fill="#ffc107" stroke="#b26a00" stroke-width=".6"/>';
+const STAR=(cx,cy)=>{const pt=(R,r,dx,dy)=>[...Array(10)].map((_,k)=>{const a=-Math.PI/2+k*Math.PI/5,q=k%2?r:R;return (cx+dx+q*Math.cos(a)).toFixed(1)+","+(cy+dy+q*Math.sin(a)).toFixed(1)}).join(" ");
+ return '<polygon points="'+pt(9,3.9,.6,1.2)+'" fill="#000" opacity=".35"/><polygon points="'+pt(8.6,3.7,0,0)+'" fill="#ffeb3b" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/><polygon points="'+pt(3.4,1.4,-1.5,-1.6)+'" fill="#fff" opacity=".8"/>'};
 const TREE=(x,y)=>'<rect x="'+(x-1)+'" y="'+y+'" width="2" height="6" fill="#6d4c41"/><circle cx="'+x+'" cy="'+(y-2)+'" r="6" fill="#2e7d32"/><circle cx="'+(x-2)+'" cy="'+(y-4)+'" r="3" fill="#43a047"/>';
 const GROUND='<ellipse cx="50" cy="56" rx="46" ry="7" fill="#000" opacity=".22"/><rect x="5" y="46" width="90" height="13" rx="5" fill="#5aa23e"/><polygon points="44,46 56,46 62,59 38,59" fill="#d7ccc8"/>';
 const BUSH='<circle cx="9" cy="47" r="4" fill="#388e3c"/><circle cx="91" cy="47" r="4" fill="#388e3c"/>';
@@ -2047,7 +2052,7 @@ function houseArt(l,i){
     s+=PERS("#6a1b9a","wk1",-3,0)+PERS("#00897b","wk2",-10,0);
   }
   if(!ov&&["ranch","colonial","mansion","civic","school"].includes(k))s+=BUSH;
-  const c=l.reno.length;for(let q=0;q<c;q++)s+=STAR(50-(c-1)*7+q*14,7);
+  const c=l.reno.length;for(let q=0;q<c;q++)s+=STAR(50-(c-1)*9.5+q*19,6);
   if(st==="demo"){
     const p=Math.min(1,l.dp),dd=l.dd||8,q=Math.max(0,Math.min(1,(p-.2)/.55)),ry=q*52,h=Math.min(9,Math.max(0,(p-.25)*14));
     const deb=p>.2&&p<.85?'<rect x="22" y="52" width="6" height="3" fill="#8d6e63"/><rect x="34" y="53" width="8" height="3" fill="#a1887f"/><rect x="60" y="52" width="6" height="3" fill="#6d4c41"/><rect x="72" y="53" width="7" height="3" fill="#8d6e63"/>':"";
@@ -2711,11 +2716,12 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     let lb="",pb=0;const sn=l.hs?(SHORT[S[l.hs].n]||S[l.hs].n.replace(/^(Beach|City|Mountain|Ski|Hiking|Log|Hot) /,"").split(" ")[0]):"";
     if(l.st==="empty")lb="Buy "+fmt(l.land);else if(l.st==="off_market")lb="Off market";else if(l.st==="owned")lb=sellMode?"Sell lot":l.forest?(HIS()?"🔨 Restore":DRY()?"💧 Drill well":"🌲 Clear trees"):"Build here";else if(l.st==="clearing"){lb=HIS()?"🔨 Restoring…":DRY()?"💧 Drilling…":"🪓 Clearing…";pb=l.cp}
     else if(l.st==="working"){lb=l.permit>0?(W().k==="tropical"?"🚢 Shipping…":"📋 Permit…"):sn+"…";pb=l.p}else if(l.st==="reno_working"){lb="Upgrading…";pb=l.rp}else if(l.st==="demo"){lb="Demolishing…";pb=l.dp}
-    else if(l.st==="ready")lb=sn+(W().k==="future"&&S[l.hs].cat==="i"&&!powered(i)?" 🔌":" ✔");else if(l.st==="rented")lb=l.dmg?"⚡ REPAIR "+fmt(repairCost(i)):fmt(rentOf(i))+"/3s";
+    else if(l.st==="ready")lb=sn+(W().k==="future"&&S[l.hs].cat==="i"&&!powered(i)?" 🔌":"");else if(l.st==="rented")lb=l.dmg?"⚡ REPAIR "+fmt(repairCost(i)):"";
     else if(l.st==="listed")lb=l.offer?"💰 "+fmt(l.offer.price):"On market";else if(l.st==="ai_owned")lb=sn;
     else if(l.st==="ai_for_sale")lb="Buy "+fmt(l.aiP);else lb="Sold ✔";
     if(l.offer)pb=l.offer.ttl/l.offer.max;
-    const a=e.querySelector(".act"),em=l.st==="empty",ah=(em?"":lb)+(bp>0?'<i class="bp">+'+bp+"%</i>":"");if(a._h!==ah){a._h=ah;a.innerHTML=ah}a.style.display=em&&!(bp>0)?"none":"";a.classList.toggle("ai",l.st==="ai_for_sale");a.classList.toggle("dmgl",!!l.dmg);e.classList.toggle("dmg",!!l.dmg);
+    const a=e.querySelector(".act"),em=l.st==="empty",ah=em?"":lb;if(a._h!==ah){a._h=ah;a.innerHTML=ah}a.style.display=ah?"":"none";
+    {const sb=bp>0&&!ai,bt="+"+bp+"%",bg=e.querySelector(".bpg");e.classList.toggle("hasbp",sb);if(sb&&bg._t!==bt){bg._t=bt;bg.textContent=bt}e.classList.toggle("chal",inChallenge(l,i))}a.classList.toggle("ai",l.st==="ai_for_sale");a.classList.toggle("dmgl",!!l.dmg);e.classList.toggle("dmg",!!l.dmg);
     const bi=e.querySelector(".pb i");bi.style.width=pb*100+"%";bi.style.background=l.offer?"var(--blue)":"var(--gold)";
     e.classList.toggle("offer",!!l.offer);e.classList.toggle("hot",false);
     {const ot=l.offer?("OFFER "+fmt(l.offer.price)+"  •  ").repeat(4):"",os=e.querySelector(".otk span");if(os&&os._t!==ot){os._t=ot;os.textContent=ot}}
@@ -3047,6 +3053,13 @@ function updObjective(o=objective){if(!o)return;const T=["rented","listed","read
   if(o.t==="remodel"){o.b=lots.filter(l=>l.hs===o.to&&T.includes(l.st)).length;o.c=Math.min(o.d||0,o.n);o.done=(o.d||0)>=o.n&&o.b>=o.n;return}
   if(o.t==="pair")o.c=lots.some((l,i)=>l.hs===o.a&&T.includes(l.st)&&adj(i).some(n=>lots[n].hs===o.b&&T.includes(lots[n].st)))?1:0;
   o.done=o.c>=o.n}
+// Does this lot currently count toward the level goal or the bonus challenge?
+function inChallenge(l,i){if(!l||!l.hs||!S[l.hs]||!["rented","listed","ready","reno_working"].includes(l.st))return false;const home=S[l.hs].cat==="h";
+  return [objective,bonus].some(o=>{if(!o)return false;
+    if(o.t==="build")return l.hs===o.k;if(o.t==="remodel")return l.hs===o.to;
+    if(o.t==="homes")return home&&["rented","listed"].includes(l.st);if(o.t==="front")return i<5&&home&&["rented","listed"].includes(l.st);
+    if(o.t==="pair")return (l.hs===o.a&&adj(i).some(n=>lots[n]&&lots[n].hs===o.b))||(l.hs===o.b&&adj(i).some(n=>lots[n]&&lots[n].hs===o.a));
+    return false})}
 function objShort(o=objective){if(!o)return"";if(o.t==="flipk")return"🏷️"+S[o.k].ic+(o.done?"✔":o.c+"/"+o.n);if(o.t==="buyai")return"🛒"+(o.done?"✔":o.c+"/"+o.n);if(o.t==="remodel")return"🔨"+S[o.from].ic+"→"+S[o.to].ic+(o.done?"✔":"");if(o.t==="pair")return S[o.a].ic+"+"+S[o.b].ic+(o.done?"✔":"");return o.t==="build"?S[o.k].ic+(o.done?"✔":""):OI[o.t]+(o.done?"✔":Math.min(o.c,o.n)+"/"+o.n)}
 function objLong(o=objective){if(!o)return"";const pr=" ("+Math.min(o.c,o.n)+"/"+o.n+")";
   if(o.t==="flipk")return"Sell "+o.n+" "+pl(S[o.k].n,o.n)+pr;if(o.t==="buyai")return"Buy "+o.n+" neighbor house"+(o.n>1?"s":"")+" that go for sale"+pr;if(o.t==="remodel")return"Demolish "+o.n+" "+pl(S[o.from].n,o.n)+" ("+Math.min(o.d||0,o.n)+"/"+o.n+") and build "+o.n+" "+pl(S[o.to].n,o.n)+" ("+Math.min(o.b||0,o.n)+"/"+o.n+")";if(o.t==="pair")return"Build "+an(S[o.a].n)+" next to "+an(S[o.b].n);return o.t==="build"?"Build "+an(S[o.k].n):o.t==="flip"?"Sell "+o.n+" "+HW(o.n)+HWX()+pr:o.t==="homes"?"Own "+o.n+" rented "+(W().k==="themepark"?"tourist stays":"homes")+" at once"+pr:o.t==="front"?"Own "+o.n+" beachfront homes (top row) at once"+pr:o.t==="reno"?"Finish "+o.n+" renovations (paint, roof, interior)"+pr:"Have "+o.n+" different building types"+pr}
