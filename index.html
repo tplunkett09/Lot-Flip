@@ -136,7 +136,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .b:disabled{opacity:.4}
 .b.active{border-color:var(--blue);background:rgba(41,182,246,.15);color:var(--blue)}
 .rock{position:absolute;z-index:75;font-size:18px;line-height:1;pointer-events:none;transition:transform .95s cubic-bezier(.5,0,.9,.6)}
-.deer{position:absolute;z-index:66;line-height:0;pointer-events:none;transition-property:top;transition-timing-function:linear;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+.deer{position:absolute;z-index:66;line-height:0;pointer-events:none;transition-property:top;transition-timing-function:linear;filter:drop-shadow(0 0 .8px rgba(255,255,255,.9)) drop-shadow(0 1px 1px rgba(0,0,0,.45))}
 .deer svg{display:block;width:100%;height:100%;overflow:visible}
 .deer .lg1,.deer .lg2{animation:wlk .32s ease-in-out infinite alternate}.deer .lg2{animation-delay:-.32s}
 .deer .hd{transition:transform .4s}.deer.idle .lg1,.deer.idle .lg2{animation-play-state:paused}.deer.idle .hd{transform:rotate(-14deg)}
@@ -2541,6 +2541,7 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
     if(!(car.ghost>0))for(const k of Object.keys(traffic)){const tr=traffic[k];if(!tr||tr.exitCommitted||!["depart","leave"].includes(tr.kind)||(tr.cw||0)<1.2)continue;
       const g=trafficGeometry(+k);if(!g||g.road!==car.road)continue;const rt=trafficRoute(g,tr.dir,"depart"),clr=40+rt.turn+10,d=((g.x+tr.dir*20)-current.x)*car.dir-(car.len||20)/2;
       if(d>clr-4&&d<clr+36){targetFactor=0;break}}
+    for(const cr of crossers){if(!cr.crossing||cr.road!==car.road)continue;const d=(cr.x-current.x)*car.dir-(car.len||20)/2-cr.half;if(d>-4&&d<44){targetFactor=0;car.stall=0;break}}
     if(car.ghost>0){car.ghost-=dt;targetFactor=1}
     const factor=setSpeedFactor(car,targetFactor,dt);
     const slow=(W().k==="mountain"&&(ev.k==="snow"||ev.k==="storm"))||(W().k==="desert"&&ev.k==="storm")?.6:1;let nx=currentX+car.dir*car.speed*factor*dt*slow,wrapped=false;
@@ -2549,7 +2550,7 @@ function updateRoadTraffic(dt){roadTraffic=roadTraffic.filter(c=>{if(c.done){c.e
     if(wrapped&&(car.emerg||car.tmp)){car.done=true;car.x=nx;return}if(!(car.ghost>0))nx=safeRoadProgress(car,currentX,nx,current,wrapped);
     const waitingAtEdge=wrapped&&nx===(car.dir===1?edge:-18);
     const actualDelta=waitingAtEdge?0:(wrapped?car.speed*factor*dt:Math.abs(nx-currentX));
-    if(actualDelta<.01){car.stall=(car.stall||0)+dt;if(car.stall>6){car.stall=0;if(!car.hop){car.hop=1;fadeVeh(car.el,()=>{car.hop=0;car.speedFactor=1;if(car.emerg||car.tmp){car.done=true;return}car.x=car.dir===1?-18:width+18})}}}else car.stall=0;
+    if(actualDelta<.01&&!crossers.some(cr=>cr.crossing&&cr.road===car.road)){car.stall=(car.stall||0)+dt;if(car.stall>6){car.stall=0;if(!car.hop){car.hop=1;fadeVeh(car.el,()=>{car.hop=0;car.speedFactor=1;if(car.emerg||car.tmp){car.done=true;return}car.x=car.dir===1?-18:width+18})}}}else car.stall=0;
     car.actualSpeed=actualDelta/Math.max(dt,.001);
     car.x=nx;
   });
@@ -2816,21 +2817,21 @@ function strike(){const o=$("stm");if(W().k==="desert"||W().k==="lake")noise(1.2
 // Mountain wildlife: top-down animals (drawn facing right, like the cars) that cross the road,
 // rotated to face the way they walk, with a short pause mid-road to look at traffic.
 const WILD={
- deer:{w:26,h:13,t:3.4,svg:()=>{const c="#a5713f";return '<ellipse cx="18" cy="10" rx="10" ry="4.6" fill="'+c+'"/><ellipse cx="8.6" cy="10" rx="2.6" ry="3.2" fill="#f5f0e6"/>'
+ deer:{w:32,h:16,t:3.4,svg:()=>{const c="#c99558";return '<ellipse cx="18" cy="10" rx="10" ry="4.6" fill="'+c+'"/><ellipse cx="8.6" cy="10" rx="2.6" ry="3.2" fill="#f5f0e6"/>'
    +'<g class="hd" style="transform-origin:26px 10px"><ellipse cx="28" cy="10" rx="4" ry="2.5" fill="'+c+'"/><ellipse cx="33" cy="10" rx="3.6" ry="2.3" fill="'+c+'"/><circle cx="36.4" cy="10" r="1" fill="#3e2723"/>'
    +'<ellipse cx="31" cy="7" rx="1.8" ry=".9" fill="#8d5a2b"/><ellipse cx="31" cy="13" rx="1.8" ry=".9" fill="#8d5a2b"/>'
    +'<path d="M31 8.4Q32 3.6 36.6 3.8M32.6 5.4L31.2 3M34.6 4.2L34.8 1.8M31 11.6Q32 16.4 36.6 16.2M32.6 14.6L31.2 17M34.6 15.8L34.8 18.2" stroke="#6d4c41" stroke-width=".9" stroke-linecap="round" fill="none"/></g>'},legs:"#5d4037",lx:[11,23]},
- elk:{w:32,h:16,t:4.2,svg:()=>{const c="#b08b5e";return '<ellipse cx="17" cy="10" rx="11" ry="5" fill="'+c+'"/><ellipse cx="7.5" cy="10" rx="2.8" ry="3.6" fill="#e6d2b0"/>'
+ elk:{w:38,h:19,t:4.2,svg:()=>{const c="#d8b98c";return '<ellipse cx="17" cy="10" rx="11" ry="5" fill="'+c+'"/><ellipse cx="7.5" cy="10" rx="2.8" ry="3.6" fill="#e6d2b0"/>'
    +'<g class="hd" style="transform-origin:26px 10px"><ellipse cx="28" cy="10" rx="4.6" ry="3" fill="#5d4037"/><ellipse cx="33.6" cy="10" rx="3.8" ry="2.4" fill="#6d4c41"/><circle cx="37" cy="10" r="1" fill="#212121"/>'
    +'<path d="M31.5 8.4Q26 3 18 2.4M27 4.6L27.6 1.6M23 3.2L23 .6M31.5 11.6Q26 17 18 17.6M27 15.4L27.6 18.4M23 16.8L23 19.4" stroke="#8d6e63" stroke-width="1.1" fill="none" stroke-linecap="round"/></g>'},legs:"#4e342e",lx:[10,23]},
- moose:{w:34,h:17,t:5.2,svg:()=>{const c="#3e2723";return '<ellipse cx="17" cy="10" rx="11.5" ry="5.4" fill="'+c+'"/><ellipse cx="22" cy="10" rx="4" ry="4.4" fill="#4e342e"/>'
+ moose:{w:40,h:20,t:5,svg:()=>{const c="#6d4c41";return '<ellipse cx="17" cy="10" rx="11.5" ry="5.4" fill="'+c+'"/><ellipse cx="22" cy="10" rx="4" ry="4.4" fill="#5d4037"/>'
    +'<g class="hd" style="transform-origin:27px 10px"><ellipse cx="29" cy="10" rx="4" ry="2.8" fill="#4e342e"/><ellipse cx="35" cy="10" rx="4.4" ry="2.4" fill="#5d4037"/><ellipse cx="38.4" cy="10" rx="1.6" ry="1.8" fill="#6d4c41"/>'
-   +'<path d="M30 7.6Q27 1 21 1.6Q24 3 25 5Q27 4.8 30 7.6z" fill="#bcaaa4" stroke="#8d6e63" stroke-width=".5"/><path d="M30 12.4Q27 19 21 18.4Q24 17 25 15Q27 15.2 30 12.4z" fill="#bcaaa4" stroke="#8d6e63" stroke-width=".5"/></g>'},legs:"#212121",lx:[10,24]},
- bear:{w:28,h:16,t:4.6,svg:()=>{const c="#2b2b2b";return '<ellipse cx="16" cy="10" rx="10" ry="6" fill="'+c+'"/>'
+   +'<path d="M30 7.6Q27 1 21 1.6Q24 3 25 5Q27 4.8 30 7.6z" fill="#efe6d8" stroke="#a1887f" stroke-width=".5"/><path d="M30 12.4Q27 19 21 18.4Q24 17 25 15Q27 15.2 30 12.4z" fill="#efe6d8" stroke="#8d6e63" stroke-width=".5"/></g>'},legs:"#212121",lx:[10,24]},
+ bear:{w:32,h:18,t:4.4,svg:()=>{const c="#2b2b2b";return '<ellipse cx="16" cy="10" rx="10" ry="6" fill="'+c+'"/>'
    +'<g class="hd" style="transform-origin:25px 10px"><circle cx="28" cy="10" r="4" fill="'+c+'"/><ellipse cx="32.4" cy="10" rx="2" ry="1.6" fill="#8d6e63"/><circle cx="33.8" cy="10" r=".8" fill="#000"/><circle cx="26.6" cy="6.4" r="1.4" fill="'+c+'"/><circle cx="26.6" cy="13.6" r="1.4" fill="'+c+'"/></g>'},legs:"#1a1a1a",lx:[9,21]},
- fox:{w:22,h:11,t:2.6,svg:()=>{const c="#e66a1f";return '<path d="M10 10Q4 6 .5 9.4Q3 10 .5 10.6Q4 14 10 10z" fill="'+c+'"/><path d="M2.6 8.8Q.4 9.4.5 10Q.4 10.6 2.6 11.2z" fill="#fff"/><ellipse cx="17" cy="10" rx="7.6" ry="3.2" fill="'+c+'"/>'
+ fox:{w:26,h:13,t:2.6,svg:()=>{const c="#e66a1f";return '<path d="M10 10Q4 6 .5 9.4Q3 10 .5 10.6Q4 14 10 10z" fill="'+c+'"/><path d="M2.6 8.8Q.4 9.4.5 10Q.4 10.6 2.6 11.2z" fill="#fff"/><ellipse cx="17" cy="10" rx="7.6" ry="3.2" fill="'+c+'"/>'
    +'<g class="hd" style="transform-origin:24px 10px"><path d="M23 7.4Q29 8 33 10Q29 12 23 12.6z" fill="'+c+'"/><path d="M29 9Q32 9.6 33 10Q32 10.4 29 11z" fill="#fff3e0"/><circle cx="33" cy="10" r=".7" fill="#212121"/><polygon points="24,7.6 26.6,5.6 26.4,8.2" fill="#3e2723"/><polygon points="24,12.4 26.6,14.4 26.4,11.8" fill="#3e2723"/></g>'},legs:"#3e2723",lx:[13,20]},
- rabbit:{w:16,h:8,t:2.2,hop:1,svg:()=>{const c="#9e9a94";return '<ellipse cx="16" cy="10" rx="7.6" ry="5.4" fill="'+c+'"/><circle cx="8.4" cy="10" r="2.4" fill="#fff"/>'
+ rabbit:{w:20,h:10,t:2.2,hop:1,svg:()=>{const c="#bdb6ad";return '<ellipse cx="16" cy="10" rx="7.6" ry="5.4" fill="'+c+'"/><circle cx="8.4" cy="10" r="2.4" fill="#fff"/>'
    +'<g class="hd" style="transform-origin:22px 10px"><circle cx="25" cy="10" r="3.6" fill="'+c+'"/><circle cx="28.4" cy="10" r=".8" fill="#ec407a"/><ellipse cx="19.6" cy="8.2" rx="4.4" ry="1.3" fill="#bdb8b0" stroke="#6d6a66" stroke-width=".4"/><ellipse cx="19.6" cy="11.8" rx="4.4" ry="1.3" fill="#bdb8b0" stroke="#6d6a66" stroke-width=".4"/><ellipse cx="19.6" cy="8.2" rx="3" ry=".5" fill="#f8bbd0"/><ellipse cx="19.6" cy="11.8" rx="3" ry=".5" fill="#f8bbd0"/></g>'},legs:"#757575",lx:[]}};
 function wildSvg(k){const a=WILD[k],lg=(x,c,y)=>'<rect class="'+c+'" x="'+x+'" y="'+y+'" width="3" height="2" rx=".9" fill="'+a.legs+'"/>';
  const legs=a.lx.map((x,q)=>lg(x,q?"lg2":"lg1",4.4-(k==="moose"?.8:0))+lg(x,q?"lg1":"lg2",13.6+(k==="moose"?.8:0))).join("");
@@ -2841,12 +2842,18 @@ function spawnDeer(sc){const rd=[...sc.querySelectorAll(".road")],r=rd[Math.floo
  const d=document.createElement("div");d.className="deer"+(a.hop?" hop":"");d.innerHTML=wildSvg(k);d.style.width=a.w+"px";d.style.height=a.h+"px";
  d.style.left=(cx-a.w/2).toFixed(0)+"px";d.style.transform="rotate("+(down?90:-90)+"deg)";
  const top0=R0.top-oy-len/2-a.h/2-2,top1=R0.bottom-oy+len/2-a.h/2+2;
- // Walk up to the curb, stop and look at traffic, then cross.
- const from=down?top0:top1,to=down?top1:top0,pre=from+(down?-10:10),walk=.6,pause=.5+Math.random()*.8;
+ // Walk up to the curb, stop and look for traffic, wait for a gap, then cross. Cars stop for it.
+ const from=down?top0:top1,to=down?top1:top0,pre=from+(down?-10:10),walk=.6,look=.6+Math.random()*.6;
+ const cr={road:r,x:cx,half:a.h/2+2,crossing:false};crossers.push(cr);
  d.style.top=pre.toFixed(0)+"px";d.style.opacity="0";sc.appendChild(d);void d.offsetWidth;
  d.style.transition="top "+walk+"s linear, opacity .3s";d.style.opacity="1";d.style.top=from.toFixed(0)+"px";
- setTimeout(()=>{d.classList.add("idle");setTimeout(()=>{d.classList.remove("idle");d.style.transition="top "+a.t+"s linear";d.style.top=to.toFixed(0)+"px"},pause*1000)},walk*1000);
- setTimeout(()=>d.remove(),(walk+pause+a.t+.3)*1000)}
+ const clear=()=>!roadTraffic.some(c=>c.road===r&&!c.done&&Math.abs(roadVehiclePose(c).x-cx)<(c.len||20)/2+a.h/2+46);
+ let waited=0;const tryCross=()=>{if(!d.isConnected){crossers.splice(crossers.indexOf(cr),1);return}
+  if(!clear()&&waited<8){waited+=.15;setTimeout(tryCross,150);return}
+  cr.crossing=true;d.classList.remove("idle");d.style.transition="top "+a.t+"s linear";d.style.top=to.toFixed(0)+"px";
+  setTimeout(()=>{const q=crossers.indexOf(cr);if(q>=0)crossers.splice(q,1);d.style.transition="opacity .4s";d.style.opacity="0";setTimeout(()=>d.remove(),450)},a.t*1000)};
+ setTimeout(()=>{d.classList.add("idle");setTimeout(tryCross,look*1000)},walk*1000)}
+let crossers=[];
 function sceneBurst(){const sc=$("scene");if(!sc)return;const W0=sc.clientWidth,x=W0*(.1+Math.random()*.8),y=10+Math.random()*60,h=Math.random()*360;tone(300+Math.random()*300,.2,"triangle",.03,0,100);
  for(let k=0;k<22;k++){const p=document.createElement("i");p.className="fwp";p.style.zIndex=90;const a=k/22*Math.PI*2,r=30+Math.random()*30;p.style.cssText+=";left:"+x+"px;top:"+y+"px;background:hsl("+(h+Math.random()*50)+",95%,62%);box-shadow:0 0 8px hsl("+h+",95%,62%);--dx:"+(Math.cos(a)*r).toFixed(0)+"px;--dy:"+(Math.sin(a)*r).toFixed(0)+"px";sc.appendChild(p);setTimeout(()=>p.remove(),1500)}}
 function quake(){const sc=$("scene");if(!sc)return;sc.classList.remove("quake");void sc.offsetWidth;sc.classList.add("quake");buzz(120);setTimeout(()=>sc.classList.remove("quake"),950)}
