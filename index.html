@@ -81,10 +81,10 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot.lotpark.to-top>svg{margin-top:34px}.lot.lotpark.to-bottom .pb{position:absolute;left:5px;right:5px;bottom:34px;width:auto}.lot.lotpark.to-top .act{position:absolute;left:7%;bottom:13px;margin:0;z-index:4}.lot.lotpark.to-top .pb{position:absolute;left:5px;right:5px;bottom:5px;width:auto}
 @media(max-width:768px){.lot.lotpark.to-top>svg{margin-top:30px}}
 .spk{display:none}.lot.lotpark .spk{display:block}
-.spk b{position:absolute;width:34px;height:24px;border:1px solid #545954;border-radius:2px;box-sizing:border-box;z-index:4;background:linear-gradient(90deg,transparent calc(50% - .5px),#d7d9d2 calc(50% - .5px),#d7d9d2 calc(50% + .5px),transparent calc(50% + .5px)),#777b75}
-.spk b.pl{left:4px}.spk b.pr{right:4px}.lot.to-bottom .spk b{bottom:6px}.lot.to-top .spk b{top:5px}
-.spk i{position:absolute;width:10px;background:#777b75;border-left:1px solid #545954;border-right:1px solid #545954;box-sizing:border-box;z-index:9}
-.spk i.dl{left:16px}.spk i.dr{right:16px}.lot.to-bottom .spk i{bottom:-12px;height:19px}.lot.to-top .spk i{top:-12px;height:18px}
+.spk b{position:absolute;left:50%;transform:translateX(-50%);width:112px;height:24px;border:1px solid #545954;border-radius:2px;box-sizing:border-box;z-index:4;background:linear-gradient(90deg,transparent calc(50% - 30.5px),#d7d9d2 calc(50% - 30.5px),#d7d9d2 calc(50% - 29.5px),transparent calc(50% - 29.5px)),linear-gradient(90deg,transparent calc(50% - 8.5px),#d7d9d2 calc(50% - 8.5px),#d7d9d2 calc(50% - 7.5px),transparent calc(50% - 7.5px)),linear-gradient(90deg,transparent calc(50% + 7.5px),#d7d9d2 calc(50% + 7.5px),#d7d9d2 calc(50% + 8.5px),transparent calc(50% + 8.5px)),linear-gradient(90deg,transparent calc(50% + 29.5px),#d7d9d2 calc(50% + 29.5px),#d7d9d2 calc(50% + 30.5px),transparent calc(50% + 30.5px)),#777b75}
+.lot.to-bottom .spk b{bottom:6px}.lot.to-top .spk b{top:5px}
+.spk i{position:absolute;left:calc(50% - 7px);width:14px;background:#777b75;border-left:1px solid #545954;border-right:1px solid #545954;box-sizing:border-box;z-index:9}
+.lot.to-bottom .spk i{bottom:-12px;height:19px}.lot.to-top .spk i{top:-12px;height:18px}
 .spk b .traffic-car{position:absolute;top:6.4px;z-index:5}.lot .spk .traffic-car svg{width:20px;height:11.25px;margin:0;display:block}.lot.business-parking .pb{z-index:10}
 .lot .act,.lot .pb{position:relative;z-index:3}
 .pi{animation:pi .5s}
@@ -626,7 +626,7 @@ function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_wor
 
 function build(){
   const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];if(typeof amb!=="undefined")amb.q=[];
-  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="otk"><span></span></div><div class="spk"><i class="dl"></i><i class="dr"></i><b class="pl"></b><b class="pr"></b></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
+  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="otk"><span></span></div><div class="spk"><i class="dc"></i><b class="pc"></b></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
   const rd=document.createElement("div");rd.className="road";
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div>';
   if(W().k==="future"){const s=document.createElement("div");s.className="fut";s.innerHTML=FUT;sc.append(s)}
@@ -1246,13 +1246,16 @@ function tpOnly(l,k,st,T,s){
     if(st==="ready")for(let k2=0;k2<10;k2++){const a=k2/10*Math.PI*2+.31;s+='<circle class="blk'+(k2%2?" b2":"")+'" cx="'+(50+36*Math.cos(a)).toFixed(1)+'" cy="'+(40+36*Math.sin(a)).toFixed(1)+'" r="1.1" fill="#fff59d"/>'}
     return s}
   // Roller Coaster: three lots wide (300 units), full lot height
-  const P=[[8,80],[22,58],[36,24],[48,12],[60,16],[72,38],[84,64],[98,58],[112,32],[126,20],[140,26],[154,50],[168,62],[182,46],[196,18],[210,8],[224,16],[238,42],[252,62],[266,54],[280,40],[292,62]],tr="M"+P.map(p=>p.join(" ")).join("L");
+  // Track with a vertical loop between the two halves (cars ride upside down through it)
+  const PA=[[8,80],[22,58],[36,24],[48,12],[60,16],[72,38],[84,64],[98,58],[112,32],[126,20],[140,26],[154,50],[164,72],[174,72]],PB=[[178,72],[196,18],[210,8],[224,16],[238,42],[252,62],[266,54],[280,40],[292,62]],P=PA.concat(PB);
+  const LOOP=" A20 20 0 0 0 176 32 A20 20 0 0 0 178 72",tr="M"+PA.map(p=>p.join(" ")).join("L")+LOOP+"L"+PB.map(p=>p.join(" ")).join("L");
   s='<rect x="4" y="80" width="292" height="8" rx="3" fill="#cfd8dc"/>';
   P.forEach(p=>{s+='<path d="M'+p[0]+' '+(p[1]+2)+'V82" stroke="#a1887f" stroke-width="1.6"/>'});
-  for(let q=0;q<P.length-1;q++){const a=P[q],b=P[q+1];s+='<path d="M'+a[0]+' '+(a[1]+8)+'L'+b[0]+' '+(b[1]+8)+'" stroke="#bcaaa4" stroke-width=".8"/>'}
+  [PA,PB].forEach(L=>{for(let q=0;q<L.length-1;q++){const a=L[q],b=L[q+1];s+='<path d="M'+a[0]+' '+(a[1]+8)+'L'+b[0]+' '+(b[1]+8)+'" stroke="#bcaaa4" stroke-width=".8"/>'}});
+  s+='<circle cx="176" cy="52" r="20" fill="none" stroke="#bcaaa4" stroke-width=".8" stroke-dasharray="1.5 2.5"/><path d="M168 82L176 52L184 82M164 82h24" stroke="#a1887f" stroke-width="1.6" fill="none"/>';
   s+='<path d="'+tr+'" stroke="#c62828" stroke-width="3" fill="none" stroke-linejoin="round"/><path d="'+tr+'" stroke="#ffcdd2" stroke-width=".8" fill="none" stroke-dasharray="2 3"/>'
 ;
-  const stn='<rect x="8" y="64" width="40" height="18" fill="#fff8e1" '+T+'/><polygon points="4,65 28,54 52,65" fill="#7e57c2" '+T+'/><path d="M10 64V50M46 64V50" stroke="#5d4037" stroke-width="1.2"/><rect x="4" y="38" width="50" height="12" rx="2" fill="#c62828" stroke="#fff" stroke-width="1"/><text x="29" y="46.4" font-size="6.2" font-weight="900" text-anchor="middle" fill="#fff59d" letter-spacing=".2">THUNDER RUN</text><rect x="22" y="70" width="12" height="12" fill="#5d4037"/>';
+  const stn='<rect x="8" y="64" width="40" height="18" fill="#fff8e1" '+T+'/><polygon points="4,65 28,54 52,65" fill="#7e57c2" '+T+'/><path d="M10 64V50M48 64V50" stroke="#5d4037" stroke-width="1.4"/><rect x="1" y="33" width="62" height="17" rx="2.5" fill="#c62828" stroke="#fff" stroke-width="1.2"/><text x="32" y="44.4" font-size="7.6" font-weight="900" text-anchor="middle" fill="#fff59d" letter-spacing=".2">THUNDER RUN</text><rect x="22" y="70" width="12" height="12" fill="#5d4037"/>';
   if(st==="ready"){[0,-.25,-.5].forEach(d=>{s+='<g><rect x="-4" y="-5" width="8" height="5" rx="1.5" fill="#1e88e5" stroke="#0d47a1" stroke-width=".6"/><circle cx="-1.5" cy="-6" r="1.2" fill="#ffcc80"/><circle cx="1.5" cy="-6" r="1.2" fill="#ffcc80"/><animateMotion dur="7s" repeatCount="indefinite" rotate="auto" begin="'+d+'s" path="'+tr+'"/></g>'});
     s+=stn+PERS("#e53935","wk1",-2,24)+PERS("#1565c0","wk2",-7,24)+PERS("#43a047","wk1",-11,24)}
   else s+=stn;
@@ -2122,10 +2125,10 @@ function trafficGeometry(i){
   // Match the CSS parking-pad center exactly. Business bays are wider and
   // visitor cars use opposite halves rather than stopping on the lawn.
   if(lots[i]&&lots[i].hs&&S[lots[i].hs]&&S[lots[i].hs].lotpark){
-    // Side car parks at each end of a wide attraction: visitors use the near stall of the left or right lot.
-    const sd=(traffic[i]&&traffic[i].side)||-1,pc=sd<0?lotRect.left-ox+4+17:lotRect.right-ox-4-17;
+    // One centre car park: visitors pull in the middle and turn left or right into the inner bays.
+    const sd=(traffic[i]&&traffic[i].side)||-1,pc=lotRect.left-ox+lotRect.width/2;
     const top=streetAbove?5:lotRect.height-6-24;
-    return {x:pc,parkX:pc+(sd<0?-7:7),parkY:lotRect.top-oy+top+12,roadY:roadRect.top-oy+roadRect.height/2,road,towardLot:streetAbove?1:-1,width:sc.clientWidth,height:sc.clientHeight}}
+    return {x:pc,parkX:pc+sd*19,parkY:lotRect.top-oy+top+12,roadY:roadRect.top-oy+roadRect.height/2,road,towardLot:streetAbove?1:-1,width:sc.clientWidth,height:sc.clientHeight}}
   const isBusiness=!!(lots[i]&&hasBusinessParking(lots[i]));
   const side=isBusiness&&traffic[i]&&traffic[i].visitor?(traffic[i].side||-1):0;
   const padWidth=isBusiness?68:40;
@@ -2137,7 +2140,7 @@ function trafficGeometry(i){
   const padTop=streetAbove?(cp?5:3):(isBusiness?lotRect.height-20-34:cp?lotRect.height-26-22:lotRect.height-24-26);
   const padHeight=isBusiness?34:cp?22:26;
   const parkY=lotRect.top-oy+padTop+padHeight/2;
-  return {x:driveX,parkX,parkY,roadY:roadRect.top-oy+roadRect.height/2,road,
+  return {x:driveX,parkX,parkY,homePad:cp,roadY:roadRect.top-oy+roadRect.height/2,road,
     towardLot:streetAbove?1:-1,width:sc.clientWidth,height:sc.clientHeight};
 }
 function trafficColor(i){const colors=["#d84343","#2878bd","#f5b82e","#f3f4ef","#8e5cb7","#279b86"];return colors[(i+2)%colors.length]}
@@ -2261,7 +2264,7 @@ function trafficPose(tr,g,timeOverride){
     const {approachX,startX,approach,turn,driveway,total}=metrics;
     const p1=approach/total,p2=(approach+turn)/total,p3=(approach+turn+driveway)/total;
     const startA=dir===1?0:180,endA=dir===1?toward*90:180-toward*90;
-    const parkA=dir===1?0:180;
+    const parkA=g.homePad?endA:parkX>g.x+.5?0:parkX<g.x-.5?180:(dir===1?0:180);
     let x,y,a;
     if(p<p1){const u=easeTraffic(p/p1);x=startX+(approachX-startX)*u;y=laneY;a=startA}
     else if(p<p2){const u=easeTraffic((p-p1)/(p2-p1));x=approachX+(g.x-approachX)*u;y=laneY+(entryY-laneY)*u;a=startA+angleDelta(startA,endA)*u}
@@ -2273,7 +2276,7 @@ function trafficPose(tr,g,timeOverride){
   const {driveway,turn,road,exitX,endX,total}=metrics;
   const p0=shift/total,p1=(shift+driveway)/total,p2=(shift+driveway+turn)/total;
   const exitA=-toward*90,endA=dir===1?0:180;
-  const parkA=dir===1?0:180;
+  const parkA=g.homePad?exitA+180:parkX>g.x+.5?0:parkX<g.x-.5?180:(dir===1?0:180);
   let x,y,a;
   if(p<p0){const u=shift>0?easeTraffic(p/p0):1;x=parkX+(g.x-parkX)*u;y=g.parkY;a=parkA+angleDelta(parkA,exitA)*u}
   else if(p<p1){const u=driveway>0?easeTraffic((p-p0)/(p1-p0)):1;x=g.x;y=g.parkY+(entryY-g.parkY)*u;a=exitA}
@@ -2631,7 +2634,7 @@ function renderTraffic(){
     if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
     const g=trafficGeometry(i);if(!g)return;
     if(tr.kind==="parked"){
-      const endA=((isHomePad(lots[i])||(lots[i].hs&&S[lots[i].hs]&&S[lots[i].hs].lotpark))&&!tr.truck)?(g.towardLot===1?90:-90):(tr.dir===1?0:180);
+      const px=g.parkX??g.x,endA=(isHomePad(lots[i])&&!tr.truck)?(g.towardLot===1?90:-90):px>g.x+.5?0:px<g.x-.5?180:(tr.dir===1?0:180);
       tr.el.style.left=((g.parkX??g.x)-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";
     }else{
       const pose=trafficPose(tr,g);tr.el.style.left=(pose.x-10)+"px";tr.el.style.top=(pose.y-5.625)+"px";tr.el.style.transform="rotate("+pose.a+"deg)";
@@ -2679,8 +2682,8 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     e.classList.toggle("to-bottom",!streetAbove);e.classList.toggle("to-top",streetAbove);
     e.classList.toggle("has-parking",hasBuilding&&(!S[l.hs].tall||!!S[l.hs].lotpark)&&!S[l.hs].nopark);e.classList.toggle("lotpark",hasBuilding&&!!S[l.hs].lotpark);
     if(hasBuilding&&S[l.hs].lotpark){const on=l.st==="ready",up=streetAbove?90:-90,key=on+"|"+up;const pk=e.querySelector(".spk");if(pk&&pk._k!==key){pk._k=key;
-      const car=(c,x)=>'<div class="traffic-car" style="left:'+x+'px;transform:rotate('+up+'deg)">'+vehicleMarkup(c)+'</div>';
-      pk.querySelector(".pl").innerHTML=on?car("#8e5cb7",13.5):"";pk.querySelector(".pr").innerHTML=on?car("#279b86",-.5):""}}
+      const car=(c,x,a)=>'<div class="traffic-car" style="left:'+x+'px;transform:rotate('+a+'deg)">'+vehicleMarkup(c)+'</div>';
+      pk.querySelector(".pc").innerHTML=on?car("#8e5cb7",5,180)+car("#279b86",87,0):""}}
     e.classList.toggle("business-parking",hasBuilding&&hasBusinessParking(l));e.classList.toggle("cpad",hasBuilding&&isHomePad(l));
     const mine=["owned","working","reno_working","demo","ready","rented","listed","clearing"].includes(l.st);
     e.classList.toggle("purchased",mine);if(W().k==="future"){const pw=powered(i),bz=!!l.hs&&l.st!=="merged"&&done(l);e.classList.toggle("nopow",bz&&S[l.hs].cat==="i"&&!pw);e.classList.toggle("dk",bz&&(ev.k==="storm"||ev.k==="blackout"&&!pw))}else e.classList.remove("nopow","dk");e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
