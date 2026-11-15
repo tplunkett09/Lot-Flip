@@ -802,6 +802,7 @@ function tick(now){
     else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");if(W().k==="themepark")pool.push("peak","peak","offseason","expansion","fireworks");if(W().k==="desert")pool.push("heat","roadtrip","roadtrip");if(W().k==="future"){pool.push("expo","expo","blackout");if(readyOf("spaceport"))pool.push("launch","launch")}if(W().k==="tropical")pool.push("cruise","cruise","luau","volcano");if(W().k==="historic")pool.push("heritage","tours","tours","inspect");if(W().k==="lake")pool.push("summer","summer","fishing","mosquito");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(W().k==="tropical"&&!ev.v&&ev.n===1)ev.k="volcano";if(ev.k==="cruise")ev.k="cruisein";if(ev.k==="volcano")ev.v=true;if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:ev.k==="cruisein"?14:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="volcano"){quake();sfx.rumble()}if(ev.k==="launch"){setTimeout(()=>{quake();sfx.rumble()},1800)}if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
+      {const tr=traffic[i];if(tr&&tr.kind==="parked"&&tr.leaveIn!=null){tr.leaveIn-=dt;if(tr.leaveIn<=0){tr.leaveIn=null;beginTrafficDeparture(i,tr,trafficGeometry(i))}}}
       // Rented homes and neighbor homes: the resident drives in and stays parked until the home is listed.
       if(l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall&&(l.st==="rented"||l.st==="ai_owned")&&!traffic[i]){l.resW=(l.resW==null?.6+Math.random()*1.8:l.resW)-dt;if(l.resW<=0){l.resW=null;startResidentArrival(i)}}
       if(visitorBusiness(l)){
@@ -853,7 +854,9 @@ function tick(now){
         if(l.marketWait<=0){l.st="empty";l.marketWait=22+Math.random()*38;toast("🏷️ Lot "+(i+1)+" is back on the market!");}
       }
       l.pt-=dt;if(l.pt<=0){l.pt=5+Math.random()*3;const lm=landMul();l.land=Math.round(Math.min(240*lm,Math.max(90*lm,l.land+(Math.random()-.5)*40*lm)))}
-      if(l.st==="ai_owned"){l.aiW-=dt;if(l.aiW<=0){l.st="ai_for_sale";startTraffic(i,"leave");l.disc=false;if(l.sp){l.disc=Math.random()<.08;l.aiP=Math.round(l.sp*(l.disc?.8+Math.random()*.2:1+Math.random()*.25))}else l.aiP=Math.round(val(i)*(.85+Math.random()*.3));l.aiT=12+Math.random()*8;l.wait=2;toast("🏠 Lot "+(i+1)+" ("+S[l.hs].n+") is for sale: "+fmt(l.aiP))}}
+      if(l.st==="ai_owned"){{const tr=traffic[i],home=l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall;if(tr&&tr.kind==="parked"){l.aiHold=0;l.aiP0=(l.aiP0||0)+dt}else{l.aiP0=0;l.aiHold=(l.aiHold||0)+dt}
+        // The neighbor has to pull in and stay a while before the house goes up for sale
+        if(home&&l.aiP0<5&&l.aiHold<25)l.aiW=Math.max(l.aiW,dt+.05)}l.aiW-=dt;if(l.aiW<=0){l.aiP0=0;l.aiHold=0;l.st="ai_for_sale";startTraffic(i,"leave");l.disc=false;if(l.sp){l.disc=Math.random()<.08;l.aiP=Math.round(l.sp*(l.disc?.8+Math.random()*.2:1+Math.random()*.25))}else l.aiP=Math.round(val(i)*(.85+Math.random()*.3));l.aiT=12+Math.random()*8;l.wait=2;toast("🏠 Lot "+(i+1)+" ("+S[l.hs].n+") is for sale: "+fmt(l.aiP))}}
       else if(l.st==="ai_for_sale"){l.aiT-=dt;l.wait-=dt;
         if(l.wait<=0){l.wait=2+Math.random()*2;l.aiP=Math.round(Math.max(100,l.sp?l.sp*(l.disc?.8:1):0,l.aiP+(Math.random()-.48)*35));if(sel===i)sheet(i)}
         if(l.aiT<=0){l.st="ai_owned";l.aiW=10+Math.random()*12;if(sel===i)closeSheet()}}
@@ -863,7 +866,7 @@ function tick(now){
       else if(l.st==="reno_working"){l.rp+=dt/l.rd;if(l.rp>=1){l.reno.push(l.pend);if(l.pend==="paint")l.paint=PAINT[Math.floor(Math.random()*PAINT.length)];toast(R[l.pend].n+" done on Lot "+(i+1)+"!");l.pend=null;l.rp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;fx(i,"done")}}
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt*(readyOf("realestate")?1.5:1)*(ev.k==="rushhr"?.6:1);if(l.wait<=0)spawnOffer(i)}
-        else{l.offer.ttl-=dt;if(l.offer.ttl<=0){sendBuyerAway(i);l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired. The buyer is heading back to the street.");if(sel===i)sheet(i)}}}
+        else{{const tr=traffic[i];if(tr&&tr.kind!=="parked"&&(l.offer.drive=(l.offer.drive||0)+dt)<14){/* offer clock starts once the buyer has parked */}else l.offer.ttl-=dt}if(l.offer.ttl<=0){sendBuyerAway(i);l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired. The buyer is heading back to the street.");if(sel===i)sheet(i)}}}
       else if(l.st==="demo"){const tr=traffic[i];if(tr&&tr.resident){if(tr.kind==="parked")beginTrafficDeparture(i,tr,trafficGeometry(i))}else if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));[objective,bonus].forEach(o=>{if(o&&o.t==="remodel"&&l.hs===o.from)o.d=(o.d||0)+1});unmerge(i);reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
@@ -2519,7 +2522,9 @@ function updateTraffic(dt){
     if(safeT<desiredT-1e-4)tr.speedFactor=Math.min(tr.speedFactor,.18);
 
     if(tr.kind==="arrive"&&tr.t>=tr.dur){
-      if(tr.leaveAfterArrival)beginTrafficDeparture(i,tr,g);
+      // Residents told to leave while pulling in park for a moment first instead of U-turning
+      if(tr.leaveAfterArrival&&tr.resident){tr.leaveAfterArrival=false;tr.kind="parked";tr.t=tr.dur;tr.actualSpeed=0;tr.leaveIn=2+Math.random()*1.5}
+      else if(tr.leaveAfterArrival)beginTrafficDeparture(i,tr,g);
       else{tr.kind="parked";tr.t=tr.dur;tr.actualSpeed=0;if(tr.visitor)tr.parkUntil=tr.stay|| (8+Math.random()*18)}
     }
     else if(tr.kind!=="arrive"&&tr.t>=tr.dur)finishTraffic(i,tr);
