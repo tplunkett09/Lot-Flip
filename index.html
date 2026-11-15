@@ -557,8 +557,9 @@ const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="d
 const clearFee=()=>W().k==="historic"?Math.round(300+lv*3):Math.round(90+lv*2);
 // Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
 const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina","coffee","skishop","souvenir","diner","boatrent","antique","tiki","robocafe"].includes(l.hs));
-// City homes get a compact two-car pad instead of a wide business lot.
-const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&!S[l.hs].tall&&!S[l.hs].nopark&&!(W().k==="city"&&S[l.hs].cat==="h"));
+// Homes get a compact two-car pad instead of a wide business lot.
+const isHomePad=l=>!!(l&&l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall);
+const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&!S[l.hs].tall&&!S[l.hs].nopark&&!isHomePad(l));
 // Multi-lot landmarks: the left lot is the parent; the lots to its right become "merged" parts.
 function spanPair(i,k){const n=S[k].span||1;for(let p=i-(n-1);p<=i;p++){if(p<0||Math.floor(p/5)!==Math.floor((p+n-1)/5))continue;if(S[k].front&&(p+n-1)>=5)continue;if(S[k].mid&&Math.floor(p/5)!==1)continue;let ok=true;for(let q=p;q<p+n;q++)if(!lots[q]||lots[q].st!=="owned"||lots[q].forest)ok=false;if(ok)return p}return -1}
 function unmerge(i){lots.forEach(x=>{if(x.st==="merged"&&x.par===i){x.st="owned";x.par=null}})}
@@ -2071,7 +2072,7 @@ function trafficGeometry(i){
   // Keep the driveway centerline fixed. Only the final parking position is
   // offset into one of the business bays, after the car has entered the pad.
   const driveX=lotRect.left-ox+lotRect.width/2;
-  const cp=!isBusiness&&W().k==="city";
+  const cp=!isBusiness&&isHomePad(lots[i]);
   const parkX=driveX+(isBusiness?side*12:cp?-7:0);
   const padTop=streetAbove?(cp?5:3):(isBusiness?lotRect.height-20-34:cp?lotRect.height-26-22:lotRect.height-24-26);
   const padHeight=isBusiness?34:cp?22:26;
@@ -2570,7 +2571,7 @@ function renderTraffic(){
     if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
     const g=trafficGeometry(i);if(!g)return;
     if(tr.kind==="parked"){
-      const endA=(tr.resident&&!hasBusinessParking(lots[i]))?(g.towardLot===1?90:-90):(tr.dir===1?0:180);
+      const endA=(isHomePad(lots[i])&&!tr.truck)?(g.towardLot===1?90:-90):(tr.dir===1?0:180);
       tr.el.style.left=((g.parkX??g.x)-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";
     }else{
       const pose=trafficPose(tr,g);tr.el.style.left=(pose.x-10)+"px";tr.el.style.top=(pose.y-5.625)+"px";tr.el.style.transform="rotate("+pose.a+"deg)";
@@ -2617,7 +2618,7 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     const streetAbove=Math.floor(i/5)>0;
     e.classList.toggle("to-bottom",!streetAbove);e.classList.toggle("to-top",streetAbove);
     e.classList.toggle("has-parking",hasBuilding&&!S[l.hs].tall&&!S[l.hs].nopark);
-    e.classList.toggle("business-parking",hasBuilding&&hasBusinessParking(l));e.classList.toggle("cpad",hasBuilding&&W().k==="city"&&S[l.hs].cat==="h");
+    e.classList.toggle("business-parking",hasBuilding&&hasBusinessParking(l));e.classList.toggle("cpad",hasBuilding&&isHomePad(l));
     const mine=["owned","working","reno_working","demo","ready","rented","listed","clearing"].includes(l.st);
     e.classList.toggle("purchased",mine);if(W().k==="future"){const pw=powered(i),bz=!!l.hs&&l.st!=="merged"&&done(l);e.classList.toggle("nopow",bz&&S[l.hs].cat==="i"&&!pw);e.classList.toggle("dk",bz&&(ev.k==="storm"||ev.k==="blackout"&&!pw))}else e.classList.remove("nopow","dk");e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display="none";
