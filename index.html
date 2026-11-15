@@ -802,8 +802,8 @@ function tick(now){
     else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");if(W().k==="themepark")pool.push("peak","peak","offseason","expansion","fireworks");if(W().k==="desert")pool.push("heat","roadtrip","roadtrip");if(W().k==="future"){pool.push("expo","expo","blackout");if(readyOf("spaceport"))pool.push("launch","launch")}if(W().k==="tropical")pool.push("cruise","cruise","luau","volcano");if(W().k==="historic")pool.push("heritage","tours","tours","inspect");if(W().k==="lake")pool.push("summer","summer","fishing","mosquito");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(W().k==="tropical"&&!ev.v&&ev.n===1)ev.k="volcano";if(ev.k==="cruise")ev.k="cruisein";if(ev.k==="volcano")ev.v=true;if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:ev.k==="cruisein"?14:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="volcano"){quake();sfx.rumble()}if(ev.k==="launch"){setTimeout(()=>{quake();sfx.rumble()},1800)}if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
-      // Rented homes: the tenant drives in and stays parked until the home is listed.
-      if(l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall&&l.st==="rented"&&!traffic[i]){l.resW=(l.resW==null?.6+Math.random()*1.8:l.resW)-dt;if(l.resW<=0){l.resW=null;startResidentArrival(i)}}
+      // Rented homes and neighbor homes: the resident drives in and stays parked until the home is listed.
+      if(l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall&&(l.st==="rented"||l.st==="ai_owned")&&!traffic[i]){l.resW=(l.resW==null?.6+Math.random()*1.8:l.resW)-dt;if(l.resW<=0){l.resW=null;startResidentArrival(i)}}
       if(visitorBusiness(l)){
         const visitor=traffic[i];
         if(visitor&&visitor.visitor&&visitor.kind==="parked"){
@@ -2101,8 +2101,10 @@ function startTraffic(i,kind){
   const cur=traffic[i];
   if(kind==="leave"){
     if(cur&&["leave","depart","retreat"].includes(cur.kind))return;
-    if(cur&&cur.resident&&cur.kind==="arrive"){cur.leaveAfterArrival=true;return}
-    if(cur&&cur.resident&&cur.kind==="parked"){beginTrafficDeparture(i,cur,g);return}
+    // Only a car that actually drove in can drive out. Never spawn one on the pad.
+    if(cur&&cur.kind==="arrive"&&!cur.truck){cur.leaveAfterArrival=true;return}
+    if(cur&&cur.kind==="parked"&&!cur.truck){beginTrafficDeparture(i,cur,g);return}
+    if(!cur)return;
     if(cur&&cur.el)cur.el.remove();
     const dir=nearSideLaneDirection(g);
     traffic[i]={kind:"leave",t:0,dur:trafficDuration(g,dir,"depart"),dir,color:trafficColor(i),speedFactor:1,actualSpeed:0,exitCommitted:false};
