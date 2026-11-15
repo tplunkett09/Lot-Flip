@@ -76,7 +76,16 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot.has-parking.business-parking.to-top::after{top:-12px;height:15px}
 .lot .ownership-frame{display:none;position:absolute;inset:-1px;border:3px solid #d6a400;border-radius:10px;z-index:8;pointer-events:none}
 .lot.purchased.business-parking .ownership-frame{display:block}
-.lot.has-parking.business-parking::after{z-index:9}.lot.business-parking .pb{z-index:10}
+.lot.has-parking.business-parking::after{z-index:9}
+.lot.lotpark.has-parking::before,.lot.lotpark.has-parking::after{display:none}
+.lot.lotpark.to-top>svg{margin-top:34px}.lot.lotpark.to-bottom .pb{position:absolute;left:5px;right:5px;bottom:34px;width:auto}.lot.lotpark.to-top .act{position:absolute;left:7%;bottom:13px;margin:0;z-index:4}.lot.lotpark.to-top .pb{position:absolute;left:5px;right:5px;bottom:5px;width:auto}
+@media(max-width:768px){.lot.lotpark.to-top>svg{margin-top:30px}}
+.spk{display:none}.lot.lotpark .spk{display:block}
+.spk b{position:absolute;width:34px;height:24px;border:1px solid #545954;border-radius:2px;box-sizing:border-box;z-index:4;background:linear-gradient(90deg,transparent calc(50% - .5px),#d7d9d2 calc(50% - .5px),#d7d9d2 calc(50% + .5px),transparent calc(50% + .5px)),#777b75}
+.spk b.pl{left:4px}.spk b.pr{right:4px}.lot.to-bottom .spk b{bottom:6px}.lot.to-top .spk b{top:5px}
+.spk i{position:absolute;width:10px;background:#777b75;border-left:1px solid #545954;border-right:1px solid #545954;box-sizing:border-box;z-index:9}
+.spk i.dl{left:16px}.spk i.dr{right:16px}.lot.to-bottom .spk i{bottom:-12px;height:19px}.lot.to-top .spk i{top:-12px;height:18px}
+.spk b .traffic-car{position:absolute;top:6.4px;z-index:5}.lot .spk .traffic-car svg{width:20px;height:11.25px;margin:0;display:block}.lot.business-parking .pb{z-index:10}
 .lot .act,.lot .pb{position:relative;z-index:3}
 .pi{animation:pi .5s}
 @keyframes pi{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
@@ -532,7 +541,7 @@ const WORLDS=[
  m:["🏘️ New homes: Smart Pod, Sky Home and Floating Mansion. Smart homes rent for 15% more","🚀 Future makeovers: Apartments → Garden Tower, Park → Hologram Park, Pool → Sky Pool, Civic Center → Smart Hall, School → Robotics Academy, Hospital → MedBay, Gas Station → Charging Station, Shopping Center → Neo Mall, Sports Complex → Drone Arena","⚡ Power grid: a Charging Station, the Spaceport, or a home with a Solar Roof (its 2nd upgrade) powers itself and the lots touching it. Businesses without power (🔌) earn 25% less","🎪 Tech Expo: buyer offers +25%, Robot Café earns double · 🚀 Rocket Launch (with a Spaceport): rents +40% · 🌑 Blackout: businesses without power earn nothing","⛈️ Storms become electrical storms","🤖 Level 93: Robot Café","🚀 Grand finale landmark at Level 97: the Spaceport (2 lots). Level 99 asks you to build one, and Level 100 is the final level"]}];
 const worldOf=l=>Math.max(0,Math.min(9,Math.floor((l-1)/10)));
 const W=l=>WORLDS[worldOf(l==null?lv:l)];
-function applyWorld(){const w=W();{const tp=w.k==="themepark",P=S.pool;P.span=tp?2:0;P.tall=tp?1:0;P.cost=tp?1400:900;P.val=tp?1600:700;P.dur=tp?10:6;P.boost=tp?.15:.1;P.rb=tp?.35:.25;P.d=tp?"Big attraction · needs 2 side-by-side lots · +15% value, +35% rent nearby":"+10% value, +25% rent nearby"}R.roof.n=w.k==="future"?"Solar Roof":"Modern Roof";Object.keys(S).forEach(k=>{const o=w.homes&&w.homes[k];S[k].n=o?o[0]:HN0[k].n;S[k].ic=o?o[1]:HN0[k].ic})}
+function applyWorld(){const w=W();{const tp=w.k==="themepark",P=S.pool;P.span=tp?2:0;P.tall=tp?1:0;P.lotpark=tp?1:0;P.cost=tp?1400:900;P.val=tp?1600:700;P.dur=tp?10:6;P.boost=tp?.15:.1;P.rb=tp?.35:.25;P.d=tp?"Big attraction · needs 2 side-by-side lots · +15% value, +35% rent nearby":"+10% value, +25% rent nearby"}R.roof.n=w.k==="future"?"Solar Roof":"Modern Roof";Object.keys(S).forEach(k=>{const o=w.homes&&w.homes[k];S[k].n=o?o[0]:HN0[k].n;S[k].ic=o?o[1]:HN0[k].ic})}
 const BUILDING_LIMITS={robocafe:1,spaceport:1,tiki:1,seaplane:1,antique:1,depot:1,boatrent:1,campground:1,diner:1,solar:1,souvenir:1,ferris:1,coaster:1,skishop:1,skiresort:1,surf:1,marina:1,subway:1,coffee:1,skyscraper:1,realestate:1,gas:2,sports:1,airport:1,park:3,apartment:3,pool:2,civic:1,school:1,hospital:1,shopping:1,fire:1,bank:1};
 const MILE=Object.keys(S).filter(k=>!["colonial","mansion"].includes(k)&&!S[k].span&&!S[k].needs).map(k=>({lv:S[k].unlock,k})).sort((a,b)=>a.lv-b.lv);
 const buildingCount=k=>lots.filter(l=>l&&l.hs===k&&!['sold','ai_owned','ai_for_sale'].includes(l.st)).length;
@@ -557,10 +566,10 @@ const mkLot=()=>({st:"empty",hs:null,p:0,dur:0,wait:0,marketWait:18+Math.random(
 const busy=()=>lots.filter(l=>l.st==="working"||l.st==="reno_working"||l.st==="demo"||l.st==="clearing").length;
 const clearFee=()=>W().k==="historic"?Math.round(300+lv*3):Math.round(90+lv*2);
 // Public destinations that naturally attract short-stay visitors. Parks and fire stations stay quiet.
-const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&l.hs&&S[l.hs]&&!S[l.hs].tall&&!S[l.hs].nopark&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina","coffee","skishop","souvenir","diner","boatrent","antique","tiki","robocafe"].includes(l.hs));
+const visitorBusiness=l=>!!(l&&["ready","rented"].includes(l.st)&&l.hs&&S[l.hs]&&(!S[l.hs].tall||S[l.hs].lotpark)&&!S[l.hs].nopark&&["apartment","civic","pool","school","hospital","shopping","bank","realestate","gas","sports","airport","surf","marina","coffee","skishop","souvenir","diner","boatrent","antique","tiki","robocafe"].includes(l.hs));
 // Homes get a compact two-car pad instead of a wide business lot.
 const isHomePad=l=>!!(l&&l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall);
-const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&!S[l.hs].tall&&!S[l.hs].nopark&&!isHomePad(l));
+const hasBusinessParking=l=>!!(l&&l.hs&&S[l.hs]&&(!S[l.hs].tall||S[l.hs].lotpark)&&!S[l.hs].nopark&&!isHomePad(l));
 // Multi-lot landmarks: the left lot is the parent; the lots to its right become "merged" parts.
 function spanPair(i,k){const n=S[k].span||1;for(let p=i-(n-1);p<=i;p++){if(p<0||Math.floor(p/5)!==Math.floor((p+n-1)/5))continue;if(S[k].front&&(p+n-1)>=5)continue;if(S[k].mid&&Math.floor(p/5)!==1)continue;let ok=true;for(let q=p;q<p+n;q++)if(!lots[q]||lots[q].st!=="owned"||lots[q].forest)ok=false;if(ok)return p}return -1}
 function unmerge(i){lots.forEach(x=>{if(x.st==="merged"&&x.par===i){x.st="owned";x.par=null}})}
@@ -617,7 +626,7 @@ function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_wor
 
 function build(){
   const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];if(typeof amb!=="undefined")amb.q=[];
-  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="otk"><span></span></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
+  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="otk"><span></span></div><div class="spk"><i class="dl"></i><i class="dr"></i><b class="pl"></b><b class="pr"></b></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
   const rd=document.createElement("div");rd.className="road";
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div>';
   if(W().k==="future"){const s=document.createElement("div");s.className="fut";s.innerHTML=FUT;sc.append(s)}
@@ -2110,6 +2119,11 @@ function trafficGeometry(i){
   const ox=scRect.left+sc.clientLeft,oy=scRect.top+sc.clientTop,row=Math.floor(i/5),streetAbove=row>0;
   // Match the CSS parking-pad center exactly. Business bays are wider and
   // visitor cars use opposite halves rather than stopping on the lawn.
+  if(lots[i]&&lots[i].hs&&S[lots[i].hs]&&S[lots[i].hs].lotpark){
+    // Side car parks at each end of a wide attraction: visitors use the near stall of the left or right lot.
+    const sd=(traffic[i]&&traffic[i].side)||-1,pc=sd<0?lotRect.left-ox+4+17:lotRect.right-ox-4-17;
+    const top=streetAbove?5:lotRect.height-6-24;
+    return {x:pc,parkX:pc+(sd<0?-7:7),parkY:lotRect.top-oy+top+12,roadY:roadRect.top-oy+roadRect.height/2,road,towardLot:streetAbove?1:-1,width:sc.clientWidth,height:sc.clientHeight}}
   const isBusiness=!!(lots[i]&&hasBusinessParking(lots[i]));
   const side=isBusiness&&traffic[i]&&traffic[i].visitor?(traffic[i].side||-1):0;
   const padWidth=isBusiness?68:40;
@@ -2181,7 +2195,7 @@ function startBusinessVisitorArrival(i){
   const side=(l.visitorSide||-1);l.visitorSide=-side;
   // Set the visitor/side before measuring geometry so the route endpoint,
   // driveway approach, and parked position all use the same parking bay.
-  traffic[i]={kind:"arrive",t:0,dur:1,dir:1,color:trafficColor(i),visitor:true,side,stay:13+Math.random()*12};
+  traffic[i]={kind:"arrive",t:0,dur:1,dir:1,color:trafficColor(i),visitor:true,side,stay:13+Math.random()*12,noSecond:!!S[l.hs].lotpark};
   const g=trafficGeometry(i);if(!g){traffic[i]=null;return;}
   const dir=nearSideLaneDirection(g);traffic[i].dir=dir;traffic[i].dur=trafficDuration(g,dir,"arrive");
 }
@@ -2615,7 +2629,7 @@ function renderTraffic(){
     if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
     const g=trafficGeometry(i);if(!g)return;
     if(tr.kind==="parked"){
-      const endA=(isHomePad(lots[i])&&!tr.truck)?(g.towardLot===1?90:-90):(tr.dir===1?0:180);
+      const endA=((isHomePad(lots[i])||(lots[i].hs&&S[lots[i].hs]&&S[lots[i].hs].lotpark))&&!tr.truck)?(g.towardLot===1?90:-90):(tr.dir===1?0:180);
       tr.el.style.left=((g.parkX??g.x)-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";
     }else{
       const pose=trafficPose(tr,g);tr.el.style.left=(pose.x-10)+"px";tr.el.style.top=(pose.y-5.625)+"px";tr.el.style.transform="rotate("+pose.a+"deg)";
@@ -2661,7 +2675,10 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     const hasBuilding=!!l.hs&&l.st!=="sold";
     const streetAbove=Math.floor(i/5)>0;
     e.classList.toggle("to-bottom",!streetAbove);e.classList.toggle("to-top",streetAbove);
-    e.classList.toggle("has-parking",hasBuilding&&!S[l.hs].tall&&!S[l.hs].nopark);
+    e.classList.toggle("has-parking",hasBuilding&&(!S[l.hs].tall||!!S[l.hs].lotpark)&&!S[l.hs].nopark);e.classList.toggle("lotpark",hasBuilding&&!!S[l.hs].lotpark);
+    if(hasBuilding&&S[l.hs].lotpark){const on=l.st==="ready",up=streetAbove?90:-90,key=on+"|"+up;const pk=e.querySelector(".spk");if(pk&&pk._k!==key){pk._k=key;
+      const car=(c,x)=>'<div class="traffic-car" style="left:'+x+'px;transform:rotate('+up+'deg)">'+vehicleMarkup(c)+'</div>';
+      pk.querySelector(".pl").innerHTML=on?car("#8e5cb7",13.5):"";pk.querySelector(".pr").innerHTML=on?car("#279b86",-.5):""}}
     e.classList.toggle("business-parking",hasBuilding&&hasBusinessParking(l));e.classList.toggle("cpad",hasBuilding&&isHomePad(l));
     const mine=["owned","working","reno_working","demo","ready","rented","listed","clearing"].includes(l.st);
     e.classList.toggle("purchased",mine);if(W().k==="future"){const pw=powered(i),bz=!!l.hs&&l.st!=="merged"&&done(l);e.classList.toggle("nopow",bz&&S[l.hs].cat==="i"&&!pw);e.classList.toggle("dk",bz&&(ev.k==="storm"||ev.k==="blackout"&&!pw))}else e.classList.remove("nopow","dk");e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
