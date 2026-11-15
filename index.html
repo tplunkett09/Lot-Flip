@@ -60,19 +60,19 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 /* Parking is anchored to the lot edge. Driveway connectors stop at the gray sidewalk before the road. */
 .lot.has-parking::before{content:"";position:absolute;left:calc(50% - 20px);width:40px;height:26px;background:#777b75;border:1px solid #545954;border-radius:3px;box-sizing:border-box;z-index:1;pointer-events:none}
 .lot.has-parking::after{content:"";position:absolute;left:calc(50% - 7px);width:14px;height:24px;background:#777b75;border-left:1px solid #545954;border-right:1px solid #545954;box-sizing:border-box;z-index:1;pointer-events:none}
-.lot.has-parking.to-bottom::before{bottom:24px}
-.lot.has-parking.to-bottom::after{bottom:-12px;height:36px}
+.lot.has-parking.to-bottom::before{bottom:12px}
+.lot.has-parking.to-bottom::after{bottom:-12px;height:24px}
 .lot.has-parking.to-top::before{top:5px}
 .lot.has-parking.to-top::after{top:-12px;height:17px}
 .lot.has-parking.cpad::before{left:calc(50% - 15px);width:30px;height:22px;border-radius:2px;background:linear-gradient(90deg,transparent calc(50% - .5px),#d7d9d2 calc(50% - .5px),#d7d9d2 calc(50% + .5px),transparent calc(50% + .5px)),#777b75}
 .lot.has-parking.cpad::after{left:calc(50% - 5px);width:10px}
-.lot.has-parking.cpad.to-bottom::before{bottom:26px}.lot.has-parking.cpad.to-bottom::after{height:38px}
+.lot.has-parking.cpad.to-bottom::before{bottom:12px}.lot.has-parking.cpad.to-bottom::after{height:24px}
 .lot.has-parking.cpad.to-top::before{top:5px}
 .lot.has-parking.business-parking::before{left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:68px;height:34px;box-sizing:border-box;border:1px solid #f8f8ef;border-radius:2px;background:linear-gradient(90deg,transparent calc(50% - .7px),#f8f8ef calc(50% - .7px),#f8f8ef calc(50% + .7px),transparent calc(50% + .7px)),linear-gradient(0deg,transparent 2px,#f8f8ef 2px,#f8f8ef 3px,transparent 3px,transparent calc(100% - 3px),#f8f8ef calc(100% - 3px),#f8f8ef calc(100% - 2px),transparent calc(100% - 2px)),#aeb2a9;}
-.lot.has-parking.business-parking.to-bottom::before{bottom:20px}
+.lot.has-parking.business-parking.to-bottom::before{bottom:12px}
 .lot.has-parking.business-parking.to-top::before{top:3px}
 .lot.has-parking.business-parking::after{left:calc(50% - 12px);width:24px}
-.lot.has-parking.business-parking.to-bottom::after{bottom:-12px;height:32px}
+.lot.has-parking.business-parking.to-bottom::after{bottom:-12px;height:24px}
 .lot.has-parking.business-parking.to-top::after{top:-12px;height:15px}
 .lot .ownership-frame{display:none;position:absolute;inset:-1px;border:3px solid #d6a400;border-radius:10px;z-index:8;pointer-events:none}
 .lot.purchased.business-parking .ownership-frame{display:block}
@@ -1175,8 +1175,10 @@ const WHEEL=(cx,cy,r,n,spin,cars)=>{let g='<g>';for(let k=0;k<n;k++){const a=k/n
 const TPK=(()=>{let g='<svg viewBox="0 0 200 30" preserveAspectRatio="none" width="100%" height="40" style="display:block">';
  g+='<polygon points="0,30 0,26 40,23 80,26 120,22 160,25 200,23 200,30" fill="#66bb6a"/>';
  g+='<rect x="92" y="10" width="16" height="16" fill="#e1d5f0" stroke="#7e57c2" stroke-width=".4"/><rect x="86" y="13" width="6" height="13" fill="#d1c4e9"/><rect x="108" y="13" width="6" height="13" fill="#d1c4e9"/><polygon points="85,13 89,5 93,13" fill="#5c6bc0"/><polygon points="107,13 111,5 115,13" fill="#5c6bc0"/><polygon points="91,10 100,1 109,10" fill="#3f51b5"/><path d="M98 26v-6a2 2 0 0 1 4 0v6z" fill="#7e57c2"/>';
- const tr="M128 27L134 12L140 20L148 6L156 22L164 14L172 24L180 10L188 26";g+='<path d="'+tr+'" stroke="#e53935" stroke-width="1" fill="none"/>';for(let x=134;x<=188;x+=6)g+='<path d="M'+x+' 27V18" stroke="#bcaaa4" stroke-width=".4"/>';
- g+='<g><rect x="-2" y="-1.6" width="4" height="1.6" fill="#1e88e5"/><animateMotion dur="5s" repeatCount="indefinite" path="'+tr+'"/></g>';
+ const TP=[[128,27],[134,12],[140,20],[148,6],[156,22],[164,14],[172,24],[180,10],[188,26]],tr="M"+TP.map(p=>p.join(" ")).join("L");
+ TP.slice(1,-1).forEach(p=>{g+='<path d="M'+p[0]+' '+(p[1]+.5)+'V27" stroke="#a1887f" stroke-width=".5"/>'});
+ g+='<path d="M'+TP.map(p=>p[0]+' '+(p[1]+2)).join("L")+'" stroke="#bcaaa4" stroke-width=".35" fill="none"/><path d="'+tr+'" stroke="#e53935" stroke-width="1.1" fill="none" stroke-linejoin="round"/><path d="'+tr+'" stroke="#ffcdd2" stroke-width=".3" fill="none" stroke-dasharray=".8 1.2"/>';
+ [0,-.22,-.44].forEach((d,q)=>{g+='<g><rect x="-1.7" y="-2" width="3.4" height="1.9" rx=".6" fill="'+(q?"#1e88e5":"#fdd835")+'" stroke="#0d47a1" stroke-width=".2"/><circle cx="-.6" cy="-2.4" r=".55" fill="#ffcc80"/><circle cx=".7" cy="-2.4" r=".55" fill="#ffcc80"/><animateMotion dur="5s" repeatCount="indefinite" rotate="auto" begin="'+d+'s" path="'+tr+'"/></g>'});
  g+='<path d="M50 26V18h12v8" fill="#fff59d" stroke="#f57f17" stroke-width=".4"/><polygon points="48,18 56,13 64,18" fill="#e53935"/></svg>';
  g+='<svg class="tfw" width="34" height="38" viewBox="0 0 34 38"><path d="M17 17L7 38M17 17L27 38" stroke="#78909c" stroke-width="1.6"/>'+WHEEL(17,17,15,8,14,1)+'</svg>';
  [["21%","#e53935",0],["37%","#fdd835",-3],["60%","#1e88e5",-6],["97%","#8e24aa",-8]].forEach(b=>{g+='<span class="bln" style="left:'+b[0]+';background:'+b[1]+';animation-delay:'+b[2]+'s"></span>'});
@@ -1341,8 +1343,8 @@ function tpWaterPark(l,st,T,s){const on=st==="ready";
    +'<rect x="14" y="33" width="62" height="17" fill="#e1f5fe" '+T+'/><path d="M10 34Q17 27 24 34Q31 27 38 34Q45 27 52 34Q59 27 66 34Q73 27 80 34Z" fill="#0288d1" '+T+'/>'
    +'<path d="M39 50V42a6 6 0 0 1 12 0v8z" fill="#01579b" stroke="#3e2723" stroke-width=".8"/>'+[18,58].map(x=>'<rect x="'+x+'" y="37" width="14" height="8" fill="#b3e5fc" stroke="#3e2723" stroke-width=".7"/><path d="M'+x+' 37h14l-1 3h-12z" fill="#ff7043"/>').join("")
    +'<text x="25" y="48.8" font-size="3.4" font-weight="900" text-anchor="middle" fill="#0277bd">TICKETS</text><text x="65" y="48.8" font-size="3.4" font-weight="900" text-anchor="middle" fill="#0277bd">LOCKERS</text>'
-   +'<rect x="12" y="18" width="66" height="13" rx="3" fill="#0277bd" stroke="#fff" stroke-width="1.2"/><text x="45" y="27.8" font-size="8.6" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="1">WATER PARK</text><path d="M24 31v2.4M66 31v2.4" stroke="#455a64" stroke-width="1.4"/>'
-   +'<path d="M14 24q2-2.4 4 0t4 0M70 24q2-2.4 4 0t4 0" stroke="#80deea" stroke-width="1.2" fill="none"/>'
+   +'<rect x="5" y="18" width="82" height="13" rx="3" fill="#0277bd" stroke="#fff" stroke-width="1.2"/><text x="46" y="27.6" font-size="8" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing=".4">WATER PARK</text><path d="M24 31v2.4M66 31v2.4" stroke="#455a64" stroke-width="1.4"/>'
+   +'<path d="M8 25q1.6-2 3.2 0t3.2 0M77.6 25q1.6-2 3.2 0t3.2 0" stroke="#80deea" stroke-width="1.1" fill="none"/>'
    // wave pool with a beach entry
    +'<path d="M8 60Q8 52 18 52H90Q98 52 98 60V79Q98 86 90 86H18Q8 86 8 79Z" fill="#29b6f6" stroke="#0277bd" stroke-width="1.4"/><path d="M10 58Q10 54 18 54H28V84H18Q10 84 10 78Z" fill="#81d4fa"/>'
    +'<g>'+[60,67,74,81].map(y=>'<path d="M30 '+y+'q4-2.6 8 0t8 0t8 0t8 0t8 0t8 0t8 0" stroke="#e1f5fe" stroke-width="1.2" fill="none"/>').join("")+(on?'<animateTransform attributeName="transform" type="translate" values="0 0;-4 0;0 0" dur="2.4s" repeatCount="indefinite"/>':'')+'</g>'
@@ -1352,7 +1354,7 @@ function tpWaterPark(l,st,T,s){const on=st==="ready";
    // slide tower, three slides and the splash pool
    +'<ellipse cx="172" cy="76" rx="22" ry="9" fill="#29b6f6" stroke="#0277bd" stroke-width="1.2"/><path d="M156 76q4-2 8 0t8 0t8 0t8 0" stroke="#e1f5fe" stroke-width="1" fill="none"/>'
    +'<path d="M125 82V14M141 82V14M125 30h16M125 46h16M125 62h16M125 30l16 16M141 46l-16 16M125 62l16 16" stroke="#78909c" stroke-width="1.4"/><rect x="121" y="10" width="24" height="5" fill="#fafafa" '+T+'/><polygon points="119,10 133,1 147,10" fill="#ff7043" '+T+'/>';
-  const SL=[["#e53935","M143 13Q176 14 168 30Q160 44 182 52Q194 58 180 72"],["#fdd835","M122 14Q100 22 108 38Q116 50 140 56Q158 62 162 74"],["#1e88e5","M144 12L192 64Q194 68 188 72"]];
+  const SL=[["#e53935","M143 13Q164 14 162 28Q160 40 166 50Q170 60 168 68"],["#fdd835","M122 14Q102 18 106 34Q110 48 130 54Q146 58 154 72"],["#1e88e5","M145 11Q186 6 192 26Q196 40 186 48Q177 56 188 64Q193 69 186 73"]];
   SL.forEach(q=>{s+='<path d="'+q[1]+'" stroke="#37474f" stroke-width="6.4" fill="none" stroke-linecap="round"/><path d="'+q[1]+'" stroke="'+q[0]+'" stroke-width="4.6" fill="none" stroke-linecap="round"/><path d="'+q[1]+'" stroke="#fff" stroke-width=".7" fill="none" opacity=".6" stroke-dasharray="2 3"/>'});
    // deck details: palms, umbrellas and loungers
   s+=PALM(5,52,.5)+PALM(100,52,.5)+PALM(196,52,.45)
@@ -1361,7 +1363,7 @@ function tpWaterPark(l,st,T,s){const on=st==="ready";
     s+='<circle class="smk" cx="180" cy="72" r="3" fill="#fff"/><circle class="smk s2" cx="162" cy="74" r="3" fill="#fff"/><circle class="smk" cx="188" cy="72" r="2.4" fill="#fff"/>'
      +'<path class="spray" d="M111 66v-6M111 64q-5 0-7 6M111 64q5 0 7 6" stroke="#e1f5fe" stroke-width="1" fill="none"/>'
      +[[40,64,0],[58,72,-.7],[76,62,-1.3],[50,80,-.4],[20,70,-1]].map(b=>'<g class="bob" style="animation-delay:'+b[2]+'s"><circle cx="'+b[0]+'" cy="'+b[1]+'" r="2.1" fill="#ffcc80"/><circle cx="'+b[0]+'" cy="'+(b[1]+1.8)+'" r="3" fill="none" stroke="#ff7043" stroke-width="1.1"/></g>').join("")
-     +PERS("#e53935","wk1",-2,0)+PERS("#1565c0","wk2",-7,0)+PERS("#43a047","wk1",-11,0)}
+     +PERS("#e53935","wk1",-2,-7)+PERS("#1565c0","wk2",-7,-7)+PERS("#43a047","wk1",-11,-7)}
   return s}
 // Theme Park stays (Motel, Hotel, Resort) and the Boardwalk / Outdoor Venue
 function tpStay(l,k,st,T,s){const rr=l.reno.includes("roof"),on=st==="rented";
@@ -2090,7 +2092,7 @@ function art(l,i){
   // This is important because the lot SVG occupies only the upper portion of each tall lot;
   // drawing the driveway inside its 0..90 viewBox leaves a visible gap before the road.
   const streetAbove=Math.floor(i/5)>0;
-  return '<g transform="translate(0 '+(l.hs&&S[l.hs].tall&&l.st!=="sold"?'0':streetAbove?'40':'14')+')">'+main+'</g>';
+  return '<g transform="translate(0 '+(l.hs&&S[l.hs].tall&&l.st!=="sold"?'0':streetAbove?'40':l.hs&&l.st!=="sold"?'26':'14')+')">'+main+'</g>';
 }
 
 let tutOn=false;
@@ -2137,7 +2139,7 @@ function trafficGeometry(i){
   const driveX=lotRect.left-ox+lotRect.width/2;
   const cp=!isBusiness&&isHomePad(lots[i]);
   const parkX=driveX+(isBusiness?side*12:cp?-7:0);
-  const padTop=streetAbove?(cp?5:3):(isBusiness?lotRect.height-20-34:cp?lotRect.height-26-22:lotRect.height-24-26);
+  const padTop=streetAbove?(cp?5:3):(isBusiness?lotRect.height-12-34:cp?lotRect.height-12-22:lotRect.height-12-26);
   const padHeight=isBusiness?34:cp?22:26;
   const parkY=lotRect.top-oy+padTop+padHeight/2;
   return {x:driveX,parkX,parkY,homePad:cp,roadY:roadRect.top-oy+roadRect.height/2,road,
