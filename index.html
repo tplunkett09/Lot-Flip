@@ -478,7 +478,7 @@ gas:{n:"Gas Station",cost:2200,val:2100,rm:0,dur:11,rev:30,cat:"i",ic:"⛽",unlo
 sports:{n:"Sports Complex",cost:3500,val:3300,rm:0,dur:14,rev:35,rb:.15,cat:"i",ic:"🏟️",unlock:64,d:"$35 every 3s · +15% rent nearby · Game Day event · noisy for mansions"},
 surf:{n:"Surf Shop",cost:1200,val:1100,rm:0,dur:7,rev:20,cat:"i",ic:"🏄",unlock:15,world:"beach",d:"Beach only · $20 every 3s · double income in Tourist Season"},
 marina:{n:"Marina",cost:3500,val:3200,rm:0,dur:15,rev:60,cat:"i",ic:"⚓",unlock:17,world:"beach",span:2,front:1,d:"Landmark · needs 2 side-by-side beachfront lots · $60 every 3s · +20% to beachfront homes"},
-subway:{n:"Subway Station",cost:900,val:900,rm:0,dur:6,boost:.2,nopark:1,cat:"i",ic:"🚇",unlock:22,world:"city",d:"City only · +20% value to neighboring lots"},
+subway:{n:"Subway Station",cost:900,val:900,rm:0,dur:6,boost:.2,nopark:1,tall:1,cat:"i",ic:"🚇",unlock:22,world:"city",d:"City only · +20% value to neighboring lots"},
 coffee:{n:"Coffee Shop",cost:1000,val:950,rm:0,dur:6,rev:18,cat:"i",ic:"☕",unlock:26,world:"city",d:"City only · $18 every 3s · double during Rush Hour"},
 skyscraper:{n:"Skyscraper",cost:5000,val:4800,rm:0,dur:18,rev:80,cat:"i",ic:"🏙️",unlock:27,world:"city",span:2,tall:1,d:"Landmark · needs 2 side-by-side lots · $80 every 3s · +15% to homes in its row"},
 skishop:{n:"Ski Rental Shop",cost:1100,val:1000,rm:0,dur:6,rev:20,cat:"i",ic:"🎿",unlock:33,world:"mountain",d:"Mountain only · $20 every 3s · double during Snow Season"},
@@ -802,6 +802,8 @@ function tick(now){
     else{ev.next-=dt;if(ev.next<=0){const pool=twist&&twist.k==="storm"?["storm","storm","boom","rent"]:lv>=4?["boom","crash","rent","storm","storm"]:["boom","crash","rent"];if(!(twist&&twist.k==="storm")){if(readyOf("park"))pool.push("party");if(readyOf("civic"))pool.push("market");if(readyOf("school"))pool.push("parade");if(readyOf("sports"))pool.push("game")}if(W().k==="beach")pool.push("season","season");if(W().k==="city")pool.push("rushhr","rushhr");if(W().k==="mountain")pool.push("snow","snow","rocks");if(W().k==="themepark")pool.push("peak","peak","offseason","expansion","fireworks");if(W().k==="desert")pool.push("heat","roadtrip","roadtrip");if(W().k==="future"){pool.push("expo","expo","blackout");if(readyOf("spaceport"))pool.push("launch","launch")}if(W().k==="tropical")pool.push("cruise","cruise","luau","volcano");if(W().k==="historic")pool.push("heritage","tours","tours","inspect");if(W().k==="lake")pool.push("summer","summer","fishing","mosquito");ev.n=(ev.n||0)+1;ev.k=lv>=4&&!ev.s&&ev.n>=2?"storm":pool[Math.floor(Math.random()*pool.length)];if(W().k==="tropical"&&!ev.v&&ev.n===1)ev.k="volcano";if(ev.k==="cruise")ev.k="cruisein";if(ev.k==="volcano")ev.v=true;if(ev.k==="storm")ev.s=true;ev.hit=false;ev.t=ev.k==="storm"?9:ev.k==="cruisein"?14:15;ev.next=(twist&&twist.k==="storm"?22:35)+Math.random()*20;toast(evText(ev.k));fxLayers();if(ev.k==="volcano"){quake();sfx.rumble()}if(ev.k==="launch"){setTimeout(()=>{quake();sfx.rumble()},1800)}if(ev.k==="rushhr")for(let q=0;q<4;q++)queueEmerg("taxi",.4+q*1.6);if(ev.k==="storm"){sfx.rumble();showTip("storm","Storms can damage rented houses. Tap a glowing red house to repair it. A Fire Station makes repairs cheaper.")}if(ev.k==="parade")queueEmerg("bus",1);if(["party","market","parade","game"].includes(ev.k))showTip("fest","Neighborhood events give a temporary bonus when you own the matching building (Park, Civic Center or School).")}}
     updateTraffic(dt);ambient(dt);
     lots.forEach((l,i)=>{
+      // Rented homes: the tenant drives in and stays parked until the home is listed.
+      if(l.hs&&S[l.hs]&&S[l.hs].cat==="h"&&!S[l.hs].tall&&l.st==="rented"&&!traffic[i]){l.resW=(l.resW==null?.6+Math.random()*1.8:l.resW)-dt;if(l.resW<=0){l.resW=null;startResidentArrival(i)}}
       if(visitorBusiness(l)){
         const visitor=traffic[i];
         if(visitor&&visitor.visitor&&visitor.kind==="parked"){
@@ -862,7 +864,7 @@ function tick(now){
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt*(readyOf("realestate")?1.5:1)*(ev.k==="rushhr"?.6:1);if(l.wait<=0)spawnOffer(i)}
         else{l.offer.ttl-=dt;if(l.offer.ttl<=0){sendBuyerAway(i);l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired. The buyer is heading back to the street.");if(sel===i)sheet(i)}}}
-      else if(l.st==="demo"){const tr=traffic[i];if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));[objective,bonus].forEach(o=>{if(o&&o.t==="remodel"&&l.hs===o.from)o.d=(o.d||0)+1});unmerge(i);reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
+      else if(l.st==="demo"){const tr=traffic[i];if(tr&&tr.resident){if(tr.kind==="parked")beginTrafficDeparture(i,tr,trafficGeometry(i))}else if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));[objective,bonus].forEach(o=>{if(o&&o.t==="remodel"&&l.hs===o.from)o.d=(o.d||0)+1});unmerge(i);reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
     if(bonus&&!bonus.done){if(bonus.t==="build")bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;else if(bonus.t!=="sale")updObjective(bonus);if(bonus.t==="build"||bonus.t==="sale"?bonus.c>=bonus.n:bonus.done){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
@@ -1003,11 +1005,27 @@ function cityBld(l,k,st,T,s){
     return s}
   return s}
 function cityOnly(l,k,st,T,s){
-  if(k==="subway"){s+='<rect x="10" y="30" width="80" height="18" rx="2" fill="#90a4ae" '+T+'/><polygon points="32,46 68,46 62,34 38,34" fill="#37474f"/><path d="M40 37h20M42 40h16M44 43h12" stroke="#78909c" stroke-width="1.2"/>'
-    +'<path d="M30 46V30h40v16" stroke="#2e7d32" stroke-width="2" fill="none"/><path d="M30 34h40" stroke="#2e7d32" stroke-width="1.2"/>'
-    +'<path d="M22 46V18M78 46V18" stroke="#37474f" stroke-width="1.5"/><circle cx="22" cy="16" r="4" fill="#4caf50" stroke="#1b5e20"/><circle cx="78" cy="16" r="4" fill="#4caf50" stroke="#1b5e20"/>'
-    +'<rect x="34" y="10" width="32" height="10" rx="2" fill="#1b5e20" stroke="#fff" stroke-width="1"/><text x="50" y="17.5" font-size="6" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing=".6">SUBWAY</text>';
-    if(st==="ready")s+='<circle class="pls" cx="22" cy="16" r="5" fill="#b9f6ca"/><circle class="pls" cx="78" cy="16" r="5" fill="#b9f6ca" style="animation-delay:-.6s"/>'+PERS("#e53935","wk1",-2,-2)+PERS("#3949ab","wk2",-8,-2)+PERS("#43a047","wk1",-12,-2);
+  if(k==="subway"){
+    // Full-lot transit hall: glass barrel roof, big sign, stairs down to the platforms and a plaza
+    s='<ellipse cx="50" cy="87" rx="46" ry="3" fill="#000" opacity=".18"/><rect x="2" y="72" width="96" height="16" rx="3" fill="#b0bec5" stroke="#78909c" stroke-width=".8"/>'
+     +[14,26,38,50,62,74,86].map(x=>'<path d="M'+x+' 72v16" stroke="#90a4ae" stroke-width=".5"/>').join("")+'<path d="M2 80h96" stroke="#90a4ae" stroke-width=".5"/>'
+     +'<rect x="10" y="30" width="80" height="44" fill="#cfd8dc" '+T+'/><rect x="10" y="66" width="80" height="8" fill="#90a4ae"/>'
+     +'<path d="M8 32Q50 2 92 32Z" fill="#81d4fa" stroke="#37474f" stroke-width="1.4"/><path d="M8 32Q50 2 92 32" fill="none" stroke="#eceff1" stroke-width="2.2"/>'
+     +[20,30,40,50,60,70,80].map(x=>{const y=32-30*(1-Math.pow((x-50)/42,2))*.98;return '<path d="M'+x+' 32V'+y.toFixed(1)+'" stroke="#546e7a" stroke-width=".8"/>'}).join("")
+     +'<path d="M14 24Q50 0 86 24" fill="none" stroke="#546e7a" stroke-width=".6"/><polygon points="24,28 34,14 38,14 28,28" fill="#fff" opacity=".35"/>'
+     +'<circle cx="50" cy="12" r="5" fill="#fff" stroke="#37474f" stroke-width="1"/><path d="M50 12V8.6M50 12l2.4 1.4" stroke="#37474f" stroke-width=".8" stroke-linecap="round"/>'
+     +'<rect x="12" y="34" width="76" height="11" rx="1.5" fill="#1b5e20" stroke="#fff" stroke-width="1"/><circle cx="21" cy="39.5" r="4" fill="#fff"/><text x="21" y="42.2" font-size="6.4" font-weight="900" text-anchor="middle" fill="#1b5e20">M</text><text x="55" y="42.6" font-size="8.4" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing="1.6">SUBWAY</text>'
+     +'<rect x="14" y="48" width="18" height="16" fill="#b3e5fc" stroke="#37474f" stroke-width=".8"/><path d="M23 48v16M14 56h18" stroke="#37474f" stroke-width=".5"/><rect x="68" y="48" width="18" height="16" fill="#b3e5fc" stroke="#37474f" stroke-width=".8"/><path d="M77 48v16M68 56h18" stroke="#37474f" stroke-width=".5"/>'
+     +'<rect x="36" y="48" width="28" height="7" rx="1" fill="#212121" stroke="#37474f" stroke-width=".6"/>'
+     +'<path d="M34 74V58h32v16" fill="#263238" stroke="#37474f" stroke-width="1"/>'+[61,64,67,70,73].map((y,q)=>'<path d="M'+(36+q*.8)+' '+y+'h'+(28-q*1.6)+'" stroke="#546e7a" stroke-width="1"/>').join("")
+     +'<path d="M34 74V60M66 74V60" stroke="#ffd54f" stroke-width="1.4"/><path d="M34 60h32" stroke="#ffd54f" stroke-width=".8"/>'
+     +[6,94].map(x=>'<path d="M'+x+' 80V54" stroke="#37474f" stroke-width="1.6"/><circle cx="'+x+'" cy="51" r="4" fill="#4caf50" stroke="#1b5e20"/><text x="'+x+'" y="53" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">M</text>').join("")
+     +'<rect x="24" y="76" width="10" height="2" fill="#795548"/><rect x="66" y="76" width="10" height="2" fill="#795548"/>';
+    if(st==="ready"){s+='<text class="blk" x="50" y="53.2" font-size="4" font-weight="900" text-anchor="middle" fill="#ffab00">TRAIN 2 MIN</text>'
+      +'<circle class="pls" cx="6" cy="51" r="5" fill="#b9f6ca"/><circle class="pls" cx="94" cy="51" r="5" fill="#b9f6ca" style="animation-delay:-.6s"/>'
+      +[[14,50],[68,50],[77,57]].map((w,q)=>'<rect class="lit" x="'+w[0]+'" y="'+w[1]+'" width="9" height="6" fill="#fff59d" opacity=".7" style="animation-duration:'+(4+q)+'s"/>').join("")
+      +PERS("#e53935","wk1",-2,28)+PERS("#3949ab","wk2",-8,28)+PERS("#43a047","wk1",-12,28)+PERS("#ff7043","wk2",-4,28)}
+    else s+='<text x="50" y="53.2" font-size="4" font-weight="900" text-anchor="middle" fill="#ffab00">SUBWAY</text>';
     return s}
   if(k==="coffee"){s+='<rect x="18" y="20" width="64" height="28" fill="#efebe9" '+T+'/><rect x="16" y="16" width="68" height="5" fill="#4e342e" '+T+'/>'
     +[0,1,2,3,4,5,6,7].map(q=>'<path d="M'+(18+q*8)+' 21h8l-1 6h-6z" fill="'+(q%2?"#fff":"#6d4c41")+'"/>').join("")
@@ -2083,6 +2101,8 @@ function startTraffic(i,kind){
   const cur=traffic[i];
   if(kind==="leave"){
     if(cur&&["leave","depart","retreat"].includes(cur.kind))return;
+    if(cur&&cur.resident&&cur.kind==="arrive"){cur.leaveAfterArrival=true;return}
+    if(cur&&cur.resident&&cur.kind==="parked"){beginTrafficDeparture(i,cur,g);return}
     if(cur&&cur.el)cur.el.remove();
     const dir=nearSideLaneDirection(g);
     traffic[i]={kind:"leave",t:0,dur:trafficDuration(g,dir,"depart"),dir,color:trafficColor(i),speedFactor:1,actualSpeed:0,exitCommitted:false};
@@ -2100,6 +2120,11 @@ function startBuyerArrival(i){
   const dir=nearSideLaneDirection(g);
   const dur=trafficDuration(g,dir,"arrive");
   traffic[i]={kind:"arrive",t:0,dur,dir,color:trafficColor(i)};
+}
+function startResidentArrival(i){
+  if(traffic[i])return;const g=trafficGeometry(i);if(!g)return;
+  const dir=nearSideLaneDirection(g);
+  traffic[i]={kind:"arrive",t:0,dur:trafficDuration(g,dir,"arrive"),dir,color:trafficColor(i),resident:true,speedFactor:1,actualSpeed:0};
 }
 function startBusinessVisitorArrival(i){
   const l=lots[i];if(!visitorBusiness(l)||traffic[i])return;
@@ -2537,7 +2562,7 @@ function renderTraffic(){
     if(tr.truck){const ld=tr.el.querySelector(".ld"),L=lots[i];if(ld&&L)ld.style.opacity=L.st==="demo"?Math.min(1,L.dp*1.4):1}
     const g=trafficGeometry(i);if(!g)return;
     if(tr.kind==="parked"){
-      const endA=tr.dir===1?0:180;
+      const endA=(tr.resident&&!hasBusinessParking(lots[i]))?(g.towardLot===1?90:-90):(tr.dir===1?0:180);
       tr.el.style.left=((g.parkX??g.x)-10)+"px";tr.el.style.top=(g.parkY-5.625)+"px";tr.el.style.transform="rotate("+endA+"deg)";
     }else{
       const pose=trafficPose(tr,g);tr.el.style.left=(pose.x-10)+"px";tr.el.style.top=(pose.y-5.625)+"px";tr.el.style.transform="rotate("+pose.a+"deg)";
