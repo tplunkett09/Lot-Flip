@@ -613,8 +613,10 @@ function nBoost(i){
   if(W().sea&&i<5&&l.hs&&S[l.hs].cat==="h"){b+=.25;if(readyOf("marina"))b+=.2}
   // Nearby amenities lift home values; apartment blocks and retail traffic can
   // reduce premium residential values when directly adjacent.
+  // Neighbor bonuses stack with diminishing returns: best in full, second at half, the rest at a quarter.
+  const nb=[];
   adj(i).forEach(n=>{const x=lots[n];if(!x||!done(x))return;const k=x.hs;
-    if(S[k].boost)b+=S[k].boost;
+    if(S[k].boost)nb.push(S[k].boost);
     if(l.hs&&S[l.hs].cat==="h"){
       if(k==="apartment")b-=l.hs==="mansion"?.18:-.08;
       if(k==="shopping")b-=l.hs==="mansion"?.22:-.10;
@@ -623,6 +625,7 @@ function nBoost(i){
       if(k==="airport")b-=l.hs==="mansion"?.3:.18;
     }
   });
+  nb.sort((x,y)=>y-x).forEach((x,q)=>{b+=x*(q===0?1:q===1?.5:.25)});
   // A fire station improves perceived safety and emergency coverage for homes
   // on the same street row, rather than boosting every property globally.
   if(l.hs&&S[l.hs].cat==="h"){
@@ -661,29 +664,36 @@ function startLevel(){
   const requiredBuilding=goalOrder.filter(x=>lv>=x.lv).at(-1).k;
   // The objective building is always affordable at the start, with a small
   // operating reserve. This avoids mathematically impossible timed starts.
-  money=Math.max(800+lv*75,S[requiredBuilding].cost+500);
-  if(twist&&twist.k==="squeeze")money=S[requiredBuilding].cost+150;money+=100*upT("cash");
-  // Each prestige rank trims starting cash, but never below what the required building needs.
-  money=Math.max(S[requiredBuilding].cost+150,Math.round(money*(1-.04*meta.pr)));
+  money=900+lv*20;
+  if(twist&&twist.k==="squeeze")money=Math.max(550,Math.round(money*.6));money+=100*upT("cash");
+  // Each prestige rank trims starting cash, but always leaves enough for a first lot and house.
+  money=Math.max(550,Math.round(money*(1-.04*meta.pr)));
   goal=Math.round((1600+lv*300)*(twist&&twist.k==="rush"?1.3:1)*(1+.12*meta.pr));
-  total=mode==="timed"?Math.round((240+lv*20)*(1-.03*meta.pr)):0;timeVal=total;elapsed=0;
+  elapsed=0;
   const n=Math.min(4,2+Math.floor(lv/3)),ix=[],ht=["ranch","colonial","mansion"];
   while(ix.length<n){const r=Math.floor(Math.random()*N);if(!ix.includes(r))ix.push(r)}
   if(W().k==="mountain"||W().k==="desert"||W().k==="historic")lots.forEach((l,q)=>{if(!ix.includes(q)&&Math.random()<(W().k==="historic"?.3:.35)){l.forest=true;if(W().k==="mountain")l.land=Math.round(l.land*.75);if(W().k==="historic")l.land=Math.round(l.land*.6)}});
   ix.forEach(k=>{const l=lots[k];l.st="ai_owned";l.hs=ht[Math.floor(Math.random()*3)];l.aiW=3+Math.random()*6});
   objective=makeObjective(lv).o;
+  total=mode==="timed"?Math.round((parT()*2.5+30)*(1-.03*meta.pr)):0;timeVal=total;
   const ks=availableBuildings().filter(x=>!S[x].needs&&!S[x].span&&!(objective.t==="build"&&x===objective.k)),k=ks[Math.floor(Math.random()*ks.length)];
   bonus=(lv>=4&&lv%3===0)?{t:"sale",k:"ranch",n:Math.round((700+lv*40)/50)*50,r:200+lv*50,c:0,done:false}:{t:"build",k,n:S[k].cat==="h"?Math.min(3,1+Math.floor(lv/3)):1,r:200+lv*50,c:0,done:false};
   {const fb=makeObjective(lv,1);if(fb){bonus=fb.o;bonus.r=Math.round((200+lv*50)*1.5/50)*50}}builders=2;speed=(1+.1*upT("crew"))*(twist&&twist.k==="rush"?1.5:1);sellMode=false;paused=false;ev={k:null,t:0,next:30};
   build();applyTheme();run=true;last=performance.now();
   ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("scene").classList.remove("pz");
   $("tl").textContent=mode==="timed"?"Time":"Elapsed";
-  toast((twist?twist.ic+" TWIST: "+twist.n+"! ":"")+"Level "+lv+": reach "+fmt(goal)+" and "+objLong().replace(/^./,c=>c.toLowerCase())+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();if(twist)showTip("tw"+twist.k,twist.ic+" "+twist.n+": "+twist.d+". Clear it for +2 ⭐.");
+  toast((twist?twist.ic+" TWIST: "+twist.n+"! ":"")+"Level "+lv+": reach "+fmt(goal)+" and "+objLong().replace(/^./,c=>c.toLowerCase())+"!"+(lv===4?" New row of lots unlocked!":""));setProg(lv);snap();asv=5;draw();if(twist)showTip("tw"+twist.k,twist.ic+" "+twist.n+": "+twist.d+". Clear it for +2 ⭐.");else if(lv>1)showTip("bal1","Balance update: starting cash is leaner, the star timer is tighter, and neighbor bonuses now shrink as they stack (best in full, second at half, the rest at a quarter).");
   if(!maybeWorldIntro())levelSplash();
 }
+// Star timer: grows gently with the level, plus time for what the level objective asks for
+// (paying for a building, selling or renovating several houses) and for the harder twists.
+function parT(){const o=objective;let a=0;
+  if(o){if(o.t==="build"&&S[o.k])a=S[o.k].cost/40;else if(o.t==="flip")a=15*o.n;else if(o.t==="reno")a=6*o.n}
+  const m=twist&&twist.k==="recession"?1.25:twist&&twist.k==="rush"?1.15:1;
+  return Math.round((115+lv*1.6+a)*m/5)*5}
 function levelSplash(){const np=t=>t.replace(/ \(\d+\/\d+\)/g,""),it=[["💰","Reach "+fmt(goal)+" in cash"],["🏗️",np(objLong())]];
   if(mode==="timed")it.push(["⏱","Time limit: "+Math.floor(total/60)+":"+String(total%60).padStart(2,"0")]);
-  if(bonus)it.push(["",np(bonLong())]);{const pr=90+lv*10;it.push(["⭐","Finish within "+Math.floor(pr/60)+":"+String(pr%60).padStart(2,"0")+" for an extra star"])}
+  if(bonus)it.push(["",np(bonLong())]);{const pr=parT();it.push(["⭐","Finish within "+Math.floor(pr/60)+":"+String(pr%60).padStart(2,"0")+" for an extra star"])}
   if(twist)it.push([twist.ic,"TWIST · "+twist.n+": "+twist.d]);
   $("lsw").textContent=W().ic+" World "+(worldOf(lv)+1)+": "+W().n;$("lst").textContent="Level "+lv;
   $("lsm").innerHTML=it.map((x,q)=>'<div class="opt" style="min-height:0;flex-direction:row;align-items:center;gap:8px'+(q<2?';border-color:var(--gold)':'')+'"><b style="font-size:18px">'+x[0]+'</b><span'+(q<2?' style="font-weight:800"':'')+'>'+x[1]+'</span></div>').join("")+'<div style="font-size:12px;opacity:.7;text-align:center">The gold items complete the level.</div>';
@@ -696,7 +706,7 @@ function maybeWorldIntro(){const w=worldOf(lv),d=WORLDS[w],key=w+(d.ready?"r":""
 $("wigo").onclick=()=>{$("wi").style.display="none";levelSplash()};
 
 function celebrate(){lvDone=true;doneAt=elapsed;sfx.win();buzz(60);fireworks();snap();$("lch").textContent=lv>=100?"🏆 You finished Lot Flip!":"🎉 Level Complete!";if(lv>=100){setTimeout(fireworks,1200);setTimeout(fireworks,2400);setTimeout(quake,300);if(readyOf("spaceport")){ev.k="launch";ev.t=12;fxLayers()}}
-  setTimeout(()=>{if(!run||!lvDone)return;closeSheet();$("buy").style.display="none";const par=90+lv*10,st=1+(bonus&&bonus.done?1:0)+(doneAt<=par?1:0);
+  setTimeout(()=>{if(!run||!lvDone)return;closeSheet();$("buy").style.display="none";const par=parT(),st=1+(bonus&&bonus.done?1:0)+(doneAt<=par?1:0);
    $("lcs").textContent="⭐".repeat(st)+"☆".repeat(3-st);$("lcd").textContent="Finished in "+Math.round(doneAt)+"s."+(bonus&&!bonus.done?" You can still finish the ⭐ bonus before moving on.":"")+(lv>=100?" You beat all 100 levels! Continue to earn your prestige rank and play again.":" Stay to finish your builds, or head to the next level.");$("lcn").textContent=lv>=100?"🌟 Continue":"▶ Next Level";
    paused=true;$("scene").classList.add("pz");$("lc").style.display="flex"},1400)}
 function fireworks(){let f=$("fw");if(!f){f=document.createElement("div");f.id="fw";document.body.appendChild(f)}
@@ -924,8 +934,8 @@ function endGame(win){
   run=false;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
   closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;win?sfx.win():sfx.lose();
   const fin=win&&lv>=100;
-  if(win){const fe=doneAt??elapsed,st=1+(bonus&&bonus.done?1:0)+(fe<=90+lv*10?1:0);const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;if(fin&&meta.pr>=10)meta.legend=1;checkAch();store.set(BKEY,JSON.stringify(best));
-    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(fe)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(90+lv*10)+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>";
+  if(win){const fe=doneAt??elapsed,st=1+(bonus&&bonus.done?1:0)+(fe<=parT()?1:0);const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;if(fin&&meta.pr>=10)meta.legend=1;checkAch();store.set(BKEY,JSON.stringify(best));
+    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(fe)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(parT())+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>";
     if(win&&lv%10===0&&!fin)h+='<p>🗺️ <b>'+W().ic+' '+W().n+' complete!</b> Next stop: '+W(lv+1).ic+' '+W(lv+1).n+'.</p>';
     if(fin)h+=meta.pr>=10?'<p>🏆 <b>Prestige 10 conquered. You are a Lot Flip Legend!</b> Thanks for playing every world.</p>':'<p>🌟 <b>All 10 worlds cleared!</b> Prestige from the Main Menu to start again at Rank '+(meta.pr+1)+'/10 for +10 ⭐. Each rank raises goals and trims your cash and time.</p>'}
   else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.<br>Building goal: '+(objective&&objective.done?'complete':objLong().toLowerCase())+'.</p>';
@@ -2675,7 +2685,7 @@ function renderTraffic(){
 const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",market:"🧺",parade:"🎺",game:"🏟️",season:"☀️",rushhr:"🚕",snow:"❄️",rocks:"🪨",peak:"☀️",heat:"🔥",expo:"🎪",launch:"🚀",blackout:"🌑",cruisein:"🛳️",cruise:"🛳️",luau:"🔥",volcano:"🌋",heritage:"🎭",tours:"🚶",inspect:"🔍",summer:"☀️",fishing:"🎣",mosquito:"🦟",roadtrip:"🚗",offseason:"🍂",expansion:"🚧",fireworks:"🎆"};
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
-  const par=90+lv*10,left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
+  const par=parT(),left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
   const ck=(ok,t)=>gi(ok,0,t+(ok?" ✅":""));let h=ck(money>=goal,money>=goal?"💰":"💰"+pc+"%")+ck(od,objShort().replace(/✔$/,""))+ck(!!bonus.done,bonShort().replace(/✔$/,""))+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
   if(twist)h+='<span class="al">'+twist.ic+'</span>';
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
@@ -3018,7 +3028,7 @@ $("bhd").onclick=()=>{meta.hard=!meta.hard;saveMeta();menuRw();toast(meta.hard?"
 let tipT,prc=false;
 function showTip(id,t){if(!meta||meta.tips[id])return;meta.tips[id]=1;saveMeta();const e=$("tip");e.style.textAlign="center";e.style.whiteSpace="normal";e.textContent="💡 "+t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},10000)}
 $("bpr").onclick=()=>{if(meta.pr>=10)return;if(!prc){prc=true;$("bpr").textContent="⚠️ Resets this mode's levels. Tap again";return}prc=false;meta.pr++;meta.stars+=10;meta.ws={};saveMeta();store.set(PKEY,JSON.stringify({lv:1,mode}));store.del(KEY);best={};store.set(BKEY,"{}");toast("🌟 Prestige Rank "+meta.pr+"/10! Goals +12%, cash −4% and time −3% per rank.");sfx.win();updMenu()};
-function goalCard(){if(!bonus)return;const par=90+lv*10,left=Math.max(0,Math.ceil(par-elapsed));
+function goalCard(){if(!bonus)return;const par=parT(),left=Math.max(0,Math.ceil(par-elapsed));
  const ck=ok=>ok?" ✅":"",t=[W().ic+" World "+(worldOf(lv)+1)+": "+W().n,"💰 Reach "+fmt(goal)+" (now "+fmt(money)+")"+ck(money>=goal),"🏗️ "+objLong()+ck(objective.done),bonLong()+ck(bonus.done),"⏱ Finish within "+par+"s for a star ("+(elapsed>par?"missed":left+"s left")+")"+(elapsed>par?" ❌":ck(lvDone))];
  if(W().sea)t.push("🌊 Top-row homes are beachfront: +25% value");
  if(twist)t.push(twist.ic+" "+twist.n+": "+twist.d);if(ev.k)t.push(evText(ev.k));
