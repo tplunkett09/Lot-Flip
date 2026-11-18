@@ -427,6 +427,24 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .plane{animation:plane 14s ease-in infinite;opacity:0}
 @keyframes plane{0%{transform:translate(-12px,0);opacity:0}5%{opacity:1}40%{transform:translate(50px,0)}70%{transform:translate(104px,-24px) rotate(-16deg)}100%{transform:translate(150px,-44px) rotate(-16deg);opacity:0}}
 @media(prefers-reduced-motion:reduce){.fl1,.fl2,.kick,.wv,.gcar,.bcn,.plane{animation:none}}
+
+/* Lot labels: centred, kept inside the lot, and kept off the buildings */
+.lot .tg{display:none}
+.lot.to-bottom .act{top:3px;left:7%;width:86%}
+.lot.to-bottom .tg{display:block;position:absolute;left:7%;width:86%;bottom:16px;text-align:center;z-index:72;pointer-events:none;line-height:1;color:#fff}
+.lot.to-bottom.tl .act{top:auto;bottom:16px}
+.lot.to-bottom.tl .tg{bottom:42px}
+.lot.to-bottom .ab{top:auto;bottom:16px;right:auto;left:50%;transform:translateX(-50%);white-space:nowrap}
+.lot.to-bottom .bpg,.lot.to-bottom .ckg{top:auto;bottom:-13px}
+.lot.lotpark.to-top .act{left:7%;width:86%}
+.act .ls,.tg .ls{max-width:100%;box-sizing:border-box}
+.tg .ls{display:inline-block;font-style:normal;font-size:8px;font-weight:900;margin-top:2px;padding:1px 5px;border-radius:7px;background:rgba(20,20,20,.72);border:1px solid rgba(255,255,255,.55);text-shadow:none;white-space:nowrap}
+.tg .ls.rp{background:#e53935}
+.tg .ls.buy{background:#ff6f00}
+.tg .ls.mk{background:#1565c0}
+.tg .ls.ok{background:#2e7d32}
+.tg .ls.go{background:#f9a825;color:#3e2723}
+.tg .ls{color:#fff;text-shadow:none}
 </style>
 </head>
 <body>
@@ -653,7 +671,7 @@ function rentOf(i){const l=lots[i];if(!l.hs||S[l.hs].cat==="i"||l.st==="reno_wor
 
 function build(){
   const sc=$("scene");sc.innerHTML="";trk={};traffic={};roadTraffic=[];if(typeof amb!=="undefined")amb.q=[];
-  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="pb"><i></i></div><div class="otk"><span></span></div><i class="bpg"></i><i class="ckg">✓</i><div class="spk"><i class="dc"></i><b class="pc"></b></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
+  const row=a=>{const r=document.createElement("div");r.className="row";for(let k=0;k<5;k++){const i=a+k,d=document.createElement("div"),side=Math.floor(i/5)===0?"to-bottom":"to-top";d.className="lot";d.innerHTML='<b class="bb"></b><b class="ab"></b><svg viewBox="0 0 100 90" preserveAspectRatio="none"></svg><div class="act"></div><div class="tg"></div><div class="pb"><i></i></div><div class="otk"><span></span></div><i class="bpg"></i><i class="ckg">✓</i><div class="spk"><i class="dc"></i><b class="pc"></b></div><div class="ownership-frame"></div>';d.onclick=()=>tapLot(i);r.appendChild(d)}return r};
   const rd=document.createElement("div");rd.className="road";
   rd.innerHTML='<div class="cw" style="left:18%"></div><div class="cw" style="left:48%"></div><div class="cw" style="right:18%"></div>';
   if(W().k==="future"){const s=document.createElement("div");s.className="fut";s.innerHTML=FUT;sc.append(s)}
@@ -3226,6 +3244,18 @@ function chips(){if(!bonus)return"";
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
   if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":ev.k==="storm"&&W().k==="mountain"?"🌨️":ev.k==="storm"&&W().k==="desert"?"🌪️":ev.k==="storm"&&W().k==="future"?"🌞":ev.k==="storm"&&W().k==="tropical"?"🌀":ev.k==="storm"&&W().k==="lake"?"🌊":EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
   return h}
+// Shrink a lot label until it fits: names to at most two lines with no word sticking out, status pills to one line inside the lot.
+function fitLbl(box,e){if(!box||!box.firstChild||!box.offsetParent)return;const W=e.clientWidth-8;
+  box.querySelectorAll(".ls").forEach(t=>{let f=8;t.style.fontSize=f+"px";t.style.padding="";t.style.whiteSpace="";
+    const wide=()=>t.offsetWidth>W||t.scrollWidth>t.clientWidth+.5;
+    if(wide())t.style.padding="1px 3px";
+    while(f>6&&wide()){f-=.5;t.style.fontSize=f+"px"}
+    if(wide())t.style.whiteSpace="normal"});
+  // under a building (rows 2 and 3) the name and its pill share a short strip, so cap their combined height
+  const cap=!e.classList.contains("to-bottom")&&box.querySelector(".ls")?27:0;
+  const nmE=box.querySelector(".nm");if(nmE){let f=9.5;box.style.fontSize=f+"px";nmE.style.overflowWrap="";
+    while(f>6&&(nmE.scrollWidth>nmE.clientWidth+.5||nmE.offsetHeight>f*1.05*2+2||(cap&&box.offsetHeight>cap))){f-=.5;box.style.fontSize=f+"px"}
+    if(nmE.scrollWidth>nmE.clientWidth+.5)nmE.style.overflowWrap="anywhere"}}
 function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classList.toggle("flood",ev.k==="storm")}const so=$("stm");if(so){so.classList.toggle("on",(ev.k==="storm"||ev.k==="volcano")&&run);so.classList.toggle("ashy",ev.k==="volcano");so.classList.toggle("snowy",W().k==="mountain");so.classList.toggle("dusty",W().k==="desert");so.classList.toggle("windy",W().k==="tropical");so.classList.toggle("hur",W().k==="beach"&&ev.k==="storm"&&run);so.classList.toggle("typ",W().k==="tropical"&&ev.k==="storm"&&run);so.classList.toggle("solar",W().k==="future")}{const sc0=$("scene");if(sc0){sc0.classList.toggle("launching",ev.k==="launch");sc0.classList.toggle("blackout",ev.k==="blackout"||ev.k==="storm"&&W().k==="future")}}{const tp=document.querySelector("#scene .trp");if(tp){const sh=tp.querySelector(".ship");if(sh){if((ev.k==="cruise"||ev.k==="cruisein")&&!sh.classList.contains("in")){sh.classList.remove("out");void sh.offsetWidth;sh.classList.add("in")}else if(ev.k!=="cruise"&&ev.k!=="cruisein"&&sh.classList.contains("in")){sh.classList.remove("in");sh.classList.add("out");clearTimeout(sh._t);sh._t=setTimeout(()=>sh.classList.remove("out"),14200)}}tp.classList.toggle("cruise",ev.k==="cruise");tp.classList.toggle("erupt",ev.k==="volcano")}}
   $("money").textContent=fmt(money);$("goal").textContent=fmt(goal);
   $("time").textContent=Math.max(0,Math.ceil(mode==="timed"?timeVal:elapsed))+"s";{const lh="<b>"+W().ic+" Lv "+lv+"</b><small>⭐"+(meta?meta.stars:0)+(meta&&meta.pr?" · P"+meta.pr:"")+"</small>";if($("lvl")._h!==lh){$("lvl")._h=lh;$("lvl").innerHTML=lh}}
@@ -3260,7 +3290,7 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     const mine=["owned","working","reno_working","demo","ready","rented","listed","clearing"].includes(l.st);
     e.classList.toggle("purchased",mine);if(W().k==="future"){const pw=powered(i),bz=!!l.hs&&l.st!=="merged"&&done(l);e.classList.toggle("nopow",bz&&S[l.hs].cat==="i"&&!pw);e.classList.toggle("dk",bz&&(ev.k==="storm"||ev.k==="blackout"&&!pw))}else e.classList.remove("nopow","dk");e.classList.toggle("ai-owned",ai);e.title=(l.st!=="empty"&&!ai?"YOUR PROPERTY · ":"")+"Lot "+(i+1)+(l.hs?" · "+S[l.hs].n:"");
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display="none";
-    const ab=e.querySelector(".ab");ab.style.display=ai?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";ab.classList.toggle("nb",l.st!=="ai_for_sale");
+    const ab=e.querySelector(".ab");ab.style.display=ai&&!(l.st==="ai_for_sale"&&!streetAbove)?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";ab.classList.toggle("nb",l.st!=="ai_for_sale");
     const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),l.forest?1:0,l.st==="clearing"?Math.round(l.cp*6):0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
     if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
     let lb="",pb=0;const nm=l.hs&&S[l.hs]&&l.st!=="sold"?S[l.hs].n:"",tag=(t,c)=>'<i class="ls'+(c?" "+c:"")+'">'+t+"</i>";let st="";
@@ -3271,9 +3301,12 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     else if(l.st==="ai_for_sale")st=tag("Buy "+fmt(l.aiP),"buy");else if(l.st==="sold")st=tag("Sold ✔","ok");
     lb=(nm?'<b class="nm">'+nm.replace(/-/g,"\u2011")+"</b>":"")+st;
     if(l.offer)pb=l.offer.ttl/l.offer.max;
-    const a=e.querySelector(".act"),em=l.st==="empty",ah=em?"":lb;if(a._h!==ah||a._w!==e.offsetWidth){a._h=ah;a._w=e.offsetWidth;a.innerHTML=ah;
-      // shrink the name just enough that its longest word fits on one line
-      const lw=nm?Math.max(...nm.split(" ").map(w=>w.length)):0,av=e.offsetWidth*.9-4;a.style.fontSize=lw?Math.max(6.5,Math.min(9.5,av/(lw*.68))).toFixed(1)+"px":""}a.style.display=ah?"":"none";
+    // Top-row lots: the name sits in the empty strip above the building and the status pill sits low on the lot,
+    // so neither covers the house. Tall buildings in the top row have no parking pad, so their name goes low instead.
+    const a=e.querySelector(".act"),tg=e.querySelector(".tg"),em=l.st==="empty",topRow=!streetAbove&&!!tg,tl=hasBuilding&&!!S[l.hs].tall;e.classList.toggle("tl",tl);
+    const nh=em||!nm?"":'<b class="nm">'+nm.replace(/-/g,"\u2011")+"</b>",th=em?"":st,ah=topRow?nh:nh+th,gh=topRow?th:"";
+    a.style.display=ah?"":"none";if(tg)tg.style.display=gh?"":"none";
+    if(a._h!==ah||a._w!==e.offsetWidth||(tg&&tg._h!==gh)){a._h=ah;a._w=e.offsetWidth;a.innerHTML=ah;if(tg){tg._h=gh;tg.innerHTML=gh}fitLbl(a,e);fitLbl(tg,e)}
     {const sb=bp>0&&!ai,bt="+"+bp+"%",bg=e.querySelector(".bpg");e.classList.toggle("hasbp",sb);if(sb&&bg._t!==bt){bg._t=bt;bg.textContent=bt}e.classList.toggle("chal",inChallenge(l,i))}a.classList.toggle("ai",l.st==="ai_for_sale");a.classList.toggle("dmgl",!!l.dmg);e.classList.toggle("dmg",!!l.dmg);
     const bi=e.querySelector(".pb i");bi.style.width=pb*100+"%";bi.style.background=l.offer?"var(--blue)":"var(--gold)";
     e.classList.toggle("offer",!!l.offer);e.classList.toggle("hot",false);
