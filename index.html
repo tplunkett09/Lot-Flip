@@ -412,7 +412,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 @keyframes coin{0%{transform:translateY(2px);opacity:0}20%{opacity:1}100%{transform:translateY(-14px);opacity:0}}
 .arm{animation:arm 12s ease-in-out infinite}
 @keyframes arm{0%{transform:translateX(-34px)}20%,55%{transform:translateX(44px)}80%,100%{transform:translateX(134px)}}
-@media(prefers-reduced-motion:reduce){.coin{animation:none}}
+@media(prefers-reduced-motion:reduce){.coin,.kup{animation:none}}
+.kup{animation:kup 2.7s ease-out infinite}@keyframes kup{0%{transform:translateY(1px);opacity:0}25%{opacity:1}100%{transform:translateY(-7px);opacity:0}}
 
 .fl1,.fl2{transform-box:fill-box;transform-origin:center;animation:fl1 6s ease-in-out infinite}.fl2{animation-name:fl2}
 @keyframes fl1{0%,40%{transform:scaleX(1)}45%,95%{transform:scaleX(0)}100%{transform:scaleX(1)}}
@@ -433,7 +434,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 .lot .tg{display:none}
 .lot.to-bottom .act{top:3px;left:7%;width:86%}
 .lot.to-bottom .tg{display:block;position:absolute;left:7%;width:86%;bottom:16px;text-align:center;z-index:72;pointer-events:none;line-height:1;color:#fff}
-.lot.to-bottom.tl .act{top:auto;bottom:16px}
+.lot.to-bottom.tl .act{top:auto;bottom:16px}.lot.to-bottom.tl.wd .act{top:95px;bottom:auto}
 .lot.to-bottom.tl .tg{bottom:42px}
 .lot.to-bottom .ab{top:auto;bottom:16px;right:auto;left:50%;transform:translateX(-50%);white-space:nowrap}
 .lot.to-bottom .bpg,.lot.to-bottom .ckg{top:auto;bottom:-13px}
@@ -1835,12 +1836,12 @@ const TRP=(()=>{let g='<svg viewBox="0 0 200 30" preserveAspectRatio="none" widt
  g+='<span class="tp cat"><svg width="20" height="16" viewBox="0 0 20 16"><path d="M1 12h18l-2 2.5H3z" fill="#fafafa" stroke="#607d8b" stroke-width=".5"/><path d="M10 12V1" stroke="#5d4037" stroke-width=".7"/><polygon points="10,1 10,11 17,11" fill="#fff" stroke="#b0bec5" stroke-width=".4"/><polygon points="9.6,3 9.6,11 4,11" fill="#26c6da"/></svg></span>';
  const dol='<svg width="12" height="7" viewBox="0 0 12 7" style="transform:scaleX(-1)"><path d="M1 4Q5 0 10 3L12 2L11 4.4L12 6L10 5Q5 7 1 4z" fill="#78909c"/><path d="M5 2l1-2 1 2" fill="#607d8b"/><circle cx="2.6" cy="3.6" r=".4" fill="#212121"/></svg>';
  g+='<span class="tp dol">'+dol+'</span><span class="tp dol d2">'+dol+'</span>';
- g+='<span class="tp ship"><svg width="120" height="34" viewBox="0 0 120 34"><g transform="translate(120 0) scale(-1 1)"><circle class="smk" cx="80" cy="3" r="2.6" fill="#eceff1"/><circle class="smk s2" cx="92" cy="4" r="2.2" fill="#eceff1"/>'
-  +'<path d="M4 22h112l-8 10H14z" fill="#1a237e"/><path d="M4 22h112l-1.4 2H5.4z" fill="#e53935"/><rect x="10" y="15" width="98" height="7" fill="#fafafa" stroke="#b0bec5" stroke-width=".4"/><rect x="20" y="10" width="78" height="5" fill="#fafafa" stroke="#b0bec5" stroke-width=".4"/><rect x="30" y="6" width="56" height="4" fill="#fafafa" stroke="#b0bec5" stroke-width=".4"/>'
-  +'<rect x="76" y="0" width="7" height="7" rx="1" fill="#e53935"/><rect x="76" y="1.4" width="7" height="1.4" fill="#1a237e"/><rect x="88" y="1" width="7" height="6" rx="1" fill="#e53935"/><rect x="88" y="2.4" width="7" height="1.4" fill="#1a237e"/>'
+ g+='<span class="tp ship"><svg width="120" height="34" viewBox="0 0 120 34"><g transform="translate(120 0) scale(-1 1)"><circle class="smk" cx="52.5" cy="2" r="2.4" fill="#eceff1"/><circle class="smk s2" cx="63.5" cy="2.6" r="2" fill="#eceff1"/>'
+  +'<path d="M4 22h112l-8 10H14z" fill="#1a237e"/><path d="M4 22h112l-1.4 2H5.4z" fill="#e53935"/><path d="M10 15h98l5 7H10z" fill="#fafafa" stroke="#b0bec5" stroke-width=".4"/><rect x="20" y="10" width="78" height="5" fill="#fafafa" stroke="#b0bec5" stroke-width=".4"/><rect x="30" y="6" width="56" height="4" fill="#fafafa" stroke="#b0bec5" stroke-width=".4"/>'
+  +'<rect x="49" y="0" width="7" height="6.4" rx="1" fill="#e53935"/><rect x="48" y="5.2" width="9" height="1.2" fill="#b0bec5"/><rect x="49" y="1.4" width="7" height="1.4" fill="#1a237e"/><rect x="60" y="1" width="7" height="5.4" rx="1" fill="#e53935"/><rect x="59" y="5.2" width="9" height="1.2" fill="#b0bec5"/><rect x="60" y="2.4" width="7" height="1.4" fill="#1a237e"/>'
   +[12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104].map(x=>'<rect x="'+x+'" y="17.5" width="2.2" height="2" rx=".4" fill="#4fc3f7"/>').join("")
   +[22,27,32,37,42,47,52,57,62,67,72,77,82,87,92].map(x=>'<rect x="'+x+'" y="11.4" width="2.4" height="2" rx=".4" fill="#4fc3f7"/>').join("")
-  +'<path d="M100 10h10l4 5h-14z" fill="#bde3f5" stroke="#90a4ae" stroke-width=".4"/><path d="M8 25h100" stroke="#fff" stroke-width=".6" stroke-dasharray="2 1.4"/><path d="M0 32q6-3 12 0" stroke="#e1f5fe" stroke-width=".8" fill="none"/></g></svg></span>';
+  +'<path d="M98 10h8l2 5H98z" fill="#bde3f5" stroke="#90a4ae" stroke-width=".4"/><path d="M98 12.4h9" stroke="#90a4ae" stroke-width=".3"/><path d="M8 25h100" stroke="#fff" stroke-width=".6" stroke-dasharray="2 1.4"/><path d="M0 32q6-3 12 0" stroke="#e1f5fe" stroke-width=".8" fill="none"/></g></svg></span>';
  return g+'<i class="wv1"></i>'})();
 const TORCH=(x,y,on)=>'<path d="M'+x+' '+y+'v-10" stroke="#6d4c41" stroke-width="1.2"/><rect x="'+(x-1.4)+'" y="'+(y-12)+'" width="2.8" height="2.4" fill="#8d6e63"/>'+(on?'<path class="flk" d="M'+x+' '+(y-12)+'q-2-3 0-6q2 3 0 6z" fill="#ff9800"/><path class="flk" style="animation-delay:-.15s" d="M'+x+' '+(y-12)+'q-1-2 0-4q1 2 0 4z" fill="#ffeb3b"/>':'');
 const THATCH=(pts,c)=>'<polygon points="'+pts+'" fill="'+(c||"#d4a656")+'" stroke="#8d6e3b" stroke-width="1"/>';
@@ -2915,9 +2916,9 @@ function homeFx(l,k,st){const w=W().k,on=st==="rented"||st==="ai_owned";let s=""
     return s}
   return s}
 function wxBld(l,k,st,T,s){const on=st==="ready",w=W().k;
-  const brd=(x,y,c,f,t)=>'<rect x="'+x+'" y="'+y+'" width="22" height="8" rx="1" fill="'+f+'" stroke="#3e2723" stroke-width=".5"/><text x="'+(x+11)+'" y="'+(y+5.8)+'" font-size="4.2" font-weight="900" text-anchor="middle" fill="'+c+'">'+t+'</text>';
+  const brd=(x,y,c,f,t)=>'<rect x="'+x+'" y="'+y+'" width="22" height="8" rx="1" fill="'+f+'" stroke="#3e2723" stroke-width=".5"/><text x="'+(x+11)+'" y="'+(y+(t.length>6?5.5:5.8))+'" font-size="'+(t.length>6?3.5:4.2)+'" font-weight="900" text-anchor="middle" fill="'+c+'">'+t+'</text>';
   const board=(x,y,c)=>on?'<g class="fl1">'+brd(x,y,c,"#fff","FOR SALE")+'</g><g class="fl2">'+brd(x,y,"#fff","#e53935","SOLD!")+'</g>':brd(x,y,c,"#fff","FOR SALE");
-  const key=(x,y)=>on?'<text class="coin" x="'+x+'" y="'+y+'" font-size="7">🔑</text>':"";
+  const key=(x,y)=>on?'<text class="kup" x="'+x+'" y="45" font-size="5.4">🔑</text>':"";
   const post=(x,c)=>'<path d="M'+x+' 47V19h12" stroke="#5d4037" stroke-width="1.8" fill="none"/><g'+(on?' class="pen"':'')+'><rect x="'+(x+1)+'" y="19" width="12" height="9" rx="1" fill="'+c+'" stroke="#3e2723" stroke-width=".6"/><text x="'+(x+7)+'" y="25.3" font-size="3.8" font-weight="900" text-anchor="middle" fill="#fff">OPEN</text></g>';
   const truck=c=>'<rect x="40" y="34" width="22" height="11" rx="2" fill="'+c+'" stroke="#3e2723"/><rect x="55" y="35.5" width="5" height="4" fill="#bde3f5"/><path d="M42 37h11M42 40h11" stroke="#eceff1" stroke-width="1.3"/><rect class="blk" x="44" y="32.5" width="6" height="2" fill="#ffeb3b"/><circle cx="45" cy="46" r="2.6" fill="#263238"/><circle cx="57" cy="46" r="2.6" fill="#263238"/>';
   const bay=(door,tc,ln)=>(on?'<rect x="41" y="31" width="18" height="17" fill="#3e2723"/><g class="ft">'+truck(tc)+'</g><rect class="bay" x="41" y="31" width="18" height="17" fill="'+door+'" stroke="#3e2723"/>':'<rect x="41" y="31" width="18" height="17" fill="'+door+'" stroke="#3e2723"/>')+'<path d="M41 36h18M41 41h18" stroke="'+ln+'" stroke-width=".7"/>';
@@ -3744,6 +3745,21 @@ function chips(){if(!bonus)return"";
   if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":ev.k==="storm"&&W().k==="mountain"?"🌨️":ev.k==="storm"&&W().k==="desert"?"🌪️":ev.k==="storm"&&W().k==="future"?"🌞":ev.k==="storm"&&W().k==="tropical"?"🌀":ev.k==="storm"&&W().k==="lake"?"🌊":EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
   return h}
 // Shrink a lot label until it fits: names to at most two lines with no word sticking out, status pills to one line inside the lot.
+// Shrinks sign lettering that would run to the edge of its board, measured with the device's own font,
+// so every sign keeps a little space at both ends (fonts differ between phones and browsers).
+function fitSigns(svg){const ts=[...svg.querySelectorAll("text[font-weight]")].filter(t=>!t._f&&/[A-Za-z]{2}/.test(t.textContent));if(!ts.length){svg._fd=1;return}
+ const all=[...svg.querySelectorAll("*")],ix=new Map(all.map((e,q)=>[e,q])),rects=[...svg.querySelectorAll("rect")];let ok=true;
+ for(const t of ts){let b,tm;try{b=t.getBBox();tm=t.getCTM()}catch(x){ok=false;continue}if(!b.width||!tm){ok=false;continue}t._f=1;
+  const ti=ix.get(t),cx=b.x+b.width/2,cy=b.y+b.height/2;let best=null;
+  for(const r of rects){if(ix.get(r)>ti)continue;let rm,rb;try{rm=r.getCTM();rb=r.getBBox()}catch(x){continue}if(!rm||Math.abs(rm.a-tm.a)>1e-3||Math.abs(rm.d-tm.d)>1e-3)continue;
+   const x0=rb.x+(rm.e-tm.e)/tm.a,y0=rb.y+(rm.f-tm.f)/tm.d;
+   if(cx>=x0&&cx<=x0+rb.width&&cy>=y0-1&&cy<=y0+rb.height+1&&rb.width<60&&rb.height<20&&rb.height>=b.height*.55&&(!best||rb.width*rb.height<best.w*best.h))best={x:x0,w:rb.width,h:rb.height}}
+  if(!best)continue;const pad=Math.max(.8,best.w*.07);let room=best.w-2*pad-.1;
+  for(let it=0;it<4&&b.width>room;it++){const f=parseFloat(t.getAttribute("font-size"))||4,k=room/b.width,y=parseFloat(t.getAttribute("y")),ls=parseFloat(t.getAttribute("letter-spacing")||0);
+   t.setAttribute("font-size",(f*k).toFixed(2));if(ls)t.setAttribute("letter-spacing",(ls*k).toFixed(2));if(!isNaN(y))t.setAttribute("y",(y-.35*f*(1-k)).toFixed(2));b=t.getBBox();if(b.width>room)room-=.05}
+  // still short on one side: centre the words on their board
+  if(b.x-best.x<pad-.05||best.x+best.w-b.x-b.width<pad-.05){const dx=best.x+best.w/2-(b.x+b.width/2),x=parseFloat(t.getAttribute("x"));if(!isNaN(x)&&Math.abs(dx)<=best.w*.3)t.setAttribute("x",(x+dx).toFixed(2))}}
+ svg._fd=ok?1:0}
 function fitLbl(box,e){if(!box||!box.firstChild||!box.offsetParent)return;const W=e.clientWidth-8;
   box.querySelectorAll(".ls").forEach(t=>{let f=8;t.style.fontSize=f+"px";t.style.padding="";t.style.whiteSpace="";
     const wide=()=>t.offsetWidth>W||t.scrollWidth>t.clientWidth+.5;
@@ -3792,7 +3808,8 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display="none";
     const ab=e.querySelector(".ab");ab.style.display=ai&&!(l.st==="ai_for_sale"&&!streetAbove)?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";ab.classList.toggle("nb",l.st!=="ai_for_sale");
     const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),l.forest?1:0,l.st==="clearing"?Math.round(l.cp*6):0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
-    if(e._k!==key){e._k=key;e.querySelector("svg").innerHTML=art(l,i)}
+    if(e._k!==key){e._k=key;const sv0=e.querySelector("svg");sv0.innerHTML=art(l,i);sv0._fd=0}
+    {const sv0=e.querySelector("svg");if(sv0&&!sv0._fd)fitSigns(sv0)}
     let lb="",pb=0;const nm=l.hs&&S[l.hs]&&l.st!=="sold"?S[l.hs].n:"",tag=(t,c)=>'<i class="ls'+(c?" "+c:"")+'">'+t+"</i>";let st="";
     if(l.st==="off_market")st=tag("Off market");else if(l.st==="owned")st=tag(sellMode?"Sell lot":l.forest?(HIS()?"🔨 Restore":DRY()?"💧 Drill well":"🌲 Clear trees"):"Build here");else if(l.st==="clearing"){st=tag(HIS()?"🔨 Restoring…":DRY()?"💧 Drilling…":"🪓 Clearing…");pb=l.cp}
     else if(l.st==="working"){st=tag(l.permit>0?(W().k==="tropical"?"🚢 Shipping…":"📋 Permit…"):"🔨 Building…");pb=l.p}else if(l.st==="reno_working"){st=tag("Upgrading…");pb=l.rp}else if(l.st==="demo"){st=tag("Demolishing…","rp");pb=l.dp}
@@ -3803,7 +3820,7 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     if(l.offer)pb=l.offer.ttl/l.offer.max;
     // Top-row lots: the name sits in the empty strip above the building and the status pill sits low on the lot,
     // so neither covers the house. Tall buildings in the top row have no parking pad, so their name goes low instead.
-    const a=e.querySelector(".act"),tg=e.querySelector(".tg"),em=l.st==="empty",topRow=!streetAbove&&!!tg,tl=hasBuilding&&!!S[l.hs].tall;e.classList.toggle("tl",tl);
+    const a=e.querySelector(".act"),tg=e.querySelector(".tg"),em=l.st==="empty",topRow=!streetAbove&&!!tg,tl=hasBuilding&&!!S[l.hs].tall;e.classList.toggle("tl",tl);e.classList.toggle("wd",hasBuilding&&!!S[l.hs].span);
     // tall homes (the Resort and the Penthouse Tower) reach the top of the lot, so their top-row name stays on one line
     e.classList.toggle("hi",hasBuilding&&l.hs==="mansion"&&(W().k==="themepark"||W().k==="city"));
     const nh=em||!nm?"":'<b class="nm">'+nm.replace(/-/g,"\u2011")+"</b>",th=em?"":st,ah=topRow?nh:nh+th,gh=topRow?th:"";
