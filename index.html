@@ -623,7 +623,7 @@ const festHost={market:"civic",party:"park",parade:"school",game:"sports"};
 const festW=k=>{const f=(FESTW[W().k]||{})[k];return f?{lbl:f[0],ic:f[1],txt:f[1]+" "+f[2].replace("{n}",S[festHost[k]].n.replace(/\u00ad/g,""))}:null};
 const evText=k=>evText0(k).replace(/\u00ad/g,"");const evText0=k=>festHost[k]&&festW(k)?festW(k).txt:k==="market"?(W().k==="themepark"?"🎟️ Ticket rush at "+S.civic.n+"! Its income doubles":"🧺 Farmers market at the "+S.civic.n+"! Its income doubles"):k==="party"?"🎉 Party at the "+S.park.n+"! Nearby rents +60%":k==="game"?"🏟️ Big event at the "+S.sports.n+"! Its income doubles":k==="parade"?(W().k==="future"?"🏆 "+S.school.n+" robot contest! Buyer offers +20%":"🎺 "+S.school.n+" parade! Buyer offers +20%"):k==="storm"&&W().k==="beach"?"🌀 Hurricane warning! Beachfront homes are most at risk":k==="storm"&&W().k==="mountain"?"🌨️ Blizzard incoming! Snow may damage houses and slow traffic":k==="storm"&&W().k==="desert"?"🌪️ Sandstorm incoming! Dust may damage houses and slows traffic":k==="storm"&&W().k==="future"?"🌞 Solar storm! The power grid is down: every business earns nothing and flares may damage homes":k==="storm"&&W().k==="tropical"?"🌀 Cyclone! Beachfront homes are most at risk":k==="heat"&&readyOf("solar")?"🔥 Heat wave! Your Solar Farm keeps the air running: no rent cut, and homes next to an Oasis still earn +20%":k==="mosquito"&&readyOf("campground")?"🦟 Mosquito season, but your Campground keeps the bugs away: no rent cut":k==="storm"&&W().k==="lake"?"🌊 Spring flood! The lake is rising. Lakefront homes are most at risk":EV[k];
 /* ===== Dev mode: open with ?dev=1 (or tap the menu title 7 times) to unlock every level. ?dev=0 turns it off. ===== */
-const BUILD="2026.11.21-8";// bump on every published change so dev mode shows which version is loaded
+const BUILD="2026.11.21-9";// bump on every published change so dev mode shows which version is loaded
 let DEV=false;try{const q=new URLSearchParams(location.search).get("dev");if(q==="1")localStorage.setItem("lot_flip_dev","1");if(q==="0")localStorage.removeItem("lot_flip_dev");DEV=localStorage.getItem("lot_flip_dev")==="1"}catch(e){}
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
@@ -2145,7 +2145,7 @@ function fuOnly(l,k,st,T,s){
   return s}
 // Extra detail and life for the small civic and shop buildings that were plainer than the rest of their world.
 function smallFx(l,k,st){const w=W().k,on=st==="ready"||st==="rented";let s="";const A=x=>on?x:"";
-  const LIT=(x,y,ww,h,q)=>on?'<rect class="lit" x="'+x+'" y="'+y+'" width="'+ww+'" height="'+h+'" fill="#ffe082" style="animation-duration:'+(6+q*1.9)+'s;animation-delay:'+(-q*2.1)+'s"/><path d="M'+(x+ww/2)+' '+y+'v'+h+'M'+x+' '+(y+h/2)+'h'+ww+'" stroke="#3e2723" stroke-width=".7"/>':"";
+  const LIT=(x,y,ww,h,q)=>(on?'<rect class="lit" x="'+x+'" y="'+y+'" width="'+ww+'" height="'+h+'" fill="#ffe082" style="animation-duration:'+(6+q*1.9)+'s;animation-delay:'+(-q*2.1)+'s"/>':'')+'<path d="M'+(x+ww/2)+' '+y+'v'+h+'M'+x+' '+(y+h/2)+'h'+ww+'" stroke="#3e2723" stroke-width=".7"/>';
   const SMK=(x,y)=>'<circle class="smk" cx="'+x+'" cy="'+y+'" r="2.4" fill="#fff"/><circle class="smk s2" cx="'+(x+1.4)+'" cy="'+y+'" r="1.9" fill="#fff"/>';
   const ICE=(xs,y)=>xs.map(x=>{const h=1.5+x%3*.6;return '<path d="M'+x+' '+y+'l.8 '+h+'l.8-'+h+'z" fill="#e3f2fd" stroke="#90caf9" stroke-width=".2"/>'}).join("");
   const BIRD=(c,e)=>on?'<g class="dove"><ellipse rx="2.6" ry="1.4" fill="'+c+'" stroke="'+e+'" stroke-width=".4"/><path class="flp" d="M-.5 -.8L-2.8 -3.6M.5 -.8L2.8 -3.6" stroke="'+e+'" stroke-width=".9" stroke-linecap="round"/></g>':"";
@@ -2558,7 +2558,7 @@ function smallFx(l,k,st){const w=W().k,on=st==="ready"||st==="rented";let s="";c
 function careBld(l,k,st,T,s){const on=st==="ready",w=W().k;
   const A=x=>on?x:"";
   const AW=(x,y,ww,h,f)=>'<path d="M'+x+' '+(y+h)+'V'+(y+ww/2)+'a'+ww/2+' '+ww/2+' 0 0 1 '+ww+' 0V'+(y+h)+'z" fill="'+(f||"#bde3f5")+'" stroke="#3e2723" stroke-width=".8"/>';
-  const LIT=(x,y,ww,h,q)=>on?'<rect class="lit" x="'+x+'" y="'+y+'" width="'+ww+'" height="'+h+'" fill="#ffe082" style="animation-duration:'+(6+q*1.9)+'s;animation-delay:'+(-q*2.1)+'s"/><path d="M'+(x+ww/2)+' '+y+'v'+h+'M'+x+' '+(y+h/2)+'h'+ww+'" stroke="#3e2723" stroke-width=".7"/>':"";
+  const LIT=(x,y,ww,h,q)=>(on?'<rect class="lit" x="'+x+'" y="'+y+'" width="'+ww+'" height="'+h+'" fill="#ffe082" style="animation-duration:'+(6+q*1.9)+'s;animation-delay:'+(-q*2.1)+'s"/>':'')+'<path d="M'+(x+ww/2)+' '+y+'v'+h+'M'+x+' '+(y+h/2)+'h'+ww+'" stroke="#3e2723" stroke-width=".7"/>';
   const CROSS=(x,y,r,c,ring)=>'<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#fff" stroke="'+ring+'" stroke-width=".8"/><path d="M'+x+' '+(y-r*.62)+'v'+r*1.24+'M'+(x-r*.62)+' '+y+'h'+r*1.24+'" stroke="'+c+'" stroke-width="'+(r*.46).toFixed(1)+'"/>';
   const BELL=(x,y)=>'<path'+(on?' class="pen"':'')+' d="M'+(x-2.2)+' '+y+'h4.4l-.7 4h-3z" fill="#ffb300" stroke="#b26a00" stroke-width=".3"/>';
   const FLAG=(x,y0,y1,c)=>'<path d="M'+x+' '+y0+'V'+y1+'" stroke="#5d4037" stroke-width="1"/><polygon'+(on?' class="flag"':'')+' points="'+x+','+y1+' '+(x+6.6)+','+(y1+2)+' '+x+','+(y1+4)+'" fill="'+c+'"/>';
@@ -2572,7 +2572,7 @@ function careBld(l,k,st,T,s){const on=st==="ready",w=W().k;
       +'<path d="M30 20v-9q0-2 2-2h20q2 0 2 2v9z" fill="#f1dcc0" '+T+'/>'+CROSS(42,14,4.2,"#00897b","#00897b")
       +'<path d="M16 46V22q0-3 3-3h46q3 0 3 3v24z" fill="#f1dcc0" '+T+'/>'+[20,28,36,44,52,60].map(x=>'<rect x="'+x+'" y="21" width="3" height="2.2" fill="#6d4c41"/>').join("")
       +'<rect x="22" y="25" width="40" height="5" rx="1" fill="#00897b"/><text x="42" y="28.9" font-size="3.6" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing=".5">DESERT CLINIC</text>'
-      +AW(21,33,8,9)+AW(55,33,8,9)+LIT(55,37,8,5,1)+'<path d="M36 46V38a6 6 0 0 1 12 0v8z" fill="#80cbc4" stroke="#3e2723"/><path d="M42 32v14" stroke="#3e2723" stroke-width=".6"/><circle cx="40.8" cy="40" r=".6" fill="#ffd54f"/><circle cx="43.2" cy="40" r=".6" fill="#ffd54f"/>'
+      +AW(21,33,8,9)+AW(55,33,8,9)+(on?'<path class="lit" d="M55 42V37a4 4 0 0 1 8 0v5z" fill="#ffe082" style="animation-duration:7.9s;animation-delay:-2.1s"/>':'')+[21,55].map(x=>'<path d="M'+(x+4)+' 33v9M'+x+' 38h8" stroke="#3e2723" stroke-width=".6"/>').join("")+'<path d="M36 46V38a6 6 0 0 1 12 0v8z" fill="#80cbc4" stroke="#3e2723"/><path d="M42 32v14" stroke="#3e2723" stroke-width=".6"/><circle cx="40.8" cy="40" r=".6" fill="#ffd54f"/><circle cx="43.2" cy="40" r=".6" fill="#ffd54f"/>'
       +'<path d="M32.4 31v7" stroke="#b71c1c" stroke-width="2" stroke-linecap="round"/><rect x="16" y="44" width="52" height="2.2" fill="#d9b78c"/><rect x="50" y="43" width="3.4" height="3" fill="#c1440e"/><path d="M51.7 43q-3-3-1-6q1 3 1 6q0-3 1.4-6q2 3-1.4 6z" fill="#558b2f"/>'+SAG(95,46,.42);
       if(on)s+='<circle class="pls" cx="42" cy="14" r="5.4" fill="#4dd0e1" fill-opacity=".45"/>'+PERS("#26a69a","wk1",-2,-2)+PERS("#c1440e","wk2",-9,-2);
       return s}
@@ -2742,7 +2742,7 @@ function fuFx(l,k,st){const on=st==="ready";let s="";const A=x=>on?x:"";
 // Static touches always show; the moving ones start once someone lives there.
 function homeFx(l,k,st){const w=W().k,on=st==="rented"||st==="ai_owned";let s="";
   if(w==="future")return fuHomeFx(l,k,st);
-  const LW=(x,y,ww,h,q)=>on?'<rect class="lit" x="'+x+'" y="'+y+'" width="'+ww+'" height="'+h+'" fill="#ffe082" style="animation-duration:'+(5+q*1.7)+'s;animation-delay:'+(-q*2.3)+'s"/><path d="M'+(x+ww/2)+' '+y+'v'+h+'M'+x+' '+(y+h/2)+'h'+ww+'" stroke="#3e2723" stroke-width=".7"/>':"";
+  const LW=(x,y,ww,h,q)=>(on?'<rect class="lit" x="'+x+'" y="'+y+'" width="'+ww+'" height="'+h+'" fill="#ffe082" style="animation-duration:'+(5+q*1.7)+'s;animation-delay:'+(-q*2.3)+'s"/>':'')+'<path d="M'+(x+ww/2)+' '+y+'v'+h+'M'+x+' '+(y+h/2)+'h'+ww+'" stroke="#3e2723" stroke-width=".7"/>';
   const GLOW=(x,y,r)=>on?'<circle class="pls" cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#ffeb3b"/>':"";
   const FBOX=(x,y,ww)=>'<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="2" fill="#6d4c41" stroke="#3e2723" stroke-width=".3"/>'+[...Array(Math.floor(ww/2.4))].map((_,q)=>'<circle cx="'+(x+1.4+q*2.4).toFixed(1)+'" cy="'+(y-.5)+'" r="1.05" fill="'+["#e53935","#fdd835","#ec407a"][q%3]+'"/>').join("");
   const SMK=(x,y)=>'<circle class="smk" cx="'+x+'" cy="'+y+'" r="2.6" fill="#fff"/><circle class="smk s2" cx="'+(x+1.5)+'" cy="'+y+'" r="2.1" fill="#fff"/>';
@@ -4078,6 +4078,50 @@ function fitSigns(svg){const ts=[...svg.querySelectorAll("text[font-weight]")].f
   // still short on one side: centre the words on their board
   if(b.x-best.x<pad-.05||best.x+best.w-b.x-b.width<pad-.05){const dx=best.x+best.w/2-(b.x+b.width/2),x=parseFloat(t.getAttribute("x"));if(!isNaN(x)&&Math.abs(dx)<=best.w*.3)t.setAttribute("x",(x+dx).toFixed(2))}}
  svg._fd=ok?1:0}
+// A lit window glow is drawn over the glass, so it can hide the window's panes and frame.
+// Move any pane bars or frame drawn inside a glow's area (just before it) to sit on top of the glow,
+// so a window looks the same lit or dark.
+function liftMuntins(svg){let ok=true;svg.querySelectorAll(".lit").forEach(L=>{if(!/^(rect|path)$/.test(L.tagName))return;let bb;try{bb=L.getBBox()}catch(x){ok=false;return}if(!bb.width||!bb.height){ok=false;return}
+  const mv=[];let p=L.previousElementSibling,n=0;
+  while(p&&n++<60){const tg=p.tagName,f=p.getAttribute("fill");
+   if(!p.classList.contains("lit")&&!p.getAttribute("transform")&&p.getAttribute("stroke")&&(tg==="path"||tg==="line"||tg==="rect"&&f==="none")&&(f==null||f==="none")){let b=null;try{b=p.getBBox()}catch(x){}
+    if(b&&(b.width||b.height)&&b.x>=bb.x-.5&&b.y>=bb.y-.5&&b.x+b.width<=bb.x+bb.width+.5&&b.y+b.height<=bb.y+bb.height+.5)mv.push(p)}
+   p=p.previousElementSibling}
+  let at=L;mv.reverse().forEach(m=>{at.after(m);at=m})});if(ok)ok=normWindows(svg);svg._lm=ok?1:0}
+// Window panes stay consistent within a building: if a building's windows mostly have a 4-pane cross,
+// the plain ones get the same cross (same colour and weight), drawn on top of any lit glow.
+function normWindows(svg){let inv;try{inv=svg.getScreenCTM().inverse()}catch(x){return false}if(!inv)return false;
+ const moving=e=>{if(e.querySelector&&e.querySelector(":scope>animate,:scope>animateTransform,:scope>animateMotion"))return true;for(let a=e.parentElement;a&&a!==svg;a=a.parentElement)if(a.querySelector(":scope>animateTransform,:scope>animateMotion"))return true;return false};
+ const box=e=>{let b,m;try{b=e.getBBox();m=inv.multiply(e.getScreenCTM())}catch(x){return null}const a=new DOMPoint(b.x,b.y).matrixTransform(m),c=new DOMPoint(b.x+b.width,b.y+b.height).matrixTransform(m);return{x:Math.min(a.x,c.x),y:Math.min(a.y,c.y),w:Math.abs(c.x-a.x),h:Math.abs(c.y-a.y),m}};
+ const inside=(b,W,t)=>b.x>=W.x-t&&b.y>=W.y-t&&b.x+b.w<=W.x+W.w+t&&b.y+b.h<=W.y+W.h+t;
+ const wins=[],seen={};
+ svg.querySelectorAll("rect").forEach(e=>{const f=(e.getAttribute("fill")||"").toLowerCase();if(f!=="#bde3f5"&&f!=="#ffe082")return;if(moving(e))return;const b=box(e);if(!b||b.w<3.5||b.h<3.5||b.w>14||b.h>14)return;
+   const k=Math.round(b.x*2)+","+Math.round(b.y*2)+","+Math.round(b.w*2)+","+Math.round(b.h*2);if(seen[k]){seen[k].els.push(e);return}seen[k]={b,els:[e]};wins.push(seen[k])});
+ if(wins.length<2)return true;
+ const segs=[];
+ [...svg.querySelectorAll("path,line,rect")].forEach(e=>{if(moving(e)||e.closest(".dove,[class^=wk],.pen,.bob,.sway,.flag,.smk"))return;const t=e.tagName;let m;try{m=inv.multiply(e.getScreenCTM())}catch(x){return}
+   const P=(x,y)=>new DOMPoint(x,y).matrixTransform(m),add=(x1,y1,x2,y2)=>{const p=P(x1,y1),q=P(x2,y2);segs.push({e,x1:Math.min(p.x,q.x),y1:Math.min(p.y,q.y),x2:Math.max(p.x,q.x),y2:Math.max(p.y,q.y)})};
+   if(t==="rect"){const x=+e.getAttribute("x")||0,y=+e.getAttribute("y")||0,w=+e.getAttribute("width"),h=+e.getAttribute("height");if(Math.min(w,h)>1.3)return;if(w<h)add(x+w/2,y,x+w/2,y+h);else add(x,y+h/2,x+w,y+h/2);return}
+   if(!e.getAttribute("stroke"))return;if(t==="line"){add(+e.getAttribute("x1"),+e.getAttribute("y1"),+e.getAttribute("x2"),+e.getAttribute("y2"));return}
+   const d=e.getAttribute("d")||"";if(/[^MmVvHhLl\d\s,.\-]/.test(d))return;
+   const tk=d.match(/[MmVvHhLl]|-?[\d.]+(?:e-?\d+)?/g)||[];let i=0,cx=0,cy=0,c="";
+   while(i<tk.length){if(/[A-Za-z]/.test(tk[i]))c=tk[i++];const n=()=>+tk[i++];
+     if(c==="M"){cx=n();cy=n();c="L"}else if(c==="m"){cx+=n();cy+=n();c="l"}
+     else if(c==="V"){const y=n();add(cx,cy,cx,y);cy=y}else if(c==="v"){const y=cy+n();add(cx,cy,cx,y);cy=y}
+     else if(c==="H"){const x=n();add(cx,cy,x,cy);cx=x}else if(c==="h"){const x=cx+n();add(cx,cy,x,cy);cx=x}
+     else if(c==="L"){const x=n(),y=n();add(cx,cy,x,y);cx=x;cy=y}else if(c==="l"){const x=cx+n(),y=cy+n();add(cx,cy,x,y);cx=x;cy=y}else i++}});
+ let tpl=null;
+ wins.forEach(W=>{if([...svg.querySelectorAll("text")].some(t=>{const b=box(t);return b&&inside(b,W.b,.5)})){W.skip=1;return}const B=W.b,t=.6;let v=0,h=0;
+   segs.forEach(g=>{if(W.els.includes(g.e))return;if(g.x1<B.x-t||g.x2>B.x+B.w+t||g.y1<B.y-t||g.y2>B.y+B.h+t)return;const sw=g.x2-g.x1,sh=g.y2-g.y1;
+     if(sw<.3&&sh>=.6*B.h&&g.x1>B.x+.25*B.w&&g.x1<B.x+.75*B.w){v=1;if(!tpl)tpl=g.e}else if(sh<.3&&sw>=.6*B.w&&g.y1>B.y+.25*B.h&&g.y1<B.y+.75*B.h){h=1;if(!tpl)tpl=g.e}});W.v=v;W.h=h});
+ const crossN=wins.filter(W=>!W.skip&&W.v&&W.h).length,plainN=wins.filter(W=>!W.skip).length-crossN;if(!crossN||crossN<2&&crossN<plainN)return true;
+ const col=tpl&&tpl.getAttribute("stroke")||"#3e2723",sw=tpl&&tpl.getAttribute("stroke-width")||".6";
+ wins.forEach(W=>{if(W.skip||W.v&&W.h)return;const top=W.els.reduce((a,e)=>a.compareDocumentPosition(e)&Node.DOCUMENT_POSITION_FOLLOWING?e:a);
+   let mi;try{mi=W.b.m.inverse()}catch(x){return}const own=box(top);if(!own)return;const b=own,toL=(x,y)=>new DOMPoint(x,y).matrixTransform(own.m.inverse());
+   const p1=toL(b.x+b.w/2,b.y),p2=toL(b.x+b.w/2,b.y+b.h),p3=toL(b.x,b.y+b.h/2),p4=toL(b.x+b.w,b.y+b.h/2);
+   const d=(W.v?"":"M"+p1.x.toFixed(2)+" "+p1.y.toFixed(2)+"L"+p2.x.toFixed(2)+" "+p2.y.toFixed(2))+(W.h?"":"M"+p3.x.toFixed(2)+" "+p3.y.toFixed(2)+"L"+p4.x.toFixed(2)+" "+p4.y.toFixed(2));
+   const pa=document.createElementNS("http://www.w3.org/2000/svg","path");pa.setAttribute("d",d);pa.setAttribute("stroke",col);pa.setAttribute("stroke-width",sw);pa.setAttribute("fill","none");top.after(pa)});
+ return true}
 function fitLbl(box,e){if(!box||!box.firstChild||!box.offsetParent)return;const W=e.clientWidth-8;
   box.querySelectorAll(".ls").forEach(t=>{let f=8;t.style.fontSize=f+"px";t.style.padding="";t.style.whiteSpace="";
     const wide=()=>t.offsetWidth>W||t.scrollWidth>t.clientWidth+.5;
@@ -4126,7 +4170,8 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     const bp=Math.round(nBoost(i)*100),bb=e.querySelector(".bb");bb.style.display="none";
     const ab=e.querySelector(".ab");ab.style.display=ai&&!(l.st==="ai_for_sale"&&!streetAbove)?"block":"none";ab.textContent=l.st==="ai_for_sale"?"FOR SALE":"NEIGHBOR";ab.classList.toggle("nb",l.st!=="ai_for_sale");
     const key=[l.st,l.hs,Math.round((l.st==="reno_working"?l.rp:l.st==="demo"?l.dp*3:l.p)*15),(l.st==="empty"||l.st==="off_market")?l.land:0,l.reno.join(),l.paint,meta.eq.roof,l.dmg?1:0,festOf(l),l.forest?1:0,l.st==="clearing"?Math.round(l.cp*6):0,traffic[i]?(traffic[i].kind+"-"+(traffic[i].secondParked?"2":"1")):"",W().k].join("|");
-    if(e._k!==key){e._k=key;const sv0=e.querySelector("svg");sv0.innerHTML=art(l,i);sv0._fd=0}
+    if(e._k!==key){e._k=key;const sv0=e.querySelector("svg");sv0.innerHTML=art(l,i);sv0._fd=0;sv0._lm=0}
+    {const sv0=e.querySelector("svg");if(sv0&&!sv0._lm)liftMuntins(sv0)}
     {const sv0=e.querySelector("svg");if(sv0&&!sv0._fd)fitSigns(sv0)}
     let lb="",pb=0;const nm=l.hs&&S[l.hs]&&l.st!=="sold"?S[l.hs].n:"",tag=(t,c)=>'<i class="ls'+(c?" "+c:"")+'">'+t+"</i>";let st="";
     if(l.st==="off_market")st=tag("Off market");else if(l.st==="owned")st=tag(sellMode?"Sell lot":l.forest?(HIS()?"🔨 Restore":DRY()?"💧 Drill well":"🌲 Clear trees"):"Build here");else if(l.st==="clearing"){st=tag(HIS()?"🔨 Restoring…":DRY()?"💧 Drilling…":"🪓 Clearing…");pb=l.cp}
