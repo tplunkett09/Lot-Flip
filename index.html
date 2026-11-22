@@ -1753,8 +1753,7 @@ function lkHome(l,k,st,T,s){const rr=l.reno.includes("roof"),on=st==="rented";
   if(k==="ranch"){const b=l.paint==="#e8d8c3"?"#90a4ae":l.paint,r=rr?"#ff7043":"#2e5e3e";
     s+='<rect x="64" y="12" width="7" height="13" fill="#9e9e9e" stroke="#3e2723"/><circle class="smk" cx="67.5" cy="9" r="2.6" fill="#fff"/><rect x="34" y="24" width="48" height="22" fill="'+b+'" '+T+'/>'+[28,32,36,40,44].map(y=>'<path d="M34 '+y+'h48" stroke="#607d8b" stroke-width=".6"/>').join("")
      +'<rect x="14" y="28" width="20" height="18" fill="#37474f" stroke="#3e2723"/><path d="M14 33h20M14 38h20M14 43h20M19 28v18M24 28v18M29 28v18" stroke="#78909c" stroke-width=".4"/><rect x="13" y="26" width="22" height="2" fill="#fafafa"/>'
-     +'<polygon points="10,28 46,10 86,26" fill="'+r+'" '+T+'/><path d="M10 28L46 10L86 26" stroke="#fafafa" stroke-width="1.2" fill="none"/><rect x="54" y="32" width="10" height="14" fill="#fafafa" stroke="#3e2723"/><rect x="56" y="34" width="6" height="5" fill="#bde3f5"/>'+WN(68,30,10,8)
-     +'<g transform="rotate(-8 82 50)"><path d="M64 50Q76 55 94 50Q76 52 64 50z" fill="#c62828" stroke="#7f0000" stroke-width=".5"/></g>';
+     +'<polygon points="10,28 46,10 86,26" fill="'+r+'" '+T+'/><path d="M10 28L46 10L86 26" stroke="#fafafa" stroke-width="1.2" fill="none"/><rect x="54" y="32" width="10" height="14" fill="#fafafa" stroke="#3e2723"/><rect x="56" y="34" width="6" height="5" fill="#bde3f5"/>'+WN(68,30,10,8);
     if(on)s+='<rect class="lit" x="68" y="30" width="10" height="8" fill="#ffe082" style="animation-duration:6s"/>';return s}
   if(k==="colonial"){const b=l.paint==="#e8d8c3"?"#eceff1":l.paint,r=rr?"#ff7043":"#455a64";
     s+='<rect x="18" y="12" width="64" height="34" fill="'+b+'" '+T+'/>'+[16,20,24,28,32,36,40,44].map(y=>'<path d="M18 '+y+'h64" stroke="#b0bec5" stroke-width=".5"/>').join("")
@@ -3034,7 +3033,21 @@ function homeFx(l,k,st){const w=W().k,on=st==="rented"||st==="ai_owned";let s=""
     const FF=pts=>on?pts.map((f,q)=>'<g><animateTransform attributeName="transform" type="translate" values="0 0;'+(q%2?2:-2)+' -1.4;'+(q%3?-1.4:1.6)+' 1;0 0" dur="'+(6+q%3)+'s" repeatCount="indefinite"/><g opacity="0"><animate attributeName="opacity" values="0;0;1;.9;0;0" keyTimes="0;.3;.45;.6;.75;1" dur="'+(2.6+q%4*.4)+'s" begin="'+(-q*.7)+'s" repeatCount="indefinite"/><circle cx="'+f[0]+'" cy="'+f[1]+'" r="1.2" fill="#e6ee9c" opacity=".35"/><circle cx="'+f[0]+'" cy="'+f[1]+'" r=".42" fill="#f4ff81"/></g></g>').join(""):"";
     if(k==="ranch"){s+=FBOX(68,38.4,10)+[16,20,24,28].map(x=>'<rect x="'+x+'" y="29.4" width="2.6" height="2" fill="#bde3f5" opacity=".75"/>').join("")+LAMP(66,34)
       +'<path d="M8 46l5-16" stroke="#c62828" stroke-width="2.2" stroke-linecap="round"/><path d="M9 43l3.4-10.6" stroke="#ef9a9a" stroke-width=".5"/>'
-      +'<g>'+(on?'<animateTransform attributeName="transform" type="rotate" values="-3 79 46;3 79 46;-3 79 46" dur="3.4s" repeatCount="indefinite"/>':'')+'<circle cx="69.4" cy="48.4" r="1.4" fill="#ffcc80"/><rect x="70.8" y="47.8" width="9" height="2" rx="1" fill="#1565c0"/></g>'
+      // Hammock strung between two posts on the lawn, gently swaying, with someone napping in it
+      +[67.4,92.6].map(x=>'<ellipse cx="'+x+'" cy="56.2" rx="1.6" ry=".5" fill="#000" opacity=".2"/><rect x="'+(x-.8)+'" y="44.4" width="1.6" height="11.8" rx=".4" fill="#8d6e63" stroke="#4e342e" stroke-width=".35"/><path d="M'+(x-.8)+' 47h1.6M'+(x-.8)+' 51h1.6" stroke="#6d4c41" stroke-width=".3"/><circle cx="'+x+'" cy="44.6" r=".9" fill="#a1887f" stroke="#4e342e" stroke-width=".3"/>').join("")
+      +'<g>'+(on?'<animateTransform attributeName="transform" type="rotate" values="-2.5 80 45.6;2.5 80 45.6;-2.5 80 45.6" dur="3.6s" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1" repeatCount="indefinite"/>':'')
+      +'<path d="M68 45.6L71.4 49.6M68 45.6L71.4 51.2M68 45.6L71.6 50.4M92 45.6L88.6 49.6M92 45.6L88.6 51.2M92 45.6L88.4 50.4" stroke="#d7ccc8" stroke-width=".3"/>'
+      +'<path d="M71.4 49.4v2M88.6 49.4v2" stroke="#6d4c41" stroke-width=".7" stroke-linecap="round"/>'
+      +'<path d="M71.4 49.6Q80 56.4 88.6 49.6L88.6 51.2Q80 57.8 71.4 51.2z" fill="#e53935" stroke="#7f0000" stroke-width=".35"/>'
+      +'<path d="M71.4 50.1Q80 56.9 88.6 50.1" stroke="#fafafa" stroke-width=".45" fill="none"/><path d="M71.4 50.7Q80 57.4 88.6 50.7" stroke="#1e88e5" stroke-width=".45" fill="none"/>'
+      +[72.6,74.4,76.2,78,79.8,81.6,83.4,85.2,87].map(x=>{const y=51.2+Math.sin((x-71.4)/17.2*Math.PI)*6.4*.5;return '<path d="M'+x+' '+(y+.2).toFixed(1)+'v1.1" stroke="#fff59d" stroke-width=".3"/>'}).join("")
+      // napper: pillow, head, body in a blue shirt, crossed legs and a straw hat tipped over the face
+      +'<ellipse cx="73.6" cy="50.2" rx="1.6" ry=".9" fill="#fafafa" stroke="#bdbdbd" stroke-width=".2"/>'
+      +'<circle cx="74.6" cy="49.6" r="1.3" fill="#ffcc80"/><ellipse cx="75.2" cy="48.8" rx="1.9" ry=".6" fill="#ffd54f" stroke="#8d6e3b" stroke-width=".2"/><path d="M74.4 48.8a1 .9 0 0 1 2 0z" fill="#ffd54f" stroke="#8d6e3b" stroke-width=".2"/>'
+      +'<path d="M75.6 50.4Q78.6 52.6 81.8 52.4L81.8 50.6Q78.6 50.8 76 49.4z" fill="#1565c0"/><path d="M78 50.6l1.4 1.6" stroke="#ffcc80" stroke-width=".6" stroke-linecap="round"/>'
+      +'<path d="M81.6 51.6Q84.4 51.6 86.6 50.4M81.6 50.8Q84.6 51.8 86.8 51.4" stroke="#5d4037" stroke-width=".8" stroke-linecap="round" fill="none"/><ellipse cx="87.2" cy="50.4" rx=".7" ry=".45" fill="#3e2723"/><ellipse cx="87.3" cy="51.4" rx=".7" ry=".45" fill="#3e2723"/>'
+      +(on?'<text x="76" y="46.4" font-size="2" font-weight="900" fill="#90a4ae" opacity="0">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" repeatCount="indefinite"/><animate attributeName="y" values="47;43.6" dur="2.4s" repeatCount="indefinite"/></text><text x="77.4" y="45" font-size="1.6" font-weight="900" fill="#90a4ae" opacity="0">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="-1.2s" repeatCount="indefinite"/><animate attributeName="y" values="46;42.4" dur="2.4s" begin="-1.2s" repeatCount="indefinite"/></text>':'')
+      +'</g>'
       +'<rect x="37" y="43.4" width="6" height="2.6" fill="#8d6e63"/>'+[38,40,42].map(x=>'<circle cx="'+x+'" cy="43.2" r=".9" fill="#a1887f" stroke="#6d4c41" stroke-width=".2"/>').join("")
       +FF([[90,36],[94,44],[4,38],[86,30],[30,52]])+BIRD("#fff");
       return s}
