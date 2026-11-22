@@ -1506,8 +1506,10 @@ function tpStay(l,k,st,T,s){const rr=l.reno.includes("roof"),on=st==="rented";
    +'<rect x="85" y="34.5" width="2" height="10.5" fill="#eceff1" stroke="#90a4ae" stroke-width=".4"/><ellipse cx="86" cy="35" rx="5.6" ry="1.7" fill="#cfd8dc" stroke="#78909c" stroke-width=".6"/><ellipse cx="86" cy="34.6" rx="4.4" ry="1" fill="#4fc3f7"/>'
    +'<rect x="85.5" y="28.6" width="1" height="6" fill="#eceff1" stroke="#90a4ae" stroke-width=".3"/><ellipse cx="86" cy="29" rx="2.8" ry=".9" fill="#cfd8dc" stroke="#78909c" stroke-width=".5"/>'
    +'<g class="spray" stroke="#b3e5fc" stroke-width=".7" fill="none"><path d="M80.6 35.4Q79.6 40 79.2 44.6M82 35.8Q81.4 40 81 44.8M91.4 35.4Q92.4 40 92.8 44.6M90 35.8Q90.6 40 91 44.8M83.4 29.2Q82.8 32 82.4 34.4M88.6 29.2Q89.2 32 89.6 34.4M86 28.6V24"/></g><circle class="spray" cx="85" cy="23.6" r=".6" fill="#e1f5fe"/><circle class="spray" cx="87" cy="24.4" r=".6" fill="#e1f5fe"/>'
-   +[31,70].map(x=>'<rect x="'+(x-2)+'" y="42.4" width="4" height="3.6" fill="#a1887f" stroke="#5d4037" stroke-width=".5"/><circle cx="'+x+'" cy="40" r="2.6" fill="#43a047"/><circle cx="'+x+'" cy="36.4" r="2" fill="#4caf50"/><circle cx="'+x+'" cy="33.4" r="1.4" fill="#66bb6a"/><circle cx="'+(x-1)+'" cy="39.4" r=".7" fill="#ec407a"/><circle cx="'+(x+1.1)+'" cy="36.4" r=".7" fill="#fdd835"/>').join("");
+;
   if(on){[[43,-1],[63,14],[33,14],[63,29]].forEach((w,q)=>{s+='<rect class="lit" x="'+w[0]+'" y="'+w[1]+'" width="6" height="8" fill="#ffe082" style="animation-duration:'+(4+q)+'s;animation-delay:'+(-q*1.4)+'s"/>'});s+='<g class="bob"><circle cx="14" cy="42" r="1.8" fill="#ffcc80"/></g>'}
+  // potted topiaries go last so they stand in front of the lit ground-floor windows
+  s+=[31,70].map(x=>'<rect x="'+(x-2)+'" y="42.4" width="4" height="3.6" fill="#a1887f" stroke="#5d4037" stroke-width=".5"/><circle cx="'+x+'" cy="40" r="2.6" fill="#43a047"/><circle cx="'+x+'" cy="36.4" r="2" fill="#4caf50"/><circle cx="'+x+'" cy="33.4" r="1.4" fill="#66bb6a"/><circle cx="'+(x-1)+'" cy="39.4" r=".7" fill="#ec407a"/><circle cx="'+(x+1.1)+'" cy="36.4" r=".7" fill="#fdd835"/>').join("");
   return s}
 function tpBld3(l,k,st,T,s){const on=st==="ready";
   if(k==="realestate"){s+='<rect x="4" y="34" width="92" height="12" fill="#bcaaa4" '+T+'/>';for(let x=8;x<96;x+=5)s+='<path d="M'+x+' 34v12" stroke="#8d6e63" stroke-width=".6"/>';
