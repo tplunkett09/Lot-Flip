@@ -355,6 +355,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 #bonus .sp{flex:1}
 .gi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:2px 7px;font-size:11px;font-weight:800;white-space:nowrap;color:var(--gold)}
 .gi.ok{border-color:var(--acc);color:#a5d6a7}.gi.bad{border-color:var(--warn);color:#ef9a9a}
+.gi.racing{border-color:#ffb300;color:#fff;background:#e65100;animation:racep 1s ease-in-out infinite}@keyframes racep{50%{transform:scale(1.12)}}
+.mbtn.race{background:linear-gradient(180deg,#ffb300,#f57c00);box-shadow:0 0 0 2px #ffe082 inset}
 .al{background:rgba(41,182,246,.15);border:1px solid var(--blue);border-radius:10px;padding:2px 6px;font-size:11px;font-weight:800;white-space:nowrap;color:var(--blue)}
 .al.red{border-color:var(--warn);color:#ef9a9a;background:rgba(229,57,53,.15)}
 .sx{position:sticky;top:0;float:right;z-index:3;width:34px;height:34px;margin:-6px -6px 4px 8px;border-radius:50%;border:2px solid var(--line);background:var(--hov);color:var(--text);font:inherit;font-size:16px;font-weight:800;line-height:1;padding:0}
@@ -499,7 +501,7 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 </div></div>
 
 <div class="ov" id="end" style="display:none"><div class="box" id="endbox"></div></div>
-<div class="ov" id="lc" style="display:none;background:rgba(0,0,0,.55)"><div class="box"><h2 id="lch">🎉 Level Complete!</h2><div class="stars" id="lcs"></div><p id="lcd"></p><button class="mbtn" id="lcn">▶ Next Level</button><button class="mbtn line" id="lck">🏗️ Keep Building</button></div></div>
+<div class="ov" id="lc" style="display:none;background:rgba(0,0,0,.55)"><div class="box"><h2 id="lch">🎉 Level Complete!</h2><div class="stars" id="lcs"></div><p id="lcd"></p><button class="mbtn race" id="lcr" style="display:none">⏱ Race for ⭐⭐⭐</button><button class="mbtn" id="lcn">▶ Next Level</button><button class="mbtn line" id="lck">🏗️ Keep Building</button></div></div>
 <div class="ov" id="buy" style="display:none;background:rgba(0,0,0,.6)"><div class="box"><button class="sx" id="buyx" aria-label="Cancel">✕</button><h2 id="buyt"></h2><p id="buyd"></p><button class="mbtn" id="buyok"></button></div></div>
 <button class="mbtn" id="nxt" style="display:none;position:fixed;right:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:45;padding:0 16px;box-shadow:0 4px 14px rgba(0,0,0,.5)">✅ Next Level ▶</button>
 
@@ -558,7 +560,7 @@ tiki:{n:"Tiki Bar",cost:1500,val:1400,rm:0,dur:7,rev:28,cat:"i",ic:"🍹",unlock
 seaplane:{n:"Seaplane Terminal",cost:7500,val:7100,rm:0,dur:18,rev:108,cat:"i",ic:"🛩️",unlock:87,world:"tropical",span:2,tall:1,front:1,d:"Landmark · needs 2 side-by-side beachfront lots (top row) · $108 every 3s · ends the island shipping fee and wait · beachfront homes rent +15%"},
 robocafe:{n:"Robot Café",cost:1600,val:1500,rm:0,dur:7,rev:30,cat:"i",ic:"🤖",unlock:93,world:"future",d:"Future only · $30 every 3s · double during the Tech Expo"},
 spaceport:{n:"Spaceport",cost:8000,val:7600,rm:0,dur:18,rev:120,globalBoost:.1,cat:"i",ic:"🚀",unlock:97,world:"future",span:2,tall:1,d:"Grand finale landmark · needs 2 side-by-side lots · $120 every 3s · +10% to all lots · powers its neighbors"},
-airport:{n:"Airport",cost:3000,val:2800,rm:0,dur:14,rev:50,globalBoost:.1,cat:"i",ic:"✈️",unlock:10,worlds:["suburbs","future"],d:"Landmark · opens flights beyond the suburbs · $50 every 3s · +10% all lots & buyer offers · noisy for homes next door"}};
+airport:{n:"Airport",cost:3000,val:2800,rm:0,dur:14,rev:50,globalBoost:.1,cat:"i",ic:"✈️",unlock:10,worlds:["suburbs","future"],span:2,d:"Landmark · needs 2 side-by-side lots · opens flights beyond the suburbs · $50 every 3s · +10% all lots & buyer offers · noisy for homes next door"}};
 /* ===== Worlds: 10 themed worlds of 10 levels each. Add a world by filling in its data. ===== */
 const HN0={};Object.keys(S).forEach(k=>HN0[k]={n:S[k].n,ic:S[k].ic});
 const WORLDS=[
@@ -595,11 +597,11 @@ Object.entries({mountain:{realestate:["Cabin Realty","🔑"]},desert:{realestate
 const worldOf=l=>Math.max(0,Math.min(9,Math.floor((l-1)/10)));
 const W=l=>WORLDS[worldOf(l==null?lv:l)];
 function applyWorld(){const w=W();{const tp=w.k==="themepark",P=S.pool;P.span=tp?2:0;P.tall=tp?1:0;P.lotpark=tp?1:0;P.cost=tp?1400:900;P.val=tp?1600:700;P.dur=tp?10:6;P.boost=tp?.15:.1;P.rb=tp?.35:.25;P.d=tp?"Big attraction · needs 2 side-by-side lots · +15% value, +35% rent nearby":"+10% value, +25% rent nearby"}R.roof.n=w.k==="future"?"Solar Roof":"Modern Roof";Object.keys(S).forEach(k=>{const o=w.homes&&w.homes[k];S[k].n=o?o[0]:HN0[k].n;S[k].ic=o?o[1]:HN0[k].ic});S.gas.d=w.k==="future"?"⚡ Powers itself and every lot touching it · $30 every 3s":w.k==="historic"?"$30 every 3s · a busy stable lowers nearby home values":"$30 every 3s · traffic lowers nearby home values";{const ge={lake:"Game Day",historic:"Opening Night",tropical:"Fire Dance",future:"Race Day"}[w.k]||"Game Day";S.sports.d="$35 every 3s · +15% rent nearby · "+ge+" event · noisy for mansions"}
-  S.airport.d=w.k==="future"?"Landmark · $50 every 3s · +10% all lots & buyer offers · noisy for homes next door":"Landmark · opens flights beyond the suburbs · $50 every 3s · +10% all lots & buyer offers · noisy for homes next door";
+  S.airport.d=w.k==="future"?"Landmark · needs 2 side-by-side lots · $50 every 3s · +10% all lots & buyer offers · noisy for homes next door":"Landmark · needs 2 side-by-side lots · opens flights beyond the suburbs · $50 every 3s · +10% all lots & buyer offers · noisy for homes next door";
   S.fire.d="+15% home value along its street · storm repairs 25% cheaper";
   S.hospital.d=w.k==="future"?"+20% nearby value · +15% home value along its street · storm repairs 25% cheaper · rescue drones":"+20% nearby property value";S.solar.d=w.k==="future"?"⚡ Powers every business in Future City, so no more power outages · needs 2 side-by-side lots · $95 every 3s":"Landmark · needs 2 side-by-side lots · $95 every 3s · Heat Waves no longer cut rents · wells cost half"}
 const BUILDING_LIMITS={robocafe:1,spaceport:1,tiki:1,seaplane:1,antique:1,depot:1,boatrent:1,campground:1,diner:1,solar:1,souvenir:1,ferris:1,coaster:1,skishop:1,skiresort:1,surf:1,marina:1,subway:1,coffee:1,skyscraper:1,realestate:1,gas:2,sports:1,airport:1,park:3,apartment:3,pool:2,civic:1,school:1,hospital:1,shopping:1,fire:1,bank:1};
-const MILE=Object.keys(S).filter(k=>!["colonial","mansion"].includes(k)&&!S[k].span&&!S[k].needs).map(k=>({lv:S[k].unlock,k})).sort((a,b)=>a.lv-b.lv);
+const MILE=Object.keys(S).filter(k=>!["colonial","mansion"].includes(k)&&(!S[k].span||k==="airport")&&!S[k].needs).map(k=>({lv:S[k].unlock,k})).sort((a,b)=>a.lv-b.lv);
 const buildingCount=k=>lots.filter(l=>l&&l.hs===k&&!['sold','ai_owned','ai_for_sale'].includes(l.st)).length;
 const buildingLimit=k=>BUILDING_LIMITS[k]??Infinity;
 const inWorld=(k,l)=>S[k].worlds?S[k].worlds.includes(W(l).k):!S[k].world||S[k].world===W(l).k;
@@ -627,7 +629,7 @@ const BUILD="2026.11.21-11";// bump on every published change so dev mode shows 
 let DEV=false;try{const q=new URLSearchParams(location.search).get("dev");if(q==="1")localStorage.setItem("lot_flip_dev","1");if(q==="0")localStorage.removeItem("lot_flip_dev");DEV=localStorage.getItem("lot_flip_dev")==="1"}catch(e){}
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
-let lvDone=false,doneAt=null,lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
+let race=false,lvDone=false,doneAt=null,lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
 
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
 const landMul=()=>W().k==="city"?1.4:W().k==="desert"?.7:1;
@@ -715,7 +717,7 @@ function build(){
 }
 
 function startLevel(){
-  lv=Math.max(1,Math.min(100,lv));applyWorld();if(typeof amb!=="undefined")amb.sn=0;lvDone=false;doneAt=null;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
+  lv=Math.max(1,Math.min(100,lv));applyWorld();if(typeof amb!=="undefined")amb.sn=0;race=false;lvDone=false;doneAt=null;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
   twist=twistFor(lv);N=lv>=4?15:10;tutOn=lv===1&&!store.get("lot_flip_tut");lots=Array.from({length:N},mkLot);closeSheet();
   const goalOrder=MILE;
   const requiredBuilding=goalOrder.filter(x=>lv>=x.lv).at(-1).k;
@@ -755,7 +757,7 @@ function levelSplash(){const np=t=>t.replace(/ \(\d+\/\d+\)/g,""),it=[["💰","R
   if(mode==="timed")it.push(["⏱","Time limit: "+Math.floor(total/60)+":"+String(total%60).padStart(2,"0")]);
   if(bonus)it.push(["",np(bonLong())]);{const pr=parT();it.push(["⭐","Finish within "+Math.floor(pr/60)+":"+String(pr%60).padStart(2,"0")+" for an extra star"])}
   if(twist)it.push([twist.ic,"TWIST · "+twist.n+": "+twist.d]);
-  if(lv===10)it.splice(2,0,["✈️","Open the Airport to fly beyond the suburbs. It unlocks the Beach and every world after it."]);
+  if(lv===10)it.splice(2,0,["✈️","Open the Airport (it needs 2 side-by-side lots in the same row) to fly beyond the suburbs. It unlocks the Beach and every world after it."]);
   $("lsw").textContent=W().ic+" World "+(worldOf(lv)+1)+": "+W().n;$("lst").textContent="Level "+lv;
   $("lsm").innerHTML=it.map((x,q)=>'<div class="opt" style="min-height:0;flex-direction:row;align-items:center;gap:8px'+(q<2?';border-color:var(--gold)':'')+'"><b style="font-size:18px">'+x[0]+'</b><span'+(q<2?' style="font-weight:800"':'')+'>'+x[1]+'</span></div>').join("")+'<div style="font-size:12px;opacity:.7;text-align:center">The gold items complete the level.</div>';
   paused=true;$("scene").classList.add("pz");$("ls").style.display="flex"}
@@ -768,8 +770,9 @@ function flyBy(){const p=document.createElement("div");p.className="flyby";p.inn
 $("wigo").onclick=()=>{$("wi").style.display="none";levelSplash()};
 
 function celebrate(){lvDone=true;doneAt=elapsed;sfx.win();buzz(60);fireworks();snap();$("lch").textContent=lv>=100?"🏆 You finished Lot Flip!":lv===10&&readyOf("airport")?"✈️ Airport Open!":"🎉 Level Complete!";if(lv===10&&readyOf("airport"))setTimeout(flyBy,500);if(lv>=100){setTimeout(fireworks,1200);setTimeout(fireworks,2400);setTimeout(quake,300);if(readyOf("spaceport")){ev.k="launch";ev.t=12;fxLayers()}}
-  setTimeout(()=>{if(!run||!lvDone)return;closeSheet();$("buy").style.display="none";const par=parT(),st=1+(bonus&&bonus.done?1:0)+(doneAt<=par?1:0);
-   $("lcs").textContent="⭐".repeat(st)+"☆".repeat(3-st);$("lcd").textContent="Finished in "+Math.round(doneAt)+"s."+(bonus&&!bonus.done?" You can still finish the ⭐ bonus before moving on.":"")+(lv>=100?" You beat all 100 levels! Continue to earn your prestige rank and play again.":lv===10?" Flights are boarding: the Beach and every world past the suburbs are now open.":" Stay to finish your builds, or head to the next level.");$("lcn").textContent=lv>=100?"🌟 Continue":lv===10?"✈️ Fly to the Beach":"▶ Next Level";
+  setTimeout(()=>{if(!run||!lvDone)return;closeSheet();$("buy").style.display="none";const par=parT(),st=starCount(),cr=canRace();
+   $("lcr").style.display=cr?"":"none";$("lck").style.display=cr?"none":"";$("lcn").classList.toggle("line",cr);
+   $("lcs").textContent="⭐".repeat(st)+"☆".repeat(3-st);$("lcd").textContent=cr?"Main goals done in "+Math.round(doneAt)+"s! ⏱ "+Math.ceil(par-elapsed)+"s left on the star clock. Finish the bonus before it runs out to earn all 3 stars. "+bonLong().replace(/^⭐ Bonus: /,"⭐ ").replace(/ → .*$/,""):"Finished in "+Math.round(doneAt)+"s."+(bonus&&!bonus.done?" You can still finish the ⭐ bonus before moving on.":"")+(lv>=100?" You beat all 100 levels! Continue to earn your prestige rank and play again.":lv===10?" Flights are boarding: the Beach and every world past the suburbs are now open.":" Stay to finish your builds, or head to the next level.");$("lcn").textContent=lv>=100?"🌟 Continue":lv===10?"✈️ Fly to the Beach":"▶ Next Level";
    paused=true;$("scene").classList.add("pz");$("lc").style.display="flex"},1400)}
 function fireworks(){let f=$("fw");if(!f){f=document.createElement("div");f.id="fw";document.body.appendChild(f)}
   for(let b=0;b<8;b++)setTimeout(()=>{const x=8+Math.random()*84,y=10+Math.random()*45,h=Math.random()*360;tone(260+Math.random()*420,.25,"triangle",.04,0,90);noise(.12,.05);
@@ -777,6 +780,16 @@ function fireworks(){let f=$("fw");if(!f){f=document.createElement("div");f.id="
     p.style.cssText="left:"+x+"vw;top:"+y+"vh;background:hsl("+(h+Math.random()*50)+",95%,62%);box-shadow:0 0 10px 2px hsl("+h+",95%,62%);--dx:"+(Math.cos(a)*r).toFixed(0)+"px;--dy:"+(Math.sin(a)*r).toFixed(0)+"px";
     f.appendChild(p);setTimeout(()=>p.remove(),1600)}},b*300)}
 $("lcn").onclick=()=>{$("lc").style.display="none";paused=false;$("scene").classList.remove("pz");endGame(true)};
+// Stars: 1 for clearing, 1 for the bonus, 1 for finishing everything within the star time.
+// Finishing the bonus after the star clock runs out still earns the bonus star, but not the time star.
+function starCount(){const par=parT(),fin=Math.max(doneAt??elapsed,bonus&&bonus.done&&bonus.at!=null?bonus.at:0);return 1+(bonus&&bonus.done?1:0)+(fin<=par?1:0)}
+const canRace=()=>!!(bonus&&!bonus.done&&elapsed<parT());
+$("lcr").onclick=()=>{$("lc").style.display="none";paused=false;$("scene").classList.remove("pz");last=performance.now();race=true;$("nxt").style.display="block";sfx.offer();toast("⏱ Go! Finish the ⭐ bonus in "+Math.ceil(parT()-elapsed)+"s for the third star.")};
+function raceEnd(win){race=false;if(!run)return;closeSheet();$("buy").style.display="none";if(win){sfx.win();buzz(60);fireworks()}else{sfx.lose();buzz(40)}snap();
+  const st=starCount();$("lch").textContent=win?"🌟 Three Stars!":"⏱ Time's Up!";$("lcs").textContent="⭐".repeat(st)+"☆".repeat(3-st);
+  $("lcd").textContent=win?"You beat the star clock with "+Math.max(0,Math.ceil(parT()-elapsed))+"s to spare. Perfect level!":"The star clock ran out before the ⭐ bonus was done. You keep "+st+" stars. Finishing the bonus now still swaps in the bonus star, but the total stays at "+st+".";
+  $("lcr").style.display="none";$("lck").style.display="";$("lcn").classList.remove("line");$("lcn").textContent=lv>=100?"🌟 Continue":lv===10?"✈️ Fly to the Beach":"▶ Next Level";
+  paused=true;$("scene").classList.add("pz");$("lc").style.display="flex"}
 $("lck").onclick=()=>{$("lc").style.display="none";paused=false;$("scene").classList.remove("pz");last=performance.now();$("nxt").style.display="block";toast("Keep building! Tap ✅ Next Level when you're ready.")};
 $("nxt").onclick=()=>{if(run&&lvDone&&!paused)endGame(true)};
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
@@ -982,8 +995,9 @@ function tick(now){
       else if(l.st==="demo"){const tr=traffic[i];if(tr&&tr.resident){if(tr.kind==="parked")beginTrafficDeparture(i,tr,trafficGeometry(i))}else if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));[objective,bonus].forEach(o=>{if(o&&o.t==="remodel"&&l.hs===o.from)o.d=(o.d||0)+1});unmerge(i);reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
-    if(bonus&&!bonus.done){if(bonus.t==="build")bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;else if(bonus.t!=="sale")updObjective(bonus);if(bonus.t==="build"||bonus.t==="sale"?bonus.c>=bonus.n:bonus.done){bonus.done=true;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
+    if(bonus&&!bonus.done){if(bonus.t==="build")bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;else if(bonus.t!=="sale")updObjective(bonus);if(bonus.t==="build"||bonus.t==="sale"?bonus.c>=bonus.n:bonus.done){bonus.done=true;bonus.at=elapsed;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
     updObjective();
+    if(race&&lvDone){if(bonus&&bonus.done)raceEnd(true);else if(elapsed>parT())raceEnd(false)}
     if(!lvDone&&money>=goal&&objective&&objective.done)celebrate();else if(!lvDone&&mode==="timed"&&timeVal<=0){run=false;endGame(false)}
     draw();
   }
@@ -998,7 +1012,7 @@ function endGame(win){
   run=false;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
   closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;win?sfx.win():sfx.lose();
   const fin=win&&lv>=100;
-  if(win){const fe=doneAt??elapsed,st=1+(bonus&&bonus.done?1:0)+(fe<=parT()?1:0);const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;if(fin&&meta.pr>=10)meta.legend=1;checkAch();store.set(BKEY,JSON.stringify(best));
+  if(win){race=false;const fe=Math.max(doneAt??elapsed,bonus&&bonus.done&&bonus.at!=null?bonus.at:0),st=starCount();const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;if(fin&&meta.pr>=10)meta.legend=1;checkAch();store.set(BKEY,JSON.stringify(best));
     h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(fe)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(parT())+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>";
     if(win&&lv%10===0&&!fin)h+='<p>🗺️ <b>'+W().ic+' '+W().n+' complete!</b> Next stop: '+W(lv+1).ic+' '+W(lv+1).n+'.</p>';
     if(fin)h+=meta.pr>=10?'<p>🏆 <b>Prestige 10 conquered. You are a Lot Flip Legend!</b> Thanks for playing every world.</p>':'<p>🌟 <b>All 10 worlds cleared!</b> Prestige from the Main Menu to start again at Rank '+(meta.pr+1)+'/10 for +10 ⭐. Each rank raises goals and trims your cash and time.</p>'}
@@ -3350,6 +3364,83 @@ function artFx(l,k,st){const w=W().k,on=st==="ready"||st==="rented";let s="";con
   return s}
  return s}
 
+// Airport landmark, drawn 200 units wide because it spans two lots:
+// terminal and gate on the left lot, hangar, control tower and the end of the runway on the right.
+function airportWide(l,st,T){
+  const fu=W().k==="future",on=st==="ready"||st==="rented",A=x=>on?x:"";
+  const P=(x,y,c)=>'<circle cx="'+x+'" cy="'+y+'" r="1.3" fill="#ffcc80"/><rect x="'+(x-1.4)+'" y="'+(y+1.2)+'" width="2.8" height="4" rx=".9" fill="'+c+'"/>';
+  const BAG=(x,y,c)=>'<rect x="'+x+'" y="'+y+'" width="2.4" height="3" rx=".5" fill="'+c+'" stroke="#263238" stroke-width=".25"/><path d="M'+(x+1.2)+' '+y+'v-1.4" stroke="#263238" stroke-width=".35"/>';
+  const glass=fu?"#80deea":"#81d4fa",acc=fu?"#00e5ff":"#0288d1",lite=fu?"#18ffff":"#ffeb3b";
+  // jet (suburbs) or shuttle (future), nose pointing right
+  const jet=(c)=>fu?'<path d="M-9 1q2-5 11-4q7 .5 9 4q-10 2.2-20 0z" fill="#eceff1" stroke="#546e7a" stroke-width=".6"/><path d="M-7 -.6l-3.8-5 6.2 3.8z" fill="#7c4dff"/><ellipse cx="4.6" cy="-.8" rx="2.6" ry="1.1" fill="#00e5ff"/><path d="M-10 1.3h-4.4" stroke="#ff9100" stroke-width="1.5" stroke-linecap="round"/>'
+    :'<ellipse rx="10" ry="2.8" fill="#fff" stroke="#546e7a" stroke-width=".6"/><polygon points="-8.4,0 -12.4,-5.6 -7,-.6" fill="'+c+'"/><polygon points="-1.6,.6 3.6,.6 -2.6,6 -5.2,6" fill="#cfd8dc" stroke="#546e7a" stroke-width=".4"/><path d="M-5 -.6h9" stroke="'+c+'" stroke-width=".7" stroke-dasharray="1 .8"/><circle cx="7" cy="-.6" r="1" fill="#0288d1"/>';
+  let s='<ellipse cx="100" cy="56" rx="94" ry="7" fill="#000" opacity=".22"/><rect x="5" y="46" width="190" height="13" rx="5" fill="#5aa23e"/>';
+  // apron and runway along the front of both lots
+  s+='<rect x="4" y="46" width="192" height="10" rx="'+(fu?4:1)+'" fill="'+(fu?"#263238":"#455a64")+'" stroke="'+(fu?"#00e5ff":"#263238")+'" stroke-width="'+(fu?.6:1)+'"/><path d="M10 51h170" stroke="'+(fu?"#00e5ff":"#fff")+'" stroke-width="1" stroke-dasharray="6 4" opacity=".85"/>'
+   +[0,1,2,3].map(q=>'<rect x="'+(184+q*2.6)+'" y="47.6" width="1.4" height="6.8" fill="'+(fu?"#00e5ff":"#fafafa")+'" opacity=".8"/>').join("")
+   +[8,24,40,56,72,88,104,120,136,152,168,184].map((x,q)=>'<circle'+(on?' class="blk'+(q%2?" b2":"")+'"':'')+' cx="'+x+'" cy="46.4" r="1.1" fill="'+lite+'"/>').join("");
+  // ---- terminal (left lot) ----
+  if(fu){
+    s+='<path d="M10 46V33q0-14 34-14h10q34 0 34 14v13z" fill="#eceff1" '+T+'/><path d="M16 37q0-12 30-12h6q30 0 30 12z" fill="#80deea" stroke="#607d8b" stroke-width=".6"/>'
+     +[28,38,49,60,70].map(x=>'<path d="M'+x+' '+(x<35||x>65?28:25.6)+'V37" stroke="#607d8b" stroke-width=".5"/>').join("")+'<path d="M20 35q10-8 26-8.6" stroke="#fff" stroke-width=".8" fill="none" opacity=".6"/>'
+     +'<rect x="30" y="39" width="38" height="5.4" rx="1" fill="#263238"/><text x="49" y="43.1" font-size="3.8" font-weight="900" text-anchor="middle" fill="#00e5ff" letter-spacing=".6">SKYPORT</text>'
+     +'<ellipse cx="49" cy="13" rx="17" ry="3.2" fill="none" stroke="#7c4dff" stroke-width="1.1" opacity=".7">'+A('<animate attributeName="ry" values="3.2;4.8;3.2" dur="2.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".35;.9;.35" dur="2.6s" repeatCount="indefinite"/>')+'</ellipse><path d="M49 19v-6" stroke="#7c4dff" stroke-width=".8" opacity=".6"/>';
+  }else{
+    s+='<rect x="14" y="25" width="74" height="21" fill="#eceff1" '+T+'/><rect x="14" y="40" width="74" height="6" fill="#000" opacity=".06"/><rect x="12" y="21.6" width="78" height="5" rx="1" fill="#0288d1" stroke="#3e2723"/>'
+     +'<text x="51" y="25.2" font-size="3.4" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing=".5">SUBURBS REGIONAL ✈</text>'
+     +'<rect x="18" y="29.6" width="66" height="8.4" fill="'+glass+'" stroke="#3e2723" stroke-width=".8"/>'+[29,40,51,62,73].map(x=>'<path d="M'+x+' 29.6v8.4" stroke="#3e2723" stroke-width=".6"/>').join("")+'<path d="M21 37l6-7.4M44 37l6-7.4M67 37l6-7.4" stroke="#fff" stroke-width=".9" opacity=".45"/>'
+     +[22,26,33,36,45,55,58,66,70,77].map(x=>'<circle cx="'+x+'" cy="34.4" r=".9" fill="#455a64" opacity=".55"/><rect x="'+(x-.9)+'" y="35.2" width="1.8" height="2.6" fill="#455a64" opacity=".55"/>').join("")
+     +A('<rect class="lit" x="18.4" y="30" width="10.2" height="7.6" fill="#ffe082" opacity=".5" style="animation-duration:7s"/><rect class="lit" x="62.4" y="30" width="10.2" height="7.6" fill="#ffe082" opacity=".5" style="animation-duration:9s;animation-delay:-3s"/>')
+     // entrance canopy and doors
+     +'<path d="M39 40.4h22l-1.4-2.2H40.4z" fill="#0288d1" stroke="#01579b" stroke-width=".3"/><rect x="44" y="40.4" width="12" height="5.6" fill="#37474f"/><path d="M50 40.4v5.6" stroke="#90a4ae" stroke-width=".5"/>'
+     // departures board
+     +'<rect x="20" y="39.4" width="15" height="5.6" rx=".6" fill="#263238" stroke="#3e2723" stroke-width=".4"/><text x="27.5" y="41.7" font-size="1.6" font-weight="900" text-anchor="middle" fill="#ffd54f">DEPARTURES</text><text x="27.5" y="44" font-size="1.5" font-weight="900" text-anchor="middle" fill="'+(on?"#76ff03":"#90a4ae")+'"'+(on?' class="blk" style="animation-duration:1.4s"':'')+'>BEACH · ON TIME</text>'
+     +'<rect x="65" y="39.6" width="7" height="5" rx=".5" fill="#263238"/><text x="68.5" y="41.8" font-size="1.6" font-weight="900" text-anchor="middle" fill="#ffd54f">GATE</text><text x="68.5" y="44" font-size="1.7" font-weight="900" text-anchor="middle" fill="#ffd54f">1</text>'
+     // rooftop units and the flag
+     +'<rect x="20" y="18.8" width="5" height="2.8" fill="#90a4ae"/><rect x="74" y="18.8" width="6" height="2.8" fill="#90a4ae"/><path d="M8 46V27" stroke="#37474f" stroke-width="1.4"/><polygon'+(on?' class="flag"':'')+' points="8,27 19,29 8,32" fill="#ff7043" stroke="#bf360c" stroke-width=".5"/>';
+  }
+  // travellers out front
+  s+='<g transform="translate(12 41.4)">'+P(0,0,"#00897b")+'</g>'+BAG(13.6,43.2,"#1565c0")+'<g transform="translate(78 41.4)">'+P(0,0,"#ef6c00")+'</g>'+BAG(79.8,43.2,"#fdd835")+'<g transform="translate(83 41.4)">'+P(0,0,"#5d4037")+'</g>'
+   +(fu?'':A('<g><animateTransform attributeName="transform" type="translate" values="0 0;-16 0" dur="6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.85;1" dur="6s" repeatCount="indefinite"/><g transform="translate(60 41.4)">'+P(0,0,"#6a1b9a")+'</g>'+BAG(61.8,43.2,"#e53935")+'</g>'));
+  // ---- jet bridge and the plane at the gate (across the lot line) ----
+  s+='<path d="M88 33h20l2 3h-22z" fill="#cfd8dc" stroke="#546e7a" stroke-width=".5"/><path d="M92 33v3M96 33v3M100 33v3M104 33v3" stroke="#90a4ae" stroke-width=".4"/><path d="M106 36v10" stroke="#546e7a" stroke-width="1"/>'
+   +'<g transform="translate('+(fu?119:121)+' 38) scale(1.3)">'+jet("#e53935")+'</g>';
+  // baggage tug shuttling to the plane
+  s+='<g>'+A('<animateTransform attributeName="transform" type="translate" values="0 0;22 0;22 0;0 0;0 0" keyTimes="0;.35;.5;.85;1" dur="9s" repeatCount="indefinite"/>')+'<g transform="translate(92 44)"><rect x="0" y="-3" width="5" height="3" rx=".6" fill="#fdd835" stroke="#3e2723" stroke-width=".3"/><circle cx="1.2" cy=".3" r=".9" fill="#263238"/><circle cx="3.8" cy=".3" r=".9" fill="#263238"/><path d="M-1 -1.4h1M-5 -1.4h1" stroke="#455a64" stroke-width=".4"/>'
+   +[-4.6,-9.2].map((x,q)=>'<rect x="'+x+'" y="-3.4" width="3.6" height="3" fill="#90a4ae" stroke="#3e2723" stroke-width=".3"/>'+BAG(x+.4,-5.6,q?"#43a047":"#1565c0")+'<circle cx="'+(x+1.8)+'" cy=".3" r=".8" fill="#263238"/>').join("")+'</g></g>';
+  // ---- hangar (right lot) ----
+  if(fu){
+    s+='<ellipse cx="148" cy="40" rx="12" ry="4" fill="#37474f" stroke="#00e5ff" stroke-width=".8"/><ellipse cx="148" cy="40" rx="7.6" ry="2.4" fill="none" stroke="#ffea00" stroke-width=".7" stroke-dasharray="2 1.4"/><text x="148" y="41.3" font-size="3.4" font-weight="900" text-anchor="middle" fill="#ffea00">H</text>'
+     +A('<ellipse class="pls" cx="148" cy="40" rx="12" ry="4" fill="none" stroke="#00e5ff" stroke-width="1.4"/>')
+     +'<g>'+A('<animateTransform attributeName="transform" type="translate" values="0 0;0 -16;0 -16;0 0;0 0" keyTimes="0;.3;.6;.9;1" dur="8s" repeatCount="indefinite"/>')+'<g transform="translate(148 36)"><path d="M-7 -1.6h5M2 -1.6h5"'+(on?' class="blk"':'')+' stroke="#263238" stroke-width="1.1" stroke-linecap="round"/><rect x="-4.6" y="-.8" width="9.2" height="3" rx="1.4" fill="#ff1744" stroke="#7f0000" stroke-width=".4"/><circle cx="0" cy="2.4" r=".9" fill="#00e5ff"/></g></g>';
+  }else{
+    s+='<path d="M140 46V30q0-9 19-9t19 9v16z" fill="#b0bec5" '+T+'/><path d="M144 30q0-6 15-6t15 6" stroke="#90a4ae" stroke-width=".7" fill="none"/>'+[147,153,159,165,171].map(x=>'<path d="M'+x+' 24v6" stroke="#90a4ae" stroke-width=".4"/>').join("")
+     +'<rect x="145" y="33" width="28" height="13" fill="#37474f" stroke="#3e2723" stroke-width=".5"/><g transform="translate(154 41.6) scale(.9)">'+jet("#1e88e5")+'</g><path d="M145 33h28" stroke="#fdd835" stroke-width=".8" stroke-dasharray="2 2"/>'
+     +'<rect x="150" y="27" width="18" height="4" rx=".6" fill="#263238"/><text x="159" y="30" font-size="2.6" font-weight="900" text-anchor="middle" fill="#fff" letter-spacing=".4">HANGAR 2</text>'
+     +[134,137.6].map(x=>'<path d="M'+x+' 46l1.4-3.6 1.4 3.6z" fill="#ff6d00"/><path d="M'+(x+.7)+' 44.2h1.4" stroke="#fff" stroke-width=".5"/>').join("");
+  }
+  // ---- control tower ----
+  const tx=fu?174:186;
+  if(fu){
+    s+='<path d="M'+tx+' 46V12" stroke="#b0bec5" stroke-width="3.8"/><path d="M'+tx+' 46V12" stroke="#607d8b" stroke-width=".6"/><ellipse cx="'+tx+'" cy="10" rx="9" ry="4" fill="#80deea" stroke="#3e2723" stroke-width=".8"/><ellipse cx="'+tx+'" cy="7.2" rx="5.6" ry="1.8" fill="#546e7a"/><path d="M'+tx+' 5.4V1.4" stroke="#455a64" stroke-width="1"/>';
+  }else{
+    s+='<rect x="'+(tx-3.5)+'" y="14" width="7" height="32" fill="#cfd8dc" '+T+'/><path d="M'+(tx-3.5)+' 22h7M'+(tx-3.5)+' 30h7M'+(tx-3.5)+' 38h7" stroke="#90a4ae" stroke-width=".5"/><rect x="'+(tx-8)+'" y="7" width="16" height="8" rx="1.5" fill="#80deea" stroke="#3e2723"/><path d="M'+(tx-4)+' 7v8M'+tx+' 7v8M'+(tx+4)+' 7v8" stroke="#3e2723" stroke-width=".4"/><rect x="'+(tx-9)+'" y="5" width="18" height="3" fill="#546e7a"/>'
+     +'<circle cx="'+(tx-3)+'" cy="11" r=".9" fill="#455a64" opacity=".7"/><circle cx="'+(tx+2)+'" cy="11" r=".9" fill="#455a64" opacity=".7"/>'
+     // radar dish
+     +'<g transform="translate('+(tx-4)+' 3)"><path d="M0 2v-1.4" stroke="#546e7a" stroke-width=".6"/><g>'+A('<animateTransform attributeName="transform" type="scale" values="1 1;.2 1;1 1;.2 1;1 1" dur="4s" repeatCount="indefinite"/>')+'<path d="M-3 -1q3 3 6 0z" fill="#eceff1" stroke="#546e7a" stroke-width=".4"/><circle cy="0" r=".5" fill="#ff5252"/></g></g>';
+  }
+  if(on)s+='<g class="bcn"><path d="M'+(tx+1)+' '+(fu?1:3)+'h-8" stroke="'+lite+'" stroke-width="1.6"/><path d="M'+(tx+1)+' '+(fu?1:3)+'h8" stroke="#fff" stroke-width="1.6"/></g>';
+  // windsock (suburbs) / landing beacon mast (future)
+  if(!fu)s+='<path d="M158.3 12h1.4v9.4h-1.4z" fill="#37474f"/>'+[0,1,2,3].map(q=>'<path d="M'+(159.7+q*2.6)+' '+(12.2+q*.35)+'h2.6v'+(4.6-q*.7)+'h-2.6z" fill="'+(q%2?"#fafafa":"#ff6d00")+'"/>').join("");
+  else s+='<path d="M190 46V24" stroke="#90a4ae" stroke-width=".9"/><circle cx="190" cy="23" r="1.6" fill="#ff1744"'+(on?' class="blk" style="animation-duration:1.2s"':'')+'/>';
+  // clouds drifting over both lots
+  s+=[[2,4,34],[1,16,44]].map(c=>'<g opacity=".85"><animateTransform attributeName="transform" type="translate" values="-20 '+c[1]+';215 '+c[1]+'" dur="'+c[2]+'s" begin="'+(-c[0]*11)+'s" repeatCount="indefinite"/><ellipse cx="0" cy="4" rx="6" ry="2" fill="#fff"/><ellipse cx="2.8" cy="2.6" rx="3.6" ry="2" fill="#fff"/></g>').join("");
+  // a plane rolling down the runway and climbing out over the right lot
+  if(on)s+='<g opacity="0"><animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;.04;.62;.7;1" dur="12s" repeatCount="indefinite"/><animateMotion dur="12s" repeatCount="indefinite" keyPoints="0;.55;1;1" keyTimes="0;.42;.68;1" calcMode="linear" path="M30 51.4H150Q178 46 198 14"/><g transform="scale(1.1)">'+jet("#43a047")+'</g></g>'
+   +'<g opacity="0"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;.5;.56;.94;1" dur="12s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="-30 2;-30 2;200 -6" keyTimes="0;.5;1" dur="12s" repeatCount="indefinite"/><g transform="scale(.6)">'+jet("#8e24aa")+'</g></g>';
+  else if(st!=="working"&&st!=="demo")s+='<g transform="translate(40 51.4)">'+jet("#43a047")+'</g>';
+  return s}
+
 function houseArt(l,i){
   const st=l.st,k=l.hs,sx=(k&&S[k]&&S[k].span)||1;
   if(st==="empty"){const rd=l.land<125*landMul();return '<ellipse cx="50" cy="58" rx="40" ry="5" fill="#000" opacity=".15"/><g transform="translate(-6,-17) scale(1.65)"><path d="M16 10v53M16 12h16" stroke="#4e342e" stroke-width="3" stroke-linecap="round"/><rect x="16" y="14" width="36" height="22" rx="3" fill="#fff" stroke="#1b5e20" stroke-width="2"/><rect x="16" y="14" width="36" height="8" fill="#2e7d32"/><text x="34" y="20" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">FOR SALE</text><text x="34" y="30" font-size="8" font-weight="900" text-anchor="middle">'+fmt(l.land)+'</text></g>'+(rd?'<g transform="translate(70,14) rotate(-12)"><rect x="-16" y="-6" width="32" height="12" rx="2.5" fill="#d32f2f" stroke="#fff" stroke-width="1.2"/><text y="2.5" font-size="5" font-weight="900" text-anchor="middle" fill="#fff">REDUCED</text></g>':"")}
@@ -3357,7 +3448,8 @@ function houseArt(l,i){
   if(st==="owned")return '<ellipse cx="50" cy="56" rx="40" ry="6" fill="#000" opacity=".2"/><circle cx="50" cy="30" r="15" fill="#ffb300"/><text x="50" y="38" font-size="22" font-weight="900" text-anchor="middle" fill="#fff">+</text>';
   const b=l.paint,r=l.reno.includes("roof")?"#ff7043":COS.roof[meta.eq.roof].v;let s=GROUND,T='stroke="#3e2723" stroke-width="1.5"';
   const wa=WART[W().k],ov=wa&&wa[k];
-  if(ov)s=ov(l,st,T,s);
+  if(k==="airport")s=airportWide(l,st,T);
+  else if(ov)s=ov(l,st,T,s);
   else if(k==="marina")s=marinaArt(st);
   else if(k==="subway"||k==="coffee"||k==="skyscraper")s=cityOnly(l,k,st,T,s);
   else if(k==="skishop"||k==="skiresort")s=mtnOnly(l,k,st,T,s);
@@ -3396,7 +3488,7 @@ function houseArt(l,i){
   else if(k==="gas")s+='<path d="M6 48V16" stroke="#546e7a" stroke-width="2"/><rect x="0" y="4" width="14" height="14" rx="2" fill="#263238" stroke="#fff"/><path d="M16 28v20M66 28v20" stroke="#78909c" stroke-width="2.5"/><rect x="24" y="36" width="6" height="12" fill="#eceff1" stroke="#455a64"/><rect x="25" y="38" width="4" height="3" fill="#263238"/><rect x="40" y="36" width="6" height="12" fill="#eceff1" stroke="#455a64"/><rect x="41" y="38" width="4" height="3" fill="#263238"/><rect x="10" y="20" width="62" height="6" rx="1" fill="#e53935" '+T+'/><rect x="10" y="26" width="62" height="2" fill="#fff"/><rect x="74" y="26" width="20" height="22" fill="#fff3e0" '+T+'/><rect x="76" y="30" width="16" height="9" fill="#b3e5fc" stroke="#3e2723"/><rect x="82" y="41" width="6" height="7" fill="#5d4037"/>';
   else if(k==="airport")s+='<rect x="4" y="46" width="92" height="9" rx="1" fill="#455a64" stroke="#263238"/><path d="M8 51h84" stroke="#fff" stroke-width="1" stroke-dasharray="5 3"/><rect x="22" y="26" width="46" height="20" fill="#eceff1" '+T+'/><rect x="22" y="24" width="46" height="4" fill="#0288d1" stroke="#3e2723"/><rect x="25" y="32" width="40" height="6" fill="#81d4fa" stroke="#3e2723" stroke-width=".8"/><path d="M35 32v6M45 32v6M55 32v6" stroke="#3e2723" stroke-width=".6"/><rect x="42" y="39" width="8" height="7" fill="#37474f"/><rect x="73" y="14" width="6" height="32" fill="#cfd8dc" '+T+'/><rect x="69" y="8" width="14" height="8" rx="1.5" fill="#80deea" stroke="#3e2723"/><rect x="68" y="6" width="16" height="3" fill="#546e7a"/><path d="M10 46V30" stroke="#37474f" stroke-width="1.5"/><polygon'+(st==="ready"?' class="flag"':'')+' points="10,30 22,32 10,35" fill="#ff7043" stroke="#bf360c" stroke-width=".5"/>';
 
-  if(st==="ready"&&!(ov&&!(wa.keep||[]).includes(k))){
+  if(st==="ready"&&k!=="airport"&&!(ov&&!(wa.keep||[]).includes(k))){
     if(k==="hospital")s+='<circle class="pls" cx="50" cy="16.5" r="7" fill="#ff5252" fill-opacity=".45"/><g class="heli"><ellipse cx="0" cy="0" rx="5" ry="3" fill="#e53935" stroke="#7f0000" stroke-width=".6"/><rect x="-12" y="-.7" width="8" height="1.4" fill="#e53935"/><ellipse cx="2" cy="-.6" rx="2.2" ry="1.5" fill="#bde3f5"/><rect class="rot" x="-6.5" y="-4.6" width="13" height="1" fill="#37474f"/></g>';
     else if(k==="pool")s+='<g class="sw1"><circle cx="22" cy="28" r="3.4" fill="#ffcc80" stroke="#8d6e63" stroke-width=".5"/><path d="M18.6 28a3.4 3.4 0 0 1 6.8 0z" fill="#e53935"/><circle class="rip" cx="22" cy="31" r="4" fill="none" stroke="#fff" stroke-width="1.2"/></g><g class="sw2"><circle cx="22" cy="39" r="3.4" fill="#ffcc80" stroke="#8d6e63" stroke-width=".5"/><path d="M18.6 39a3.4 3.4 0 0 1 6.8 0z" fill="#fdd835"/><circle class="rip" cx="22" cy="42" r="4" fill="none" stroke="#fff" stroke-width="1.2"/></g>';
     else if(k==="park")s+=PERS("#3949ab","wk1",-2,-4)+PERS("#e53935","wk2",-9,-4)+PERS("#fb8c00","wk1",-8,-4)+'<circle class="bnc" cx="30" cy="44" r="2.8" fill="#e53935" stroke="#7f0000" stroke-width=".6"/>';
@@ -3416,7 +3508,7 @@ function houseArt(l,i){
   }
   if(S[k]&&S[k].cat==="h"&&["ranch","colonial","mansion"].includes(k))s+=homeFx(l,k,st);
   if(W().k==="future"&&["park","pool","school","hospital","gas","shopping"].includes(k))s+=fuFx(l,k,st);
-  if(["civic","coffee","gas","skishop","boatrent","shopping","antique","pool","park","apartment","sports","robocafe","airport"].includes(k)&&!(W().k==="future"&&["pool","park","gas","shopping"].includes(k)))s+=smallFx(l,k,st);
+  if(["civic","coffee","gas","skishop","boatrent","shopping","antique","pool","park","apartment","sports","robocafe"].includes(k)&&!(W().k==="future"&&["pool","park","gas","shopping"].includes(k)))s+=smallFx(l,k,st);
   else if(W().k==="historic"&&["realestate","fire","hospital","school"].includes(k))s+=smallFx(l,k,st);
   s+=artFx(l,k,st);
   if(!ov&&["ranch","colonial","mansion","civic","school"].includes(k))s+=BUSH;
@@ -4062,7 +4154,7 @@ const EVS={boom:"📈",crash:"📉",rent:"💸",storm:"⛈️",party:"🎉",mark
 const gi=(ok,bad,t)=>'<span class="gi'+(ok?" ok":bad?" bad":"")+'">'+t+'</span>';
 function chips(){if(!bonus)return"";
   const par=parT(),left=Math.ceil(par-elapsed),pm=elapsed>par,pc=Math.min(100,Math.round(money/goal*100)),od=!!(objective&&objective.done),dm=lots.filter(l=>l.dmg&&l.st==="rented").length;
-  const ck=(ok,t)=>gi(ok,0,t+(ok?" ✅":""));let h=ck(money>=goal,money>=goal?"💰":"💰"+pc+"%")+ck(od,objShort().replace(/✔$/,""))+ck(!!bonus.done,bonShort().replace(/✔$/,""))+gi(0,pm,"⏱"+(pm?"✘":left+"s"))+'<span class="sp"></span>';
+  const ck=(ok,t)=>gi(ok,0,t+(ok?" ✅":""));let h=ck(money>=goal,money>=goal?"💰":"💰"+pc+"%")+ck(od,objShort().replace(/✔$/,""))+ck(!!bonus.done,bonShort().replace(/✔$/,""))+gi(0,pm,"⏱"+(pm?"✘":left+"s")).replace('class="gi',race?'class="gi racing':'class="gi')+'<span class="sp"></span>';
   if(twist)h+='<span class="al">'+twist.ic+'</span>';
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
   if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":ev.k==="storm"&&W().k==="mountain"?"🌨️":ev.k==="storm"&&W().k==="desert"?"🌪️":ev.k==="storm"&&W().k==="future"?"🌞":ev.k==="storm"&&W().k==="tropical"?"🌀":ev.k==="storm"&&W().k==="lake"?"🌊":festHost[ev.k]&&festW(ev.k)?festW(ev.k).ic:EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
