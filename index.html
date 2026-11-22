@@ -1056,6 +1056,17 @@ function roadRunner(on){const leg=(d,c)=>'<g>'+(on?'<animateTransform attributeN
         +leg(1,"#607d8b")+'</g>';
       const dust=on?[0,1,2].map(q=>'<circle cx="'+(-4-q*1.6)+'" cy="-.5" r=".6" fill="#d7ccc8"><animate attributeName="r" values=".4;1.6" dur=".9s" begin="'+(-q*.3)+'s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;0" dur=".9s" begin="'+(-q*.3)+'s" repeatCount="indefinite"/><animate attributeName="cx" values="'+(-3-q*1.4)+';'+(-7-q*1.4)+'" dur=".9s" begin="'+(-q*.3)+'s" repeatCount="indefinite"/></circle>').join(""):"";
   return dust+bird}
+// A horse looking out over its stall's half-door, seen from the front: neck in the dark stall, head resting on the door.
+function STALLHORSE(cx,t,q,on){const c=q?"#5d4037":"#a1887f",dk=q?"#3e2723":"#795548",m=q?"#4e342e":"#8d6e63";
+ return '<g transform="translate('+cx+' '+(t+6.1)+') scale(.62) translate('+(-cx)+' '+(-(t+6.9))+')"><g'+(on?' class="bob" style="animation-duration:'+(1.8+q*.6)+'s"':'')+'>'
+  +'<rect x="'+(cx-2.4)+'" y="'+(t+2.6)+'" width="4.8" height="3" fill="'+dk+'"/>'
+  +'<path d="M'+(cx-1.7)+' '+(t+1.6)+'l-.5-1.6 1.1 1z M'+(cx+1.7)+' '+(t+1.6)+'l.5-1.6-1.1 1z" fill="'+c+'" stroke="'+dk+'" stroke-width=".2"/>'
+  +'<path d="M'+(cx-1.9)+' '+(t+1.7)+'Q'+cx+' '+(t+.7)+' '+(cx+1.9)+' '+(t+1.7)+'L'+(cx+1.4)+' '+(t+5.4)+'Q'+(cx+1.4)+' '+(t+6.9)+' '+cx+' '+(t+6.9)+'Q'+(cx-1.4)+' '+(t+6.9)+' '+(cx-1.4)+' '+(t+5.4)+'z" fill="'+c+'" stroke="'+dk+'" stroke-width=".25"/>'
+  +(q?'':'<path d="M'+cx+' '+(t+1.8)+'v3.2" stroke="#fafafa" stroke-width=".6" stroke-linecap="round"/>')
+  +'<path d="M'+(cx-.9)+' '+(t+1.2)+'q.9 1.2 1.8 0" fill="'+dk+'"/>'
+  +'<circle cx="'+(cx-1.35)+'" cy="'+(t+2.8)+'" r=".33" fill="#212121"/><circle cx="'+(cx+1.35)+'" cy="'+(t+2.8)+'" r=".33" fill="#212121"/>'
+  +'<ellipse cx="'+cx+'" cy="'+(t+6.1)+'" rx="1.35" ry=".75" fill="'+m+'"/><circle cx="'+(cx-.55)+'" cy="'+(t+6.1)+'" r=".2" fill="#212121"/><circle cx="'+(cx+.55)+'" cy="'+(t+6.1)+'" r=".2" fill="#212121"/>'
+  +'</g></g>'}
 const PALM=(x,y,s)=>'<g transform="translate('+x+' '+y+') scale('+s+')"><path d="M0 0Q-2 -14 3 -26" stroke="#8d6e63" stroke-width="3" fill="none"/><path d="M3 -26q-9 -3 -14 3M3 -26q-6 -8 -13 -6M3 -26q8 -7 14 -3M3 -26q9 0 12 7M3 -26q1 -7 -2 -11" stroke="#2e9d4a" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="3" cy="-25" r="1.6" fill="#6d4c41"/></g>';
 // Beach world homes. Same gameplay keys as ranch/colonial/mansion, new look.
 function beachArt(l,k,T){
@@ -1911,10 +1922,54 @@ function hsHome(l,k,st,T,s){const rr=l.reno.includes("roof"),on=st==="rented";
    +'<path d="M46 46V36a4 3 0 0 1 8 0v10z" fill="#2e5e3e" stroke="#f5e6c8"/><rect x="34" y="45" width="32" height="2" fill="#e0e0e0"/>';
   return s}
 function hsBld(l,k,st,T,s){const on=st==="ready"||st==="rented";
-  if(k==="apartment"){s+='<rect x="18" y="4" width="64" height="42" fill="#795548" '+T+'/><rect x="16" y="2" width="68" height="4" fill="#5d4037" stroke="#3e2723" stroke-width=".5"/>'+[[24,"#6d4c41"],[52,"#6d4c41"]].map(b=>'<rect x="'+b[0]+'" y="6" width="24" height="40" fill="none" stroke="'+b[1]+'" stroke-width=".6"/>').join("");
-    [9,19,29].forEach(y=>{[22,32,54,64].forEach(x=>{s+='<rect x="'+x+'" y="'+y+'" width="7" height="7" fill="#bde3f5" stroke="#d7ccc8" stroke-width=".7"/><rect x="'+(x-.6)+'" y="'+(y-1.4)+'" width="8.2" height="1.4" fill="#d7ccc8"/>'})});
-    [26,58].forEach(x=>{s+='<rect x="'+x+'" y="38" width="8" height="8" fill="#3e2723"/><path d="M'+(x-3)+' 46l3-4h8l3 4" fill="#a1887f"/><path d="M'+(x-3)+' 46v-6M'+(x+11)+' 46v-6" stroke="#212121" stroke-width=".6"/>'});s+='<rect x="42" y="38" width="16" height="8" fill="#bde3f5" stroke="#d7ccc8"/>';
-    if(on){[[22,9],[64,19],[32,29],[54,9]].forEach((w,q)=>{s+='<rect class="lit" x="'+w[0]+'" y="'+w[1]+'" width="7" height="7" fill="#ffe082" style="animation-duration:'+(3+q)+'s;animation-delay:'+(-q*1.2)+'s"/>'});s+=PERS("#6a1b9a","wk1",-3,0)+PERS("#37474f","wk2",-10,0)}
+  if(k==="apartment"){
+    // Brownstones: a matched pair of row houses with stoops, carved cornices and stone lintels.
+    // The left house has a small deli tucked into its garden level; the right one has an iron-fenced areaway.
+    const A=x=>on?x:"";
+    const WIN=(x,y,w,h,arch)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="#bde3f5" stroke="#3e2723" stroke-width=".4"/>'
+      +'<path d="M'+(x+w/2)+' '+y+'v'+h+'M'+x+' '+(y+h*.45).toFixed(2)+'h'+w+'" stroke="#f5e6c8" stroke-width=".45"/>'
+      +(arch?'<path d="M'+(x-.8)+' '+(y+.2)+'q'+(w/2+.8)+' -3.2 '+(w+1.6)+' 0z" fill="#d7c4a3" stroke="#8d6e63" stroke-width=".3"/>':'<rect x="'+(x-.8)+'" y="'+(y-1.4)+'" width="'+(w+1.6)+'" height="1.4" fill="#d7c4a3" stroke="#8d6e63" stroke-width=".25"/>')
+      +'<rect x="'+(x-.6)+'" y="'+(y+h)+'" width="'+(w+1.2)+'" height=".9" fill="#d7c4a3"/>';
+    const LITW=(x,y,w,h,q)=>A('<rect class="lit" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="#ffe082" style="animation-duration:'+(4+q*1.3).toFixed(1)+'s;animation-delay:'+(-q*1.7).toFixed(1)+'s"/>')+'<path d="M'+(x+w/2)+' '+y+'v'+h+'M'+x+' '+(y+h*.45).toFixed(2)+'h'+w+'" stroke="#f5e6c8" stroke-width=".45"/>';
+    const FLW=(x,y,w)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="1.4" fill="#5d4037"/>'+[...Array(Math.floor(w/1.8))].map((_,q)=>'<circle cx="'+(x+.9+q*1.8).toFixed(1)+'" cy="'+(y-.2)+'" r=".75" fill="'+["#e53935","#fdd835","#ec407a","#7cb342"][q%4]+'"/>').join("");
+    const HOUSE=(x0,c,dx,flip)=>{let h='<rect x="'+x0+'" y="4" width="36" height="42" fill="'+c+'" '+T+'/>'
+      +[10.5,21.5,32].map(y=>'<path d="M'+x0+' '+y+'h36" stroke="#000" stroke-opacity=".08" stroke-width=".5"/>').join("")
+      // cornice with brackets and dentils
+      +'<rect x="'+(x0-1)+'" y="1.4" width="38" height="3.2" fill="#4e342e" stroke="#3e2723" stroke-width=".4"/>'+[...Array(12)].map((_,q)=>'<rect x="'+(x0+.6+q*3).toFixed(1)+'" y="4.6" width="1.4" height="1.2" fill="#4e342e"/>').join("")
+      +[x0+.4,x0+34.4].map(x=>'<path d="M'+x+' 4.6h1.2v3l-.6 .6-.6-.6z" fill="#4e342e"/>').join("");
+      const cols=[x0+dx[0],x0+dx[1],x0+dx[2]];
+      // upper floors: three windows each
+      cols.forEach(x=>{h+=WIN(x,8.4,6,7.4,0)+WIN(x,19.6,6,7.6,0)});
+      return h};
+    const L=14,R=50;
+    s+=HOUSE(L,"#7b4a35",[2,13,24])+HOUSE(R,"#6d4030",[6,17,28]);
+    // parlor floor: tall arched windows, and arched doorways at the top of each stoop
+    s+=[L+13,L+24,R+6,R+17].map(x=>WIN(x,30.4,6,6.4,1)).join("")+FLW(L+12.6,36.4,6.8)+FLW(R+5.6,36.4,6.8)
+     +[[L+2,0],[R+28,1]].map(d=>{const x=d[0];return '<path d="M'+(x-.6)+' 37.2V31.6a3.6 3.6 0 0 1 7.2 0v5.6z" fill="#d7c4a3" stroke="#8d6e63" stroke-width=".3"/><path d="M'+x+' 37.2V31.8a3 3 0 0 1 6 0v5.4z" fill="#3e2723"/><path d="M'+x+' 31.6a3 3 0 0 1 6 0z" fill="#ffe082" opacity=".85"/><path d="M'+(x+3)+' 31.6v5.6" stroke="#5d2a1b" stroke-width=".4"/><circle cx="'+(x+(d[1]?1.6:4.4))+'" cy="34.6" r=".35" fill="#ffd54f"/><rect x="'+(x+1.8)+'" y="29.4" width="2.4" height="1" rx=".2" fill="#ffd54f"/><text x="'+(x+3)+'" y="30.2" font-size=".9" font-weight="900" text-anchor="middle" fill="#3e2723">'+(d[1]?"14":"12")+'</text>'}).join("")
+    // stoops: steps fanning down to the sidewalk with wrought-iron railings and newel posts
+     +[[L+2,1],[R+28,-1]].map(d=>{const x=d[0],o=d[1];let st='<path d="M'+(x-.6)+' 37.2h7.2l'+(o>0?'2.4':'1.2')+' 8.8h-'+(o>0?'10.8':'10.8')+'z" fill="#a1887f" stroke="#5d4037" stroke-width=".35" transform="translate('+(o>0?'-1.2':'-1.2')+' 0)"/>';
+       for(let q=1;q<6;q++)st+='<path d="M'+(x-1.8-q*.24).toFixed(2)+' '+(37.2+q*1.47).toFixed(2)+'h'+(7.2+q*.48+1.2).toFixed(2)+'" stroke="#6d4c41" stroke-width=".3"/>';
+       return st+[x-1.4,x+7.4].map((rx,j)=>{const bx=rx+(j?2.4:-2.4);return '<path d="M'+rx+' 35.6L'+bx+' 44.4" stroke="#212121" stroke-width=".55"/><path d="M'+rx+' 37.4L'+bx+' 46" stroke="#212121" stroke-width=".3"/>'+[.25,.5,.75].map(t=>'<path d="M'+(rx+(bx-rx)*t).toFixed(2)+' '+(35.6+8.8*t).toFixed(2)+'v1.8" stroke="#212121" stroke-width=".25"/>').join("")+'<rect x="'+(bx-.6)+'" y="43.4" width="1.2" height="2.6" fill="#212121"/><circle cx="'+bx+'" cy="43.2" r=".7" fill="#212121"/><path d="M'+(bx-.9)+' 44.6q-.8.8 0 1.4" stroke="#212121" stroke-width=".25" fill="none"/>'}).join("")}).join("")
+    // left garden level: the deli, properly set under the parlor windows
+     +'<rect x="'+(L+11.6)+'" y="38" width="20" height="2.8" rx=".3" fill="#1b5e20" stroke="#ffd54f" stroke-width=".35"/><text x="'+(L+21.6)+'" y="40.1" font-size="2.2" font-weight="900" text-anchor="middle" fill="#ffd54f" letter-spacing=".5">DELI</text>'
+     +'<path d="M'+(L+11.4)+' 40.8h20.4l-1 2.2h-18.4z" fill="#fafafa" stroke="#1b5e20" stroke-width=".25"/>'+[0,1,2,3,4].map(q=>'<path d="M'+(L+11.4+q*4.08).toFixed(2)+' 40.8h2.04l-.2 2.2h-2z" fill="#2e7d32"/>').join("")+'<path d="M'+(L+12)+' 43q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0q.5.6 1 0" stroke="#2e7d32" stroke-width=".3" fill="none"/>'
+     +'<rect x="'+(L+12.4)+'" y="43" width="11" height="3" fill="#bde3f5" stroke="#3e2723" stroke-width=".3"/>'+A('<rect class="lit" x="'+(L+12.4)+'" y="43" width="11" height="3" fill="#ffe082" style="animation-duration:9s"/>')
+     +[L+14,L+16,L+18].map((x,q)=>'<path d="M'+x+' 43v.7" stroke="#5d4037" stroke-width=".15"/><ellipse cx="'+x+'" cy="44.3" rx=".45" ry=".7" fill="'+["#bf360c","#8d6e63","#c62828"][q]+'"/>').join("")+'<rect x="'+(L+19.6)+'" y="44.4" width="3.4" height="1.6" fill="#eceff1" stroke="#90a4ae" stroke-width=".15"/>'
+     +'<rect x="'+(L+24.4)+'" y="43" width="3.4" height="3" fill="#3e2723"/><rect x="'+(L+24.8)+'" y="43.4" width="2.6" height="1.2" fill="#bde3f5"/><rect x="'+(L+28.4)+'" y="44" width="3" height="2" rx=".3" fill="#fff8e1" stroke="#c62828" stroke-width=".2"/><text x="'+(L+29.9)+'" y="45.4" font-size=".9" font-weight="900" text-anchor="middle" fill="#c62828">OPEN</text>'
+    // right garden level: windows behind an iron areaway fence
+     +[R+6,R+17].map(x=>'<rect x="'+x+'" y="39.6" width="6" height="4.2" fill="#bde3f5" stroke="#3e2723" stroke-width=".35"/><path d="M'+(x+3)+' 39.6v4.2" stroke="#f5e6c8" stroke-width=".4"/><rect x="'+(x-.6)+'" y="38.4" width="7.2" height="1.2" fill="#d7c4a3"/>').join("")
+     +'<path d="M'+(R+3)+' 42.4H'+(R+25)+'" stroke="#212121" stroke-width=".5"/>'+[...Array(12)].map((_,q)=>'<path d="M'+(R+3.4+q*1.9).toFixed(1)+' 46V41.6" stroke="#212121" stroke-width=".3"/><path d="M'+(R+3.4+q*1.9).toFixed(1)+' 41.6l-.3.5h.6z" fill="#212121"/>').join("")
+    // rooftop: chimney pots, a water tank and pigeons on the cornice
+     +'<rect x="'+(L+5)+'" y="-2.4" width="5" height="4" fill="#8d4f3a" stroke="#3e2723" stroke-width=".35"/><rect x="'+(L+5.6)+'" y="-3.4" width="1.4" height="1.2" fill="#a1887f"/><rect x="'+(L+8)+'" y="-3.4" width="1.4" height="1.2" fill="#a1887f"/>'+A('<circle class="smk" cx="'+(L+6.3)+'" cy="-5" r="1.6" fill="#eee"/><circle class="smk s2" cx="'+(L+8.7)+'" cy="-5.2" r="1.3" fill="#eee"/>')
+     +'<g transform="translate('+(R+24)+' -7)"><path d="M1 8V4.4M7 8V4.4M1 6h6" stroke="#5d4037" stroke-width=".5"/><rect x="0" y="0" width="8" height="4.6" rx=".4" fill="#8d6e63" stroke="#3e2723" stroke-width=".4"/><path d="M0 1.6h8M0 3.2h8" stroke="#5d4037" stroke-width=".3"/><path d="M-.4 0l4.4-2.4 4.4 2.4z" fill="#5d4037" stroke="#3e2723" stroke-width=".3"/></g>'
+     +[[L+22,1.2,0],[R+11,1.2,1]].map(p=>'<g transform="translate('+p[0]+' '+p[1]+')"><g>'+A('<animateTransform attributeName="transform" type="rotate" values="0;0;24;0;0" keyTimes="0;.5;.6;.7;1" dur="'+(2.4+p[2]*.7)+'s" repeatCount="indefinite"/>')+'<ellipse rx="1.3" ry=".75" fill="#9e9e9e"/><circle cx="'+(p[2]?-1.1:1.1)+'" cy="-.6" r=".55" fill="#78909c"/><path d="M'+(p[2]?-1.6:1.6)+' -.6h'+(p[2]?-.5:.5)+'" stroke="#ff8f00" stroke-width=".3"/></g></g>').join("")
+    // street details: gas lamp, a stoop-side planter and a trash can
+     +'<path d="M8 56V34" stroke="#212121" stroke-width="1.1"/><path d="M6 34h4l-.8-4h-2.4z" fill="#fff59d" stroke="#212121" stroke-width=".5"/><path d="M5.4 29.6h5.2" stroke="#212121" stroke-width=".7"/>'+A('<circle class="pls" cx="8" cy="32" r="3.6" fill="#ffeb3b" fill-opacity=".6"/>')
+     +'<path d="M88 46l.6-3.6h3.6l.6 3.6z" fill="#607d8b" stroke="#37474f" stroke-width=".3"/><path d="M88.2 42.4h4.6" stroke="#37474f" stroke-width=".6"/>'
+     +'<path d="M'+(R+30.6)+' 46l.5-2h2.2l.5 2z" fill="#bf5a3c"/><circle cx="'+(R+31.7)+'" cy="43" r="1.3" fill="#43a047"/><circle cx="'+(R+31.2)+'" cy="42.6" r=".45" fill="#ec407a"/>';
+    // lit windows across both houses
+    [[L+2,8.4],[L+24,8.4],[R+17,8.4],[L+13,19.6],[R+6,19.6],[R+28,19.6],[L+24,30.4],[R+6,30.4]].forEach((w,q)=>{s+=LITW(w[0],w[1],6,w[1]>29?6.4:(w[1]>19?7.6:7.4),q)});
+    if(on)s+=PERS("#6a1b9a","wk1",-3,0)+PERS("#37474f","wk2",-10,0);
     return s}
   if(k==="park"){s='<rect x="6" y="10" width="88" height="48" rx="6" fill="#7cb342" stroke="#558b2f" stroke-width="1.5"/><path d="M6 34h88M50 10v48" stroke="#c8a165" stroke-width="5"/><circle cx="50" cy="34" r="14" fill="#c8a165"/>'+TREE(14,16)+TREE(86,16)+TREE(16,46)+TREE(84,46)
     +'<rect x="40" y="30" width="20" height="10" fill="#fafafa" stroke="#5d4037" stroke-width=".6"/><polygon points="38,31 50,22 62,31" fill="#c62828" stroke="#5d4037" stroke-width=".6"/><path d="M50 22v-3" stroke="#ffd54f"/><path d="M42 31v9M50 31v9M58 31v9" stroke="#bdbdbd" stroke-width=".8"/><path d="M40 37h20" stroke="#bdbdbd" stroke-width=".6"/>'
@@ -1949,8 +2004,13 @@ function hsBld(l,k,st,T,s){const on=st==="ready"||st==="rented";
   if(k==="gas"&&S.gas.span){const on=st==="ready";
     // Livery Stable, two lots wide: a corral with a trotting horse on the left, the big red barn in the middle,
     // and the blacksmith's forge on the right.
-    const HORSE=(c,m)=>'<path d="M-6 -1q0-3 3-3.2h6q2.6 0 3.2 2.4l-.2 2.6q-1 1.2-3 1.2h-6q-3-.2-3-3z" fill="'+c+'" stroke="#4e342e" stroke-width=".4"/><path d="M4.6 -3q1.6-3 3.2-3.6l1.6 1.4-.8 1.4-1.6-.2-1 2.4z" fill="'+c+'" stroke="#4e342e" stroke-width=".4"/><path d="M6.8 -6.6l.4-1.2.6 1.2" fill="#4e342e"/><circle cx="8.2" cy="-5.6" r=".3" fill="#212121"/><path d="M4.8 -3.4q1.2-2 2.4-2.8" stroke="'+m+'" stroke-width=".8" fill="none"/>';
-    const LEGS=(c,anim)=>[[-4.6,0],[-2.6,1],[2.4,1],[4,0]].map(v=>'<path d="M'+v[0]+' 1.6v4" stroke="'+c+'" stroke-width=".9">'+(anim?'<animateTransform attributeName="transform" type="rotate" values="'+(v[1]?'-18 ':'18 ')+v[0]+' 1.6;'+(v[1]?'18 ':'-18 ')+v[0]+' 1.6;'+(v[1]?'-18 ':'18 ')+v[0]+' 1.6" dur=".5s" repeatCount="indefinite"/>':'')+'</path>').join("");
+    // Side-view horse facing right, hooves at y=5.6: deep barrel, arched neck with mane, head about 2/5 of the body length.
+    const HORSE=(c,m)=>'<path d="M-5.6 -1.8Q-6.2 -3.6 -4.2 -3.9Q0 -4.4 3 -3.9Q4.6 -3.6 4.8 -1.6Q4.8 .4 3.2 .7Q0 1.1 -3.6 .7Q-5.4 .4 -5.6 -1.8z" fill="'+c+'" stroke="#4e342e" stroke-width=".35"/>'
+      +'<path d="M2.6 -3.6Q4.2 -6.6 6 -8.4L7.6 -7.4Q6.4 -5 5 -1.6z" fill="'+c+'" stroke="#4e342e" stroke-width=".35"/>'
+      +'<path d="M5.7 -8.6Q6.8 -9.2 7.6 -8.4L10.2 -5.6Q10.6 -4.8 9.8 -4.5Q9 -4.3 8.6 -4.8L6.6 -6.6z" fill="'+c+'" stroke="#4e342e" stroke-width=".35"/>'
+      +'<path d="M6.1 -8.6l.2-1.5.8 1.2z" fill="'+c+'" stroke="#4e342e" stroke-width=".25"/><circle cx="7.3" cy="-7.4" r=".32" fill="#212121"/><circle cx="9.7" cy="-5" r=".18" fill="#3e2723"/>'
+      +'<path d="M2.4 -3.9Q3.6 -6.8 5.8 -8.8" stroke="'+m+'" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M3 -5l-.8-.4M3.8 -6.4l-.8-.5M4.7 -7.6l-.7-.6" stroke="'+m+'" stroke-width=".5"/>';
+    const LEGS=(c,anim)=>[[-4.4,0],[-3,1],[2.4,1],[3.6,0]].map(v=>'<g>'+(anim?'<animateTransform attributeName="transform" type="rotate" values="'+(v[1]?'-18 ':'18 ')+v[0]+' .2;'+(v[1]?'18 ':'-18 ')+v[0]+' .2;'+(v[1]?'-18 ':'18 ')+v[0]+' .2" dur=".5s" repeatCount="indefinite"/>':'')+'<path d="M'+v[0]+' .2v4.8" stroke="'+c+'" stroke-width=".85" stroke-linecap="round"/><rect x="'+(v[0]-.5)+'" y="4.9" width="1" height=".7" rx=".2" fill="#212121"/></g>').join("");
     s='<ellipse cx="100" cy="56" rx="94" ry="7" fill="#000" opacity=".22"/><rect x="5" y="46" width="190" height="13" rx="5" fill="#5aa23e"/>'
      // corral: dirt yard, split-rail fence, hay feeder and water trough
      +'<path d="M8 47Q30 44 62 47L62 55Q34 57 8 55z" fill="#bca27a" opacity=".85"/>'
@@ -1961,7 +2021,7 @@ function hsBld(l,k,st,T,s){const on=st==="ready"||st==="rented";
      // horse trotting around the corral
      +'<g>'+(on?'<animateTransform attributeName="transform" type="translate" values="0 0;22 0;22 0;0 0;0 0" keyTimes="0;.42;.5;.92;1" dur="9s" repeatCount="indefinite"/>':'')
      +'<g transform="translate(22 49.4)"><g>'+(on?'<animateTransform attributeName="transform" type="scale" values="1 1;1 1;-1 1;-1 1;1 1" keyTimes="0;.46;.47;.96;.97" dur="9s" calcMode="discrete" repeatCount="indefinite"/>':'')
-     +HORSE("#a1887f","#3e2723")+LEGS("#6d4c41",on)+'<path d="M-6 -2q-2 1-1.6 5" stroke="#3e2723" stroke-width=".9" fill="none"/></g></g></g>'
+     +HORSE("#a1887f","#3e2723")+LEGS("#6d4c41",on)+'<path d="M-5.6 -2.6q-1.6 1.4-1.2 5.6" stroke="#3e2723" stroke-width=".9" fill="none" stroke-linecap="round"/></g></g></g>'
      // big red barn
      +'<polygon points="70,20 80,6 110,-2 140,6 150,20" fill="#6d2f22" '+T+'/><path d="M80 6L110 -2L140 6" stroke="#4e1f16" stroke-width=".6" fill="none"/>'
      +'<rect x="74" y="18" width="72" height="28" fill="#9c3d2a" '+T+'/>'+[78,82,86,90,94,126,130,134,138,142].map(x=>'<path d="M'+x+' 18v28" stroke="#7a2a1e" stroke-width=".4"/>').join("")
@@ -1981,12 +2041,12 @@ function hsBld(l,k,st,T,s){const on=st==="ready"||st==="rented";
      +'<rect x="122" y="27" width="11" height="19" fill="#8d3a28" stroke="#f5e6c8" stroke-width=".6"/><path d="M122 27l11 19M133 27l-11 19" stroke="#f5e6c8" stroke-width=".4"/>'
      // stall windows with horses looking out
      +[[78,29],[136,29]].map((d,q)=>'<rect x="'+d[0]+'" y="'+d[1]+'" width="11" height="10" fill="#2b1d17" stroke="#f5e6c8" stroke-width=".6"/><rect x="'+d[0]+'" y="'+(d[1]+5)+'" width="11" height="5" fill="#8d3a28" stroke="#f5e6c8" stroke-width=".5"/><path d="M'+d[0]+' '+(d[1]+5)+'l11 5M'+(d[0]+11)+' '+(d[1]+5)+'l-11 5" stroke="#f5e6c8" stroke-width=".3"/>'
-       +'<g'+(on?' class="bob" style="animation-duration:'+(1.8+q*.6)+'s"':'')+'><path d="M'+(d[0]+3)+' '+(d[1]+6)+'q0-4 3-4.4q3 .4 3.4 2.4l-1 .6q-1-.6-2 .2l-.4 1.2z" fill="'+(q?"#5d4037":"#a1887f")+'"/><path d="M'+(d[0]+5.2)+' '+(d[1]+1.8)+'l.4-1.4.6 1.4" fill="'+(q?"#5d4037":"#a1887f")+'"/><circle cx="'+(d[0]+7.4)+'" cy="'+(d[1]+3.4)+'" r=".35" fill="#212121"/><path d="M'+(d[0]+4.4)+' '+(d[1]+2.2)+'q-.6 2 0 3.6" stroke="#3e2723" stroke-width=".6" fill="none"/><path d="M'+(d[0]+5.6)+' '+(d[1]+3.6)+'l1.6 1.2" stroke="#f5e6c8" stroke-width=".35"/></g>').join("")
+       +STALLHORSE(d[0]+5.5,d[1],q,on)).join("")
      +[94,126].map(x=>'<path d="M'+x+' 26v1.4" stroke="#212121" stroke-width=".4"/><rect x="'+(x-1)+'" y="27.4" width="2" height="2.6" fill="#ffca28" stroke="#212121" stroke-width=".3"/>'+(on?'<circle class="pls" cx="'+x+'" cy="28.7" r="2.2" fill="#ffeb3b" fill-opacity=".5"/>':'')).join("")
      // hitching rail with a saddled horse, and hay bales by the barn
      +'<path d="M66 46v-6M84 46v-6M65 40.4h20" stroke="#5d4037" stroke-width=".9"/>'
-     +'<g transform="translate(75 43.4)">'+HORSE("#8d6e63","#3e2723")+'<path d="M-1.6 -4.2h3.4v2.8h-3.4z" fill="#5d4037"/><path d="M-2.2 -4.4q2-.8 4.6 0" stroke="#3e2723" stroke-width=".5" fill="none"/><path d="M0 -1.4v2.2" stroke="#3e2723" stroke-width=".3"/>'+LEGS("#6d4c41",false)
-       +'<path d="M-6 -2q-2 1-1.6 5" stroke="#3e2723" stroke-width=".9" fill="none">'+(on?'<animateTransform attributeName="transform" type="rotate" values="-12 -6 -2;14 -6 -2;-12 -6 -2" dur="1.6s" repeatCount="indefinite"/>':'')+'</path><path d="M8.6 -4.4L10 -3" stroke="#5d4037" stroke-width=".3"/></g>'
+     +'<g transform="translate(75 43.6) scale(-.92 .92)">'+HORSE("#8d6e63","#3e2723")+'<path d="M-2.4 -4.1Q-.4 -5 1.6 -4.1L1.4 -1.6H-2.2z" fill="#5d4037" stroke="#3e2723" stroke-width=".25"/><path d="M-2.6 -4.2q-.2-.8.4-1M1.8 -4.2q.3-.9-.2-1.2" stroke="#3e2723" stroke-width=".4" fill="none"/><rect x="-1.6" y="-1.8" width="2.2" height="1.6" rx=".3" fill="#c62828"/><path d="M-.4 -1.4v3.4" stroke="#3e2723" stroke-width=".3"/>'+LEGS("#6d4c41",false)
+       +'<path d="M-5.6 -2.6q-1.6 1.4-1.2 5.6" stroke="#3e2723" stroke-width=".9" fill="none" stroke-linecap="round">'+(on?'<animateTransform attributeName="transform" type="rotate" values="-12 -5.6 -2.6;14 -5.6 -2.6;-12 -5.6 -2.6" dur="1.6s" repeatCount="indefinite"/>':'')+'</path><path d="M9.6 -5Q11.4 -3.6 11 -1.6" stroke="#5d4037" stroke-width=".3" fill="none"/></g>'
      +[[138,49],[144,49],[141,45.2]].map(b=>'<rect x="'+(b[0]-3)+'" y="'+b[1]+'" width="6" height="4" rx=".6" fill="#e6c25a" stroke="#a1887f" stroke-width=".4"/><path d="M'+(b[0]-3)+' '+(b[1]+1.4)+'h6M'+(b[0]-3)+' '+(b[1]+2.8)+'h6" stroke="#c9a33f" stroke-width=".3"/>').join("")
      // blacksmith's forge: open shed with a glowing hearth, bellows, anvil and horseshoes
      +'<path d="M152 46V24M192 46V24" stroke="#5d4037" stroke-width="1.4"/><polygon points="149,25 172,17 195,25" fill="#5d4037" stroke="#3e2723" stroke-width=".6"/><path d="M151 25h43" stroke="#3e2723" stroke-width=".8"/>'
@@ -2011,7 +2071,7 @@ function hsBld(l,k,st,T,s){const on=st==="ready"||st==="rented";
      +'<rect x="38" y="19.4" width="44" height="5.4" rx=".8" fill="#3e2723" stroke="#f5e6c8" stroke-width=".5"/><text x="60" y="23.4" font-size="3.6" font-weight="900" text-anchor="middle" fill="#f5e6c8" letter-spacing=".6">LIVERY STABLE</text>'
      +'<rect x="50" y="27" width="20" height="19" fill="#2b1d17" stroke="#f5e6c8" stroke-width=".8"/><path d="M50 27l20 19M70 27l-20 19" stroke="#f5e6c8" stroke-width=".3" opacity=".3"/>'
      +[[33,30],[76,30]].map((d,q)=>'<rect x="'+d[0]+'" y="'+d[1]+'" width="11" height="10" fill="#2b1d17" stroke="#f5e6c8" stroke-width=".6"/><rect x="'+d[0]+'" y="'+(d[1]+5)+'" width="11" height="5" fill="#8d3a28" stroke="#f5e6c8" stroke-width=".5"/><path d="M'+d[0]+' '+(d[1]+5)+'l11 5M'+(d[0]+11)+' '+(d[1]+5)+'l-11 5" stroke="#f5e6c8" stroke-width=".3"/>'
-       +'<g'+(on?' class="bob" style="animation-duration:'+(1.8+q*.6)+'s"':'')+'><path d="M'+(d[0]+3)+' '+(d[1]+6)+'q0-4 3-4.4q3 .4 3.4 2.4l-1 .6q-1-.6-2 .2l-.4 1.2z" fill="'+(q?"#5d4037":"#a1887f")+'"/><path d="M'+(d[0]+5.2)+' '+(d[1]+1.8)+'l.4-1.4.6 1.4" fill="'+(q?"#5d4037":"#a1887f")+'"/><circle cx="'+(d[0]+7.4)+'" cy="'+(d[1]+3.4)+'" r=".35" fill="#212121"/><path d="M'+(d[0]+4.4)+' '+(d[1]+2.2)+'q-.6 2 0 3.6" stroke="#3e2723" stroke-width=".6" fill="none"/></g>').join("")
+       +STALLHORSE(d[0]+5.5,d[1],q,on)).join("")
      +[47.4,72.6].map(x=>'<path d="M'+x+' 26v1.4" stroke="#212121" stroke-width=".4"/><rect x="'+(x-1)+'" y="27.4" width="2" height="2.6" fill="#ffca28" stroke="#212121" stroke-width=".3"/>'+(on?'<circle class="pls" cx="'+x+'" cy="28.7" r="2.2" fill="#ffeb3b" fill-opacity=".5"/>':'')).join("")
      // hitching rail with a tied horse, and a water trough
      +'<path d="M4 46v-8M26 46v-8M3 38.4h24" stroke="#5d4037" stroke-width=".9"/>'
@@ -2559,15 +2619,7 @@ function smallFx(l,k,st){const w=W().k,on=st==="ready"||st==="rented";let s="";c
      +'<rect x="4" y="44" width="10" height="1.6" rx=".6" fill="#8d6e63"/><path d="M5 45.6v2.4M13 45.6v2.4M4 44v-3.4h10V44" stroke="#5d4037" stroke-width=".6" fill="none"/>'
      +FFX([[8,34],[92,26],[14,20],[86,14],[40,50]])+BIRD("#fff","#90a4ae");
     return s}
-  if(w==="historic"&&k==="apartment"){
-    s+=[18,22,26,30,34,38,42,46,50,54,58,62,66,70,74,78].map(x=>'<rect x="'+x+'" y="6" width="1.4" height="1.4" fill="#5d4037"/>').join("")
-     +[[22,16.2],[32,16.2],[54,16.2],[64,16.2],[22,26.2],[32,26.2],[54,26.2],[64,26.2]].map(p=>FBX(p[0]-.6,p[1]+.4,8.2)).join("")
-     +LIT(32,9,7,7,0)+LIT(22,29,7,7,1)+LIT(64,9,7,7,2)
-     +'<path d="M41 38h18l-1.4-2.6H42.4z" fill="#c62828" stroke="#3e2723" stroke-width=".3"/>'+[43,46.4,49.8,53.2].map(x=>'<path d="M'+x+' 35.4h1.4l.2 2.6h-1.8z" fill="#fafafa"/>').join("")+'<text x="50" y="43" font-size="2.8" font-weight="900" text-anchor="middle" fill="#c62828">DELI</text>'
-     +'<rect x="72" y="-3" width="7" height="5" fill="#8d6e63" stroke="#3e2723" stroke-width=".4"/><path d="M72 -3l3.5-2 3.5 2" fill="#5d4037"/><path d="M73 2v-1M78 2v-1" stroke="#3e2723" stroke-width=".4"/>'+SMK(26,-1)+'<rect x="24.4" y="-1" width="3.2" height="3" fill="#7b3b2c"/>'
-     +'<g><ellipse cx="57.4" cy="15.2" rx="1.4" ry=".9" fill="#ff8f00"/><circle cx="58.6" cy="14.4" r=".8" fill="#ff8f00"/></g>'
-     +'<path d="M8 56V34" stroke="#212121" stroke-width="1.1"/><path d="M6 34h4l-.8-4h-2.4z" fill="#fff59d" stroke="#212121" stroke-width=".5"/><path d="M5.4 29.6h5.2" stroke="#212121" stroke-width=".9"/>'+(on?'<circle class="pls" cx="8" cy="32" r="3.6" fill="#ffeb3b" fill-opacity=".6"/>':'')+BIRD("#9e9e9e","#616161");
-    return s}
+  if(w==="historic"&&k==="apartment")return s; // the Brownstones draw all of their own detail in hsBld
   if(w==="tropical"&&k==="apartment"){
     s+=[25,37].map(y=>'<path d="M18 '+(y-2.4)+'h64" stroke="#c9a35a" stroke-width=".6"/>'+[20,26,32,38,44,50,56,62,68,74,80].map(x=>'<path d="M'+x+' '+(y-2.4)+'v2.4" stroke="#c9a35a" stroke-width=".5"/>').join("")).join("")
      +[24,40,60,76].map((x,q)=>'<path d="M'+x+' 13.6v2" stroke="#5d4037" stroke-width=".3"/><g'+(on?' class="pen" style="animation-delay:'+(-q*.4)+'s"':'')+'><ellipse cx="'+x+'" cy="16.8" rx="1.3" ry="1.6" fill="'+["#ff7043","#ffca28","#ec407a","#26c6da"][q]+'" stroke="#5d4037" stroke-width=".2"/></g>'+(on?'<circle class="pls" cx="'+x+'" cy="16.8" r="2.4" fill="#ffe082" fill-opacity=".55" style="animation-delay:'+(-q*.5)+'s"/>':'')).join("")
@@ -2816,7 +2868,8 @@ function careBld(l,k,st,T,s){const on=st==="ready",w=W().k;
       +'<rect x="28" y="24.4" width="44" height="5.4" fill="#263238" stroke="#8d6e63" stroke-width=".8"/><text x="50" y="28.5" font-size="3.4" font-weight="900" text-anchor="middle" fill="#fafafa" letter-spacing=".3">OLD SCHOOLHOUSE</text>'
       +[21.6,31.4,60.6,70.4].map((x,q)=>WN(x,32,8,11)+(q%3===0?LIT(x,32,8,11,q):"")+'<rect x="'+(x-.6)+'" y="43" width="9.2" height="1" fill="#fafafa"/>').join("")
       +'<rect x="44" y="34" width="12" height="12" fill="#fafafa" stroke="#3e2723"/><path d="M50 34v12" stroke="#3e2723" stroke-width=".6"/><path d="M44 34a6 3.6 0 0 1 12 0z" fill="#bde3f5" stroke="#3e2723" stroke-width=".6"/><circle cx="48.8" cy="40.4" r=".6" fill="#ffd54f"/><circle cx="51.2" cy="40.4" r=".6" fill="#ffd54f"/><path d="M41 46h18l1.6 2H39.4z" fill="#bdbdbd"/>'
-      +'<path d="M4 54.4h31M65 54.4h31M4 52.4h31M65 52.4h31" stroke="#fafafa" stroke-width=".7"/>'+[5,8,11,14,17,20,23,26,29,32,66,69,72,75,78,81,84,87,90,93].map(x=>'<path d="M'+x+' 56.4v-5.4l.9-.9.9.9v5.4z" fill="#fafafa" stroke="#cfd8dc" stroke-width=".2"/>').join("")
+      // picket fence is marked FRONT so it is drawn over the children and walkers in the schoolyard
+      +'<!--FRONT--><path d="M4 54.4h31M65 54.4h31M4 52.4h31M65 52.4h31" stroke="#fafafa" stroke-width=".7"/>'+[5,8,11,14,17,20,23,26,29,32,66,69,72,75,78,81,84,87,90,93].map(x=>'<path d="M'+x+' 56.4v-5.4l.9-.9.9.9v5.4z" fill="#fafafa" stroke="#cfd8dc" stroke-width=".2"/>').join("")+'<!--/FRONT-->'
       +GLAMP(7)+FLAG(92,48,16,"#c62828");
       if(on)s+=PERS("#5d4037","wk1",-1,-3)+PERS("#8e24aa","wk2",-7,-3)+'<g class="wk1" style="animation-delay:-2.2s"><circle cx="0" cy="54" r="2.4" fill="none" stroke="#8d6e63" stroke-width=".6"/></g>';
       return s}
@@ -3749,7 +3802,7 @@ function birdUp(m,body,edge,wing,r){const sc=r/2.6,d=edge||"#78909c",wg=wing&&wi
   +'<g class="flp"><path d="M-.6 -.7Q.2 -4.2 2.2 -5.4Q1 -3 1.4 -.6z" fill="'+body+'" stroke="'+d+'" stroke-width=".25"/><path d="M.4 -1.6Q1 -3.2 1.8 -4.4M-.1 -1.2Q.4 -2.6 1 -3.6" stroke="'+wg+'" stroke-width=".25" fill="none"/></g>'
   +'<path d="M-.4 1.1l-.3 .8M.4 1.1l-.1 .8" stroke="#ffa000" stroke-width=".22"/></g>'}
 function art(l,i){
-  let main=houseArt(l,i);main=main.replace(/<g class="dove"><ellipse rx="([\d.]+)" ry="[\d.]+" fill="([^"]+)" stroke="([^"]+)" stroke-width="[\d.]+"\/><path class="flp" d="[^"]*" stroke="([^"]+)"[^>]*\/><\/g>/g,(m,r,b,e,wc)=>'<g class="dove">'+birdUp(m,b,e,wc,+r)+'</g>');{let wk="";main=main.replace(/<g class="wk[12]"[^>]*><g transform="translate\(0 [^)]*\)"><circle[^>]*\/><rect[^>]*\/><\/g><\/g>/g,m=>{wk+=m;return""})+wk}if(l.forest&&!l.hs&&HIS()){main=(l.st==="empty"||l.st==="off_market")?main+fixerArt(-1):fixerArt(l.st==="clearing"?l.cp:0)}else if(l.forest&&!l.hs){const dr=DRY();if(l.st==="empty"||l.st==="off_market")main=(dr?'<path d="M8 50l10-3 6 4 10-2M66 52l10-4 8 3 8-2M20 56l8-2" stroke="#a1887f" stroke-width=".8" fill="none"/>'+SAG(12,48,.6):PINE(14,46,1)+PINE(86,46,1)+PINE(24,30,.8)+PINE(78,30,.8))+main;else if(l.st==="owned")main=dr?dryLot(0):forestLot(0);else if(l.st==="clearing")main=dr?dryLot(l.cp):forestLot(l.cp)}
+  let main=houseArt(l,i);main=main.replace(/<g class="dove"><ellipse rx="([\d.]+)" ry="[\d.]+" fill="([^"]+)" stroke="([^"]+)" stroke-width="[\d.]+"\/><path class="flp" d="[^"]*" stroke="([^"]+)"[^>]*\/><\/g>/g,(m,r,b,e,wc)=>'<g class="dove">'+birdUp(m,b,e,wc,+r)+'</g>');{let wk="";main=main.replace(/<g class="wk[12]"[^>]*><g transform="translate\(0 [^)]*\)"><circle[^>]*\/><rect[^>]*\/><\/g><\/g>/g,m=>{wk+=m;return""})+wk}{let fr="";main=main.replace(/<!--FRONT-->([\s\S]*?)<!--\/FRONT-->/g,(m,x)=>{fr+=x;return""})+fr}if(l.forest&&!l.hs&&HIS()){main=(l.st==="empty"||l.st==="off_market")?main+fixerArt(-1):fixerArt(l.st==="clearing"?l.cp:0)}else if(l.forest&&!l.hs){const dr=DRY();if(l.st==="empty"||l.st==="off_market")main=(dr?'<path d="M8 50l10-3 6 4 10-2M66 52l10-4 8 3 8-2M20 56l8-2" stroke="#a1887f" stroke-width=".8" fill="none"/>'+SAG(12,48,.6):PINE(14,46,1)+PINE(86,46,1)+PINE(24,30,.8)+PINE(78,30,.8))+main;else if(l.st==="owned")main=dr?dryLot(0):forestLot(0);else if(l.st==="clearing")main=dr?dryLot(l.cp):forestLot(l.cp)}
   main=main.replace(/fill="#5aa23e"/g,'style="fill:var(--gnd)"').replace(/#5aa23e/g,(W().pal||COS.theme[meta.eq.theme]).g);
   // Vacant lots stay clear. Add pavement only when a building exists or construction is underway.
   const hasBuilding=!!l.hs&&l.st!=="sold";
