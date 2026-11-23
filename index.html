@@ -631,12 +631,12 @@ const FESTW={
 const festHost={market:"civic",party:"park",parade:"school",game:"sports"};
 const festW=k=>{const f=(FESTW[W().k]||{})[k];return f?{lbl:f[0],ic:f[1],txt:f[1]+" "+f[2].replace("{n}",S[festHost[k]].n.replace(/\u00ad/g,""))}:null};
 const evText=k=>evText0(k).replace(/\u00ad/g,"");const evText0=k=>festHost[k]&&festW(k)?festW(k).txt:k==="market"?(W().k==="themepark"?"🎟️ Ticket rush at "+S.civic.n+"! Its income doubles":"🧺 Farmers market at the "+S.civic.n+"! Its income doubles"):k==="party"?"🎉 Party at the "+S.park.n+"! Nearby rents +60%":k==="game"?"🏟️ Big event at the "+S.sports.n+"! Its income doubles":k==="parade"?(W().k==="future"?"🏆 "+S.school.n+" robot contest! Buyer offers +20%":"🎺 "+S.school.n+" parade! Buyer offers +20%"):k==="storm"&&W().k==="beach"?"🌀 Hurricane warning! Beachfront homes are most at risk":k==="storm"&&W().k==="mountain"?"🌨️ Blizzard incoming! Snow may damage houses and slow traffic":k==="storm"&&W().k==="desert"?"🌪️ Sandstorm incoming! Dust may damage houses and slows traffic":k==="storm"&&W().k==="future"?"🌞 Solar storm! The power grid is down: every business earns nothing and flares may damage homes":k==="storm"&&W().k==="tropical"?"🌀 Cyclone! Beachfront homes are most at risk":k==="heat"&&readyOf("solar")?"🔥 Heat wave! Your Solar Farm keeps the air running: no rent cut, and homes next to an Oasis still earn +20%":k==="mosquito"&&readyOf("campground")?"🦟 Mosquito season, but your Campground keeps the bugs away: no rent cut":k==="storm"&&W().k==="lake"?"🌊 Spring flood! The lake is rising. Lakefront homes are most at risk":EV[k];
-/* ===== Dev mode: open with ?dev=1 (or tap the menu title 7 times) to unlock every level. ?dev=0 turns it off. ===== */
-const BUILD="2026.11.21-11";// bump on every published change so dev mode shows which version is loaded
+/* ===== Dev mode: open with ?dev=1 to unlock every level. ?dev=0 (or tapping the menu title 7 times) turns it off. ===== */
+const BUILD="2026.11.23-1";// bump on every published change so dev mode shows which version is loaded
 let DEV=false;try{const q=new URLSearchParams(location.search).get("dev");if(q==="1")localStorage.setItem("lot_flip_dev","1");if(q==="0")localStorage.removeItem("lot_flip_dev");DEV=localStorage.getItem("lot_flip_dev")==="1"}catch(e){}
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
-let race=false,lvDone=false,doneAt=null,lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,sellMode=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
+let race=false,lvDone=false,doneAt=null,lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
 
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
 const landMul=()=>W().k==="city"?1.4:W().k==="desert"?.7:1;
@@ -743,11 +743,11 @@ function startLevel(){
   total=mode==="timed"?Math.round((parBase()*2.5+30)*(1-.02*meta.pr)):0;timeVal=total;
   const ks=availableBuildings().filter(x=>!S[x].needs&&!S[x].span&&!(objective.t==="build"&&x===objective.k)&&!(objective.t==="finale"&&objective.parts.some(p=>p.k===x))),k=ks[Math.floor(Math.random()*ks.length)];
   bonus=(lv>=4&&lv%3===0)?{t:"sale",k:"ranch",n:Math.round((700+lv*40)/50)*50,r:200+lv*50,c:0,done:false}:{t:"build",k,n:S[k].cat==="h"?Math.min(3,1+Math.floor(lv/3)):1,r:200+lv*50,c:0,done:false};
-  {const fb=makeObjective(lv,1);if(fb){bonus=fb.o;bonus.r=Math.round((200+lv*50)*1.5/50)*50}}{const need=Math.max(0,...[objective,bonus].map(o=>o&&o.t==="clear"?o.n+1:0));let have=lots.filter(l=>l.forest).length,g=0;while(have<need&&g++<200){const l=lots[Math.floor(Math.random()*N)];if(l.st!=="empty"||l.forest)continue;l.forest=true;if(W().k==="mountain")l.land=Math.round(l.land*.75);if(W().k==="historic")l.land=Math.round(l.land*.6);have++}}builders=2+upT("team");speed=(1+.1*upT("crew"))*(twist&&twist.k==="rush"?1.5:1);sellMode=false;paused=false;ev={k:null,t:0,next:30};
+  {const fb=makeObjective(lv,1);if(fb){bonus=fb.o;bonus.r=Math.round((200+lv*50)*1.5/50)*50}}{const need=Math.max(0,...[objective,bonus].map(o=>o&&o.t==="clear"?o.n+1:0));let have=lots.filter(l=>l.forest).length,g=0;while(have<need&&g++<200){const l=lots[Math.floor(Math.random()*N)];if(l.st!=="empty"||l.forest)continue;l.forest=true;if(W().k==="mountain")l.land=Math.round(l.land*.75);if(W().k==="historic")l.land=Math.round(l.land*.6);have++}}builders=2+upT("team");speed=(1+.1*upT("crew"))*(twist&&twist.k==="rush"?1.5:1);paused=false;ev={k:null,t:0,next:30};
   build();applyTheme();run=true;last=performance.now();
   ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("scene").classList.remove("pz");
   $("tl").textContent=mode==="timed"?"Time":"Elapsed";
-  setProg(lv);snap();asv=5;draw();if(twist)showTip("tw"+twist.k,twist.ic+" "+twist.n+": "+twist.d+". Clear it for +2 ⭐.");
+  setProg(lv);snap();asv=5;draw();if(twist)showTip("tw"+twist.k,twist.ic+" "+twist.n+": "+twist.d+". First clear earns +2 ⭐.");
   if(!maybeWorldIntro())levelSplash();
 }
 // Star timer: grows gently with the level, plus time for what the level objective asks for
@@ -799,13 +799,13 @@ function raceEnd(win){race=false;if(!run)return;closeSheet();$("buy").style.disp
 $("lck").onclick=()=>{$("lc").style.display="none";paused=false;$("scene").classList.remove("pz");last=performance.now();$("nxt").style.display="block";toast("Keep building! Tap ✅ Next Level when you're ready.")};
 $("nxt").onclick=()=>{if(run&&lvDone&&!paused)endGame(true)};
 function togglePause(){if(!run)return;paused=!paused;$("pz").style.display=paused?"flex":"none";$("scene").classList.toggle("pz",paused);if(!paused)last=performance.now()}
-function snap(){return store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,sellMode,lots,bonus,objective,lvDone,doneAt}))}
+function snap(){return store.set(KEY,JSON.stringify({lv,money,goal,timeVal,total,elapsed,builders,speed,mode,lots,bonus,objective,lvDone,doneAt}))}
 function autosave(){if(run&&!paused&&lots.length)snap()}
 function getProg(){try{return JSON.parse(store.get(PKEY))}catch(e){return null}}
 function setProg(n){const p=getProg();if(!p||n>p.lv)store.set(PKEY,JSON.stringify({lv:n,mode}))}
 function saveGame(){toast(snap()?"Game saved!":"Couldn’t save in this browser.")}
 function loadGame(){
-  try{const d=JSON.parse(store.get(KEY));lv=d.lv;applyWorld();twist=twistFor(lv);money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;sellMode=false;lots=d.lots;N=lots.length;fixSpans();bonus=d.bonus;const milestones=MILE;const expected=(milestones.filter(x=>lv>=x.lv).at(-1)||{k:"ranch"}).k;objective=d.objective;if(!objective||(!objective.t&&!S[objective.k])||(objective.t==="build"&&!S[objective.k]))objective=makeObjective(lv).o;if(!objective.t){objective.t="build";objective.n=1;objective.c=0}if(!bonus.t)bonus.t="build";
+  try{const d=JSON.parse(store.get(KEY));lv=d.lv;applyWorld();twist=twistFor(lv);money=d.money;goal=d.goal;timeVal=d.timeVal;total=d.total||0;elapsed=d.elapsed||0;builders=d.builders;speed=d.speed;mode=d.mode;lots=d.lots;N=lots.length;fixSpans();bonus=d.bonus;const milestones=MILE;const expected=(milestones.filter(x=>lv>=x.lv).at(-1)||{k:"ranch"}).k;objective=d.objective;if(!objective||(!objective.t&&!S[objective.k])||(objective.t==="build"&&!S[objective.k]))objective=makeObjective(lv).o;if(!objective.t){objective.t="build";objective.n=1;objective.c=0}if(!bonus.t)bonus.t="build";
     lvDone=!!d.lvDone;doneAt=d.doneAt??null;$("nxt").style.display=lvDone?"block":"none";ev={k:null,t:0,next:30};setMode(mode);build();applyTheme();lots.forEach((l,i)=>{if(l.st==="listed"&&l.offer)startBuyerArrival(i)});run=true;paused=false;last=performance.now();
     ["ov","pz","end"].forEach(x=>$(x).style.display="none");$("tl").textContent=mode==="timed"?"Time":"Elapsed";toast("Loaded Level "+lv);draw();maybeWorldIntro();return true}catch(e){toast("Couldn’t load save.");return false}
 }
@@ -841,7 +841,6 @@ function flash(){const m=$("money");m.classList.remove("flash");void m.offsetWid
 
 function tapLot(i){
   if(!run||paused)return;if(lots[i]&&lots[i].st==="merged"&&lots[i].par!=null)return tapLot(lots[i].par);const l=lots[i],e=els[i];e.classList.add("tap");setTimeout(()=>e.classList.remove("tap"),180);sfx.tap();
-  if(sellMode){if(l.st==="owned"){money+=l.land;pop(i,"+"+fmt(l.land),1);toast("Sold unbuilt lot for "+fmt(l.land));reset(l);flash()}else toast("Sell Mode only works on bought, unbuilt lots.");draw();return}
   if(l.st==="off_market")return toast("This lot has been taken off the market for now. Watch for it to return!");
   if(l.st==="empty"){if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");return showBuy(i)}
   if(l.st==="ai_owned")return toast(W().k==="themepark"?"A neighbor owns this. Watch for it to go up for sale!":"A neighbor lives here. Watch for it to go up for sale!");
@@ -896,7 +895,7 @@ function act(i,a){
   else if(a==="demo"&&l.restored)toast("📜 Preservation rule: restored homes can't be demolished.");
   else if(a==="demo")sheet(i,true);
   else if(a==="demo0")sheet(i);
-  else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");if(busy()>=builders)return toast("All builders are busy!");money-=100;l.offer=null;l.st="demo";l.dp=0;l.dd=8/speed;sfx.crash();closeSheet();toast("Demolition crew on the way…");draw()}
+  else if(a==="demo2"){if(money<100)return toast("Need $100 to demolish.");if(busy()>=builders)return toast("All builders are busy!");money-=100;if(l.offer)sendBuyerAway(i);l.offer=null;l.st="demo";l.dw=0;l.dp=0;l.dd=8/speed;sfx.crash();closeSheet();toast("Demolition crew on the way…");draw()}
   else if(a==="accept")resolveOffer(i,true);
   else if(a==="reject")resolveOffer(i,false);
   else if(a==="buyai"&&l.st==="ai_for_sale"){if(money<l.aiP)return toast("Need "+fmt(l.aiP)+" to buy this house.");money-=l.aiP;[objective,bonus].forEach(o=>{if(o&&o.t==="buyai")o.c++});l.sp=0;l.st="rented";l.rent=rentOf(i);l.rt=3;closeSheet();fx(i,"done");toast("Bought the "+S[l.hs].n+"! Auto-renting for "+fmt(l.rent)+"/3s.");draw()}
@@ -1009,7 +1008,7 @@ function tick(now){
       else if(l.st==="listed"){
         if(!l.offer){l.wait-=dt*(readyOf("realestate")?1.5:1)*(ev.k==="rushhr"?.6:1);if(l.wait<=0)spawnOffer(i)}
         else{{const tr=traffic[i];if(tr&&tr.kind!=="parked"&&(l.offer.drive=(l.offer.drive||0)+dt)<14){/* offer clock starts once the buyer has parked */}else l.offer.ttl-=dt}if(l.offer.ttl<=0){sendBuyerAway(i);l.offer=null;l.wait=2+Math.random()*3;toast("Offer on Lot "+(i+1)+" expired. The buyer is heading back to the street.");if(sel===i)sheet(i)}}}
-      else if(l.st==="demo"){const tr=traffic[i];if(tr&&(tr.resident||tr.visitor)&&!tr.truck){tr.noSecond=true;if(tr.kind==="parked")beginTrafficDeparture(i,tr,trafficGeometry(i))}else if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));[objective,bonus].forEach(o=>{if(o&&o.t==="remodel"&&l.hs===o.from)o.d=(o.d||0)+1});unmerge(i);reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
+      else if(l.st==="demo"){const tr=traffic[i];if(tr&&!tr.truck&&(l.dw=(l.dw||0)+dt)<12){/* let any car at the lot (resident, visitor or buyer) drive away before the demo truck arrives */tr.noSecond=true;tr.queuedBuyer=false;if(tr.kind==="parked")beginTrafficDeparture(i,tr,trafficGeometry(i));else if(tr.kind==="arrive")tr.leaveAfterArrival=true}else if(!tr||!tr.truck)startDemoTruck(i);else if(tr.kind==="parked"){l.dp+=dt/l.dd;if(l.dp>=1){beginTrafficDeparture(i,tr,trafficGeometry(i));[objective,bonus].forEach(o=>{if(o&&o.t==="remodel"&&l.hs===o.from)o.d=(o.d||0)+1});unmerge(i);reset(l);l.st="owned";fx(i,"done");toast("Demolition finished on Lot "+(i+1)+". You still own the lot.")}}}
       else if(l.st==="sold"){l.soldT-=dt;if(l.soldT<=0){l.st="ai_owned";l.aiW=5+Math.random()*8;l.rt=0}}
     });
     if(bonus&&!bonus.done){if(bonus.t==="build")bonus.c=lots.filter(l=>l.hs===bonus.k&&["rented","listed","ready"].includes(l.st)).length;else if(bonus.t!=="sale")updObjective(bonus);if(bonus.t==="build"||bonus.t==="sale"?bonus.c>=bonus.n:bonus.done){bonus.done=true;bonus.at=elapsed;money+=bonus.r;flash();sfx.coin();toast("⭐ Bonus complete! +"+fmt(bonus.r))}}
@@ -1029,8 +1028,8 @@ function endGame(win){
   run=false;$("nxt").style.display="none";$("lc").style.display="none";$("buy").style.display="none";
   closeSheet();store.del(KEY);setProg(win?lv+1:lv);let h;win?sfx.win():sfx.lose();
   const fin=win&&lv>=100;
-  if(win){race=false;const fe=Math.max(doneAt??elapsed,bonus&&bonus.done&&bonus.at!=null?bonus.at:0),st=starCount();const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;if(fin&&meta.pr>=10)meta.legend=1;checkAch();store.set(BKEY,JSON.stringify(best));
-    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(fe)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(parT())+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>";
+  if(win){race=false;const fe=Math.max(doneAt??elapsed,bonus&&bonus.done&&bonus.at!=null?bonus.at:0),st=starCount();const prev=best[lv]||0;best[lv]=Math.max(prev,st);const gain=Math.max(0,st-prev)+(meta.hard?2:0)+(twist&&!prev?2:0);let chest=0;if(lv%5===0&&!meta.chest[lv]){meta.chest[lv]=1;chest=3+Math.floor(Math.random()*6)}if(!prev)meta.st.cleared++;if(st>=3)meta.st.three++;if(meta.hard)meta.st.hard++;if(twist)meta.st.tw++;meta.stars+=gain+chest;if(fin&&meta.pr>=10)meta.legend=1;checkAch();store.set(BKEY,JSON.stringify(best));
+    h='<h2>🎉 Level '+lv+' Complete!</h2><div class="stars">'+"⭐".repeat(st)+"☆".repeat(3-st)+'</div><p>Finished in '+Math.round(fe)+'s · Bonus '+(bonus&&bonus.done?"✔ done":"✘ missed")+'<br>⭐ for clearing · ⭐ for bonus · ⭐ for beating '+(parT())+'s<br>Best: '+best[lv]+"/3</p><p>+"+gain+" ⭐ earned"+(chest?" · 🎁 Chest +"+chest+" ⭐":"")+(meta.hard?" · 💀 Hard bonus":"")+(twist&&!prev?" · "+twist.ic+" Twist +2 ⭐":"")+" · Total "+meta.stars+" ⭐</p>";
     if(win&&lv%10===0&&!fin)h+='<p>🗺️ <b>'+W().ic+' '+W().n+' complete!</b> Next stop: '+W(lv+1).ic+' '+W(lv+1).n+'.</p>';
     if(fin)h+=meta.pr>=10?'<p>🏆 <b>Prestige 10 conquered. You are a Lot Flip Legend!</b> Thanks for playing every world.</p>':'<p>🌟 <b>All 10 worlds cleared!</b> Prestige from the Main Menu to start again at Rank '+(meta.pr+1)+'/10 for +10 ⭐. Each rank raises goals and trims your cash and time.</p>'}
   else h='<h2>⏰ Time’s Up</h2><p>You made '+fmt(money)+' of '+fmt(goal)+'.<br>Building goal: '+(objective&&objective.done?'complete':objLong().replace(/^./,c=>c.toLowerCase()))+'.</p>';
@@ -4609,7 +4608,7 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
     {const sv0=e.querySelector("svg");if(sv0&&!sv0._lm)liftMuntins(sv0)}
     {const sv0=e.querySelector("svg");if(sv0&&!sv0._fd)fitSigns(sv0)}
     let lb="",pb=0;const nm=l.hs&&S[l.hs]&&l.st!=="sold"?S[l.hs].n:"",tag=(t,c)=>'<i class="ls'+(c?" "+c:"")+'">'+t+"</i>";let st="";
-    if(l.st==="off_market")st=tag("Off market");else if(l.st==="owned")st=tag(sellMode?"Sell lot":l.forest?(HIS()?"🔨 Restore":DRY()?"💧 Drill well":"🌲 Clear trees"):"Build here");else if(l.st==="clearing"){st=tag(HIS()?"🔨 Restoring…":DRY()?"💧 Drilling…":"🪓 Clearing…");pb=l.cp}
+    if(l.st==="off_market")st=tag("Off market");else if(l.st==="owned")st=tag(l.forest?(HIS()?"🔨 Restore":DRY()?"💧 Drill well":"🌲 Clear trees"):"Build here");else if(l.st==="clearing"){st=tag(HIS()?"🔨 Restoring…":DRY()?"💧 Drilling…":"🪓 Clearing…");pb=l.cp}
     else if(l.st==="working"){st=tag(l.permit>0?(W().k==="tropical"?"🚢 Shipping…":"📋 Permit…"):"🔨 Building…");pb=l.p}else if(l.st==="reno_working"){st=tag("Upgrading…");pb=l.rp}else if(l.st==="demo"){st=tag("Demolishing…","rp");pb=l.dp}
     else if(l.st==="ready"){if(W().k==="future"&&S[l.hs].rev&&!powered(i))st=tag("🔌 No power","rp")}else if(l.st==="rented"){if(l.dmg)st=tag("⚡ Repair "+fmt(repairCost(i)),"rp")}
     else if(l.st==="listed")st=l.offer?tag("💰 "+fmt(l.offer.price),"go"):tag("On market","mk");
@@ -4660,7 +4659,7 @@ $("bl").onclick=()=>showLevels("menu");
 function devUI(){let b=$("devb");if(!DEV){if(b)b.remove();return}if(b)return;b=document.createElement("button");b.id="devb";b.textContent="🛠 DEV · v"+BUILD;
   b.style.cssText="position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:1000;padding:6px 10px;border-radius:10px;border:2px solid #f5b82e;background:#222;color:#f5b82e;font:700 12px system-ui;opacity:.85";
   b.onclick=()=>{if(run&&!paused){money+=5000;toast("🛠 +$5,000");draw()}else if(meta){meta.stars+=100;saveMeta();menuRw();toast("🛠 +100 ⭐")}};document.body.appendChild(b)}
-{let tc=0,tt0=0;$("ttl").addEventListener("click",()=>{const t=Date.now();tc=t-tt0<800?tc+1:1;tt0=t;if(tc>=7){tc=0;DEV=!DEV;try{DEV?localStorage.setItem("lot_flip_dev","1"):localStorage.removeItem("lot_flip_dev")}catch(e){}devUI();updMenu();toast(DEV?"🛠 Dev mode ON (v"+BUILD+"): all levels unlocked":"Dev mode OFF")}})}
+{let tc=0,tt0=0;$("ttl").addEventListener("click",()=>{const t=Date.now();tc=t-tt0<800?tc+1:1;tt0=t;if(tc>=7&&DEV){tc=0;DEV=false;try{localStorage.removeItem("lot_flip_dev")}catch(e){}devUI();updMenu();toast("Dev mode OFF")}})}
 devUI();
 $("snd").textContent=snd?"🔊":"🔇";$("snd").onclick=()=>{snd=!snd;store.set("lot_flip_snd",snd?"1":"0");$("snd").textContent=snd?"🔊":"🔇";if(snd)sfx.tap()};
 
