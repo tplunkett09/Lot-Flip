@@ -360,6 +360,9 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 #tip{display:none;background:rgba(41,182,246,.15);border:1px solid var(--blue);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;text-align:center}
 #bonus{display:flex;flex-wrap:nowrap;gap:4px;align-items:center;justify-content:flex-start;overflow:hidden;min-height:24px;cursor:pointer}
 #bonus .sp{flex:1}
+#bonus .gtog{flex:none;min-width:30px;height:24px;display:inline-flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:12px;color:var(--mut);margin-left:2px}
+#goals{display:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12.5px;font-weight:700;line-height:1.45;white-space:pre-line;text-align:left;color:var(--text)}
+#goals.on{display:block}
 .gi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:2px 7px;font-size:11px;font-weight:800;white-space:nowrap;color:var(--gold)}
 .gi.ok{border-color:var(--acc);color:#a5d6a7}.gi.bad{border-color:var(--warn);color:#ef9a9a}
 .gi.racing{border-color:#ffb300;color:#fff;background:#e65100;animation:racep 1s ease-in-out infinite}@keyframes racep{50%{transform:scale(1.12)}}
@@ -465,10 +468,32 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
 
 /* Let palm fronds and signs reach the lot border instead of being cut flat 5px inside it */
 .lot>svg{overflow:visible;clip-path:inset(-6px -5px 0 -5px)}
+
+#side{display:contents}
+/* Phone landscape: stats + goals in a left sidebar, the whole board on the right, sized to fit the screen height. */
+@media (orientation:landscape) and (max-height:540px){
+ body{padding:4px max(8px,env(safe-area-inset-right,0px)) 4px max(8px,env(safe-area-inset-left,0px))}
+ body.so{padding-bottom:4px}
+ #app{max-width:none;display:grid;grid-template-columns:minmax(250px,34%) minmax(0,1fr);gap:8px;align-items:start}
+ #side{display:flex;flex-direction:column;gap:5px;position:sticky;top:4px;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 8px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+ #side .hud{position:static;padding:0}
+ #side .hrow{flex-wrap:wrap;row-gap:4px;padding:3px 6px}
+ #side .money-group{flex:1 1 100%}
+ #side .hsub{grid-template-columns:1fr 1fr;gap:4px}
+ #side .hsub .inc{grid-column:1/-1;display:flex;justify-content:space-between}
+ #goals{font-size:12px;padding:6px 8px;line-height:1.4}
+ #tut,#tip{font-size:12px;padding:6px 8px}
+ #scene{--lh:clamp(100px,calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 150px)/2),142px);padding:8px;gap:8px}
+ #scene .lot{height:var(--lh)}
+ #scene .lot svg{height:calc(var(--lh) - 48px)}
+ #sheet{right:auto;left:max(8px,env(safe-area-inset-left,0px));width:min(440px,42vw);margin:0;bottom:calc(6px + env(safe-area-inset-bottom,0px))}
+ .sh{max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 16px)}
+}
 </style>
 </head>
 <body>
 <div id="app">
+  <div id="side">
   <div class="hud" id="hud">
     <div class="hrow">
       <div class="money-group"><b id="money">$0</b><small>Goal <span id="goal">$0</span></small></div>
@@ -480,7 +505,8 @@ h1{font-size:20px;margin:0;font-weight:800;color:var(--gold)}
     <div class="hsub"><button class="hchip" id="hire">👷 <b id="bld">0/0</b><em id="hq">+$300</em></button><button class="hchip" id="tools">🛠️ <b id="spd">1×</b><em id="tq">$250</em></button><div class="inc"><div>Income <b id="rent" style="color:var(--acc)">$0/s</b></div><div>Goal <b id="pct">0%</b></div></div></div>
     <div class="bar"><i id="gbar"></i></div>
   </div>
-  <div id="bonus"></div><div id="evt"></div><div id="tut"></div><div id="tip"></div>
+  <div id="bonus"></div><div id="goals"></div><div id="evt"></div><div id="tut"></div><div id="tip"></div>
+  </div>
   <div id="scene"></div>
 
 </div>
@@ -636,6 +662,7 @@ const BUILD="2026.11.23-1";// bump on every published change so dev mode shows w
 let DEV=false;try{const q=new URLSearchParams(location.search).get("dev");if(q==="1")localStorage.setItem("lot_flip_dev","1");if(q==="0")localStorage.removeItem("lot_flip_dev");DEV=localStorage.getItem("lot_flip_dev")==="1"}catch(e){}
 let KEY,BKEY,PKEY,N=10;let asv=5,traffic={},roadTraffic=[];
 const CP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Preferences;const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){let ok=false;try{localStorage.setItem(k,v);ok=true}catch(e){}if(CP)try{CP.set({key:k,value:v})}catch(e){}return ok||!!CP},del(k){try{localStorage.removeItem(k)}catch(e){}if(CP)try{CP.remove({key:k})}catch(e){}}};
+let goalsOpen=store.get("lot_flip_goals")!=="0";
 let race=false,lvDone=false,doneAt=null,lv=1,money=0,goal=0,timeVal=0,total=0,elapsed=0,builders=2,speed=1,lots=[],els=[],last=0,run=false,paused=false,mode="timed",sel=null,bonus=null,objective=null,ev={k:null,t:0,next:30},best={},tt;
 
 const done=l=>l.hs&&["rented","listed","ready","ai_owned","ai_for_sale"].includes(l.st);
@@ -857,13 +884,15 @@ $("buyx").onclick=()=>{$("buy").style.display="none";buyIdx=null};
 $("buyok").onclick=()=>{const i=buyIdx,l=lots[i];$("buy").style.display="none";buyIdx=null;if(!run||!l)return;
   if(l.st!=="empty")return toast("Lot "+(i+1)+" is no longer for sale.");if(money<l.land)return toast("Need "+fmt(l.land)+" to buy this lot.");
   money-=l.land;l.st="owned";sfx.coin();toast("Lot bought! Tap it to build.");draw()};
+// Keep an open menu current: options light up the moment you can afford them.
+function liveSheet(){const sh=$("sheet");if(!sh.firstChild)return;sh.querySelectorAll("[data-need]").forEach(b=>{const d=!!b.dataset.blk||money<+b.dataset.need;if(b.classList.contains("dim")!==d)b.classList.toggle("dim",d)});const fb=sh.querySelector(".fbn");if(fb){const t=String(builders-busy());if(fb.textContent!==t)fb.textContent=t}}
 function closeSheet(){sel=null;$("sheet").innerHTML="";document.body.classList.remove("so")}
 function sheet(i,conf){
   const l=lots[i];sel=i;document.body.classList.add("so");
   const hd=(t,s)=>"<h3>"+t+'</h3><div class="sub">'+s+"</div>",cl="";let h="";
-  if(l.st==="owned"&&l.forest&&HIS()){const f=clearFee();h=hd("Lot "+(i+1)+" · Fixer-Upper","This old Victorian needs work. Restore it and it's ready to rent with +25% value. Restored homes can't be demolished.")+'<div class="opts"><button class="opt'+(money<f?" dim":"")+'" data-a="clear"><b>🔨 Restore '+fmt(f)+"</b><small>Uses a builder for about 8 seconds</small></button></div>"}
-  else if(l.st==="owned"&&l.forest){const f=clearFee();h=hd("Lot "+(i+1)+(DRY()?" · Dry Lot":" · Forest"),DRY()?"There's no water here yet. Drill a well before you can build.":"The trees must be cleared before you can build here.")+'<div class="opts"><button class="opt'+(money<f?" dim":"")+'" data-a="clear"><b>'+(DRY()?"💧 Drill well ":"🪓 Clear trees ")+fmt(f)+"</b><small>Uses a builder for a few seconds</small></button></div>"}
-  else if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: "+(builders-busy())+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const pf=permitFee(k),nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0,pe=!locked&&!capped?placeErr(k,i):"";return '<button class="opt'+(locked||capped||nofit||pe||money<S[k].cost+pf?" dim":"")+'" data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost)+(pf?(" +"+(W().k==="tropical"?"🚢":"📋"))+fmt(pf):""))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":pe?pe:nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+(S[k].mid?" in the middle row":"")+". Buy the lots next to this one.":(Number.isFinite(limit)?"Max "+limit+(count?" ("+count+" built)":"")+" · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
+  if(l.st==="owned"&&l.forest&&HIS()){const f=clearFee();h=hd("Lot "+(i+1)+" · Fixer-Upper","This old Victorian needs work. Restore it and it's ready to rent with +25% value. Restored homes can't be demolished.")+'<div class="opts"><button class="opt'+(money<f?" dim":"")+'" data-need="'+f+'" data-a="clear"><b>🔨 Restore '+fmt(f)+"</b><small>Uses a builder for about 8 seconds</small></button></div>"}
+  else if(l.st==="owned"&&l.forest){const f=clearFee();h=hd("Lot "+(i+1)+(DRY()?" · Dry Lot":" · Forest"),DRY()?"There's no water here yet. Drill a well before you can build.":"The trees must be cleared before you can build here.")+'<div class="opts"><button class="opt'+(money<f?" dim":"")+'" data-need="'+f+'" data-a="clear"><b>'+(DRY()?"💧 Drill well ":"🪓 Clear trees ")+fmt(f)+"</b><small>Uses a builder for a few seconds</small></button></div>"}
+  else if(l.st==="owned"){h=hd("Lot "+(i+1)+" · Build","What should go here? Free builders: <span class=\"fbn\">"+(builders-busy())+"</span>"+(W().sea&&i<5?" · 🌊 Beachfront lot":""))+'<div class="opts">'+Object.keys(S).filter(k=>inWorld(k)).sort((a,b)=>S[a].unlock-S[b].unlock).map(k=>{const locked=!unlocked(k),limit=buildingLimit(k),count=buildingCount(k),capped=count>=limit;const pf=permitFee(k),nofit=!locked&&!capped&&S[k].span&&spanPair(i,k)<0,pe=!locked&&!capped?placeErr(k,i):"";return '<button class="opt'+(locked||capped||nofit||pe||money<S[k].cost+pf?" dim":"")+'" data-need="'+(S[k].cost+pf)+'"'+(locked||capped||nofit||pe?' data-blk="1"':'')+' data-a="'+k+'"'+(locked||capped?' disabled':'')+'><b>'+S[k].ic+" "+S[k].n+(locked?" 🔒":" "+fmt(S[k].cost)+(pf?(" +"+(W().k==="tropical"?"🚢":"📋"))+fmt(pf):""))+"</b><small>"+(locked?"Unlocks at Level "+S[k].unlock:capped?"MAX BUILT ("+count+"/"+limit+")":pe?pe:nofit?"🧩 Needs "+S[k].span+" side-by-side lots you own"+(S[k].front?" on the beachfront (top row)":"")+(S[k].mid?" in the middle row":"")+". Buy the lots next to this one.":(Number.isFinite(limit)?"Max "+limit+(count?" ("+count+" built)":"")+" · ":"")+S[k].d)+"</small></button>"}).join("")+cl+"</div>"}
   else if(l.st==="ai_for_sale"){h=hd("Buy "+S[l.hs].n+" · Lot "+(i+1),"Asking "+fmt(l.aiP)+" · Value "+fmt(val(i)))+'<div class="opts"><button class="opt ok" data-a="buyai">🛒 Buy & Auto-Rent</button>'+cl+"</div>"}
   else if(conf){h=hd("⚠️ Demolish Lot "+(i+1)+"?","Costs $100 and clears the property.")+'<div class="opts"><button class="opt no" data-a="demo2">Confirm Demolish</button><button class="opt x" data-a="demo0">Cancel</button></div>'}
   else if(["rented","listed","ready"].includes(l.st)){
@@ -872,8 +901,8 @@ function sheet(i,conf){
     if(W().k==="future"&&S[l.hs].rev&&l.st==="ready"&&!powered(i))h+='<div class="ob">'+powerHelp(i,1)+'</div>';
     if(l.offer)h+='<div class="ob">💰 Buyer offers <b>'+fmt(l.offer.price)+'</b> (value '+fmt(val(i))+')</div><div class="opts"><button class="opt ok" data-a="accept">✓ Accept</button><button class="opt no" data-a="reject">✕ Reject</button></div>';
     h+='<div class="opts">';
-    if(l.dmg)h+='<button class="opt'+(money<repairCost(i)?" dim":"")+'" data-a="repair"><b>🔧 Repair '+fmt(repairCost(i))+"</b><small>Storm damage · earning half rent until fixed</small></button>";
-    if(l.st==="rented"&&!inf&&nx&&!l.dmg)h+='<button class="opt'+(money<R[nx].cost?" dim":"")+'" data-a="upgrade"><b>👷 '+R[nx].n+" "+fmt(R[nx].cost)+"</b><small>+"+fmt(R[nx].vb)+" value</small></button>";
+    if(l.dmg)h+='<button class="opt'+(money<repairCost(i)?" dim":"")+'" data-need="'+repairCost(i)+'" data-a="repair"><b>🔧 Repair '+fmt(repairCost(i))+"</b><small>Storm damage · earning half rent until fixed</small></button>";
+    if(l.st==="rented"&&!inf&&nx&&!l.dmg)h+='<button class="opt'+(money<R[nx].cost?" dim":"")+'" data-need="'+R[nx].cost+'" data-a="upgrade"><b>👷 '+R[nx].n+" "+fmt(R[nx].cost)+"</b><small>+"+fmt(R[nx].vb)+" value</small></button>";
     if(l.st==="rented"&&!inf)h+='<button class="opt" data-a="list"><b>🏷️ List for Sale</b><small>Pauses rent</small></button>';
     if(l.st==="listed")h+='<button class="opt" data-a="unlist"><b>🛑 Unlist</b><small>Resume rent</small></button>';
     h+='<button class="opt" data-a="demo"><b>🏗️ Demolish $100</b><small>Back to empty land</small></button>'+cl+"</div>";
@@ -4495,6 +4524,7 @@ function chips(){if(!bonus)return"";
   if(twist)h+='<span class="al">'+twist.ic+'</span>';
   if(dm)h+='<span class="al red">🔧'+dm+'</span>';
   if(ev.k)h+='<span class="al">'+(ev.k==="storm"&&W().k==="beach"?"🌀":ev.k==="storm"&&W().k==="mountain"?"🌨️":ev.k==="storm"&&W().k==="desert"?"🌪️":ev.k==="storm"&&W().k==="future"?"🌞":ev.k==="storm"&&W().k==="tropical"?"🌀":ev.k==="storm"&&W().k==="lake"?"🌊":festHost[ev.k]&&festW(ev.k)?festW(ev.k).ic:EVS[ev.k])+Math.ceil(ev.t)+'s</span>';
+  h+='<span class="gtog" aria-label="'+(goalsOpen?'Hide goals':'Show goals')+'">'+(goalsOpen?'▴':'▾')+'</span>';
   return h}
 // Shrink a lot label until it fits: names to at most two lines with no word sticking out, status pills to one line inside the lot.
 // Shrinks sign lettering that would run to the edge of its board, measured with the device's own font,
@@ -4575,7 +4605,7 @@ function draw(){{const lk=document.querySelector("#scene .lake");if(lk)lk.classL
   $("rent").textContent="$"+lots.reduce((a,l,i)=>a+(l.st==="rented"?rentOf(i)/3:0)+(l.hs&&S[l.hs].rev&&l.st==="ready"?S[l.hs].rev/3:0),0).toFixed(1)+"/s";
   const pc=Math.min(100,Math.round(money/goal*100));$("gbar").style.width=pc+"%";$("pct").textContent=pc+"%";
 
-  $("tut").textContent=tutText();$("bonus").innerHTML=chips();$("evt").textContent="";
+  $("tut").textContent=tutText();$("bonus").innerHTML=chips();renderGoals();liveSheet();$("evt").textContent="";
   const cH=run&&money>=300&&builders<5,cT=run&&money>=250&&speed<2;
   $("hq").textContent=builders>=5?"MAX":"+$300";$("hire").classList.toggle("can",cH);$("hire").classList.toggle("off",builders>=5);
   $("spd").textContent=speed.toFixed(2).replace(/0$/,"")+"×";$("tq").textContent=speed>=2?"MAX":"$250";$("tools").classList.toggle("can",cT);$("tools").classList.toggle("off",speed>=2);
@@ -4953,12 +4983,15 @@ function powerHelp(i,quiet){const l=lots[i],sp=powerSpots(i),hs=[...new Set(adj(
  if(quiet)return t;const e=$("tip");e.style.textAlign="center";e.style.whiteSpace="normal";e.textContent=t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},12000);return t}
 function showTip(id,t){if(!meta||meta.tips[id])return;meta.tips[id]=1;saveMeta();const e=$("tip");e.style.textAlign="center";e.style.whiteSpace="normal";e.textContent="💡 "+t+" (tap to dismiss)";e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},10000)}
 $("bpr").onclick=()=>{if(meta.pr>=10)return;if(!prc){prc=true;$("bpr").textContent="⚠️ Resets this mode's levels. Tap again";return}prc=false;meta.pr++;meta.stars+=10;meta.ws={};saveMeta();store.set(PKEY,JSON.stringify({lv:1,mode}));store.del(KEY);best={};store.set(BKEY,"{}");toast("🌟 Prestige Rank "+meta.pr+"/10! Goals +7%, cash −4% and time −2% per rank.");sfx.win();updMenu()};
-function goalCard(){if(!bonus)return;const par=parT(),left=Math.max(0,Math.ceil(par-elapsed));
+function goalLines(){const par=parT(),left=Math.max(0,Math.ceil(par-elapsed));
  const ck=ok=>ok?" ✅":"",t=[W().ic+" World "+(worldOf(lv)+1)+": "+W().n,"💰 Reach "+fmt(goal)+" (now "+fmt(money)+")"+ck(money>=goal),"🏗️ "+objLong()+ck(objective.done),bonLong()+ck(bonus.done),"⏱ Finish within "+par+"s for a star ("+(elapsed>par?"missed":left+"s left")+")"+(elapsed>par?" ❌":ck(lvDone))];
  if(W().sea)t.push("🌊 Top-row homes are beachfront: +25% value");
  if(twist)t.push(twist.ic+" "+twist.n+": "+twist.d);if(ev.k)t.push(evText(ev.k));
- const e=$("tip");e.style.whiteSpace="pre-line";e.style.textAlign="left";e.textContent=t.join("\n");e.style.display="block";e.onclick=()=>{e.style.display="none"};clearTimeout(tipT);tipT=setTimeout(()=>{e.style.display="none"},8000)}
-$("bonus").onclick=goalCard;
+ return t}
+// Goals panel: open by default, tap the goal row (or its ▴/▾ button) to collapse; choice is remembered.
+function renderGoals(){const e=$("goals");if(!e)return;const on=!!(bonus&&goalsOpen);e.classList.toggle("on",on);if(!on)return;const tx=goalLines().join("\n");if(e._t!==tx){e._t=tx;e.textContent=tx}}
+function goalCard(){if(!bonus)return;goalsOpen=!goalsOpen;store.set("lot_flip_goals",goalsOpen?"1":"0");$("bonus").innerHTML=chips();renderGoals()}
+$("bonus").onclick=goalCard;$("goals").onclick=goalCard;
 $("pzc").onclick=()=>togglePause();$("lvc").onclick=()=>$("lback").onclick();$("rwc").onclick=()=>$("rwx").onclick();
 const an=n=>(/^[AEIOU]/.test(n)?"an ":"a ")+n,pl=(n,c)=>c>1?(/(ch|s|x)$/.test(n)?n+"es":n+"s"):n;
 // Names that are already plural or read as a place ("Boat Rentals", "Gas & Snacks", "Dockside Fuel") take no "a" and count as "2 × Name".
